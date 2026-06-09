@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { SlidersHorizontal } from 'lucide-react-native';
 
 import { Box, Text } from '@/shared/ui';
 import { palette, radius, spacing } from '@/shared/design/tokens';
@@ -34,7 +35,7 @@ export function WatchlistHeader({ title, onSortFilter, onAddStock }: WatchlistHe
                     onPress={onSortFilter}
                     style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}>
                     <Box style={styles.iconBox}>
-                        <Text style={styles.iconText}>⏷</Text>
+                        <SlidersHorizontal color={palette.textSecondary} size={18} strokeWidth={2} />
                     </Box>
                 </Pressable>
                 <Pressable
@@ -94,6 +95,9 @@ const styles = StyleSheet.create({
         height: 40,
         width: 40,
     },
+    iconButtonPressed: {
+        opacity: 0.8,
+    },
     iconBox: {
         alignItems: 'center',
         backgroundColor: palette.surface,
@@ -103,10 +107,6 @@ const styles = StyleSheet.create({
         height: 40,
         justifyContent: 'center',
         width: 40,
-    },
-    iconText: {
-        color: palette.textSecondary,
-        fontSize: 18,
     },
     addButton: {
         backgroundColor: palette.primary,

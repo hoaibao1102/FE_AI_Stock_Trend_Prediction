@@ -92,19 +92,16 @@ export function WatchlistScreen() {
     [navigation, removeItem],
   );
 
-  const renderListHeader = useCallback(
-    () => (
-      <>
-        <WatchlistHeader
-          title="My Watchlist"
-          onSortFilter={() => { }}
-          onAddStock={() => { }}
-        />
-        <WatchlistSearchBar value={searchQuery} onChangeText={setSearchQuery} />
-        <WatchlistFilterChips activeChip={activeChip} onChipChange={setActiveChip} />
-      </>
-    ),
-    [searchQuery, activeChip],
+  const listHeader = (
+    <>
+      <WatchlistHeader
+        title="My Watchlist"
+        onSortFilter={() => {}}
+        onAddStock={() => {}}
+      />
+      <WatchlistSearchBar value={searchQuery} onChangeText={setSearchQuery} />
+      <WatchlistFilterChips activeChip={activeChip} onChipChange={setActiveChip} />
+    </>
   );
 
   if (isActuallyLoading) {
@@ -121,7 +118,7 @@ export function WatchlistScreen() {
   if (error && items.length === 0) {
     return (
       <View style={styles.shell}>
-        {renderListHeader()}
+        {listHeader}
         <ErrorWatchlistState message={error} onRetry={refresh} />
       </View>
     );
@@ -135,7 +132,7 @@ export function WatchlistScreen() {
         ItemSeparatorComponent={ListSeparator}
         keyExtractor={(item) => item.watchlist_id}
         ListEmptyComponent={<EmptyWatchlistState />}
-        ListHeaderComponent={renderListHeader}
+        ListHeaderComponent={listHeader}
         refreshControl={
           <RefreshControl
             onRefresh={refresh}
