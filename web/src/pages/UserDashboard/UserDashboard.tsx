@@ -111,6 +111,20 @@ function SparklineChart({ indexData }: { indexData: MarketOverviewIndex }) {
     )
 }
 
+function formatTradingDate(value: string | number | null | undefined): string {
+  if (!value) return "--";
+
+  const str = String(value);
+
+  if (str.length !== 8) return str;
+
+  const year = str.slice(0, 4);
+  const month = str.slice(4, 6);
+  const day = str.slice(6, 8);
+
+  return `${year}-${month}-${day}`;
+};
+
 export default function UserDashboard() {
     const [data, setData] = useState<UserDashboardData | null>(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -339,68 +353,80 @@ export default function UserDashboard() {
                 <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 shadow-xl">
                     <h2 className="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2">
                         <TrendingUp className="size-4 text-emerald-500" /> Top 5 Gainers
-                        <span className="text-[10px] text-slate-500 font-normal">({market_leaders.latest_trading_date})</span>
+                        <span className="text-[10px] text-slate-500 font-normal">({formatTradingDate(market_leaders.latest_trading_date)})</span>
                     </h2>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs border-collapse">
-                            <thead>
-                                <tr className="border-b border-slate-800 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
-                                    <th className="py-2">Symbol</th>
-                                    <th className="py-2">Company</th>
-                                    <th className="py-2 text-right">Price</th>
-                                    <th className="py-2 text-right">Change %</th>
-                                    <th className="py-2 text-right">Volume</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-800/50">
-                                {market_leaders.gainers.map((g) => (
-                                    <tr key={g.symbol} className="hover:bg-slate-800/10 transition-colors">
-                                        <td className="py-2.5 font-bold text-slate-200">
-                                            <Link to={`/stocks/${g.symbol}`} className="hover:text-blue-400 transition">{g.symbol}</Link>
-                                        </td>
-                                        <td className="py-2.5 text-slate-400 max-w-[150px] truncate">{g.company_name}</td>
-                                        <td className="py-2.5 text-right font-semibold text-slate-200">{formatNumber(g.close_price, 0)}</td>
-                                        <td className="py-2.5 text-right font-black text-emerald-500">{formatPercent(g.price_change_percent)}</td>
-                                        <td className="py-2.5 text-right text-slate-400">{formatCompact(g.volume)}</td>
+                    {market_leaders.gainers.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr className="border-b border-slate-800 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
+                                        <th className="py-2">Symbol</th>
+                                        <th className="py-2">Company</th>
+                                        <th className="py-2 text-right">Price</th>
+                                        <th className="py-2 text-right">Change %</th>
+                                        <th className="py-2 text-right">Volume</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody className="divide-y divide-slate-800/50">
+                                    {market_leaders.gainers.map((g) => (
+                                        <tr key={g.symbol} className="hover:bg-slate-800/10 transition-colors">
+                                            <td className="py-2.5 font-bold text-slate-200">
+                                                <Link to={`/stocks/${g.symbol}`} className="hover:text-blue-400 transition">{g.symbol}</Link>
+                                            </td>
+                                            <td className="py-2.5 text-slate-400 max-w-[150px] truncate">{g.company_name}</td>
+                                            <td className="py-2.5 text-right font-semibold text-slate-200">{formatNumber(g.close_price, 0)}</td>
+                                            <td className="py-2.5 text-right font-black text-emerald-500">{formatPercent(g.price_change_percent)}</td>
+                                            <td className="py-2.5 text-right text-slate-400">{formatCompact(g.volume)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-10 border border-dashed border-slate-800 rounded-xl">
+                            <p className="text-slate-500 text-xs">No gainers data for this date</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Top Losers */}
                 <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 shadow-xl">
                     <h2 className="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2">
                         <TrendingDown className="size-4 text-rose-500" /> Top 5 Losers
-                        <span className="text-[10px] text-slate-500 font-normal">({market_leaders.latest_trading_date})</span>
+                        <span className="text-[10px] text-slate-500 font-normal">({formatTradingDate(market_leaders.latest_trading_date)})</span>
                     </h2>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs border-collapse">
-                            <thead>
-                                <tr className="border-b border-slate-800 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
-                                    <th className="py-2">Symbol</th>
-                                    <th className="py-2">Company</th>
-                                    <th className="py-2 text-right">Price</th>
-                                    <th className="py-2 text-right">Change %</th>
-                                    <th className="py-2 text-right">Volume</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-800/50">
-                                {market_leaders.losers.map((l) => (
-                                    <tr key={l.symbol} className="hover:bg-slate-800/10 transition-colors">
-                                        <td className="py-2.5 font-bold text-slate-200">
-                                            <Link to={`/stocks/${l.symbol}`} className="hover:text-blue-400 transition">{l.symbol}</Link>
-                                        </td>
-                                        <td className="py-2.5 text-slate-400 max-w-[150px] truncate">{l.company_name}</td>
-                                        <td className="py-2.5 text-right font-semibold text-slate-200">{formatNumber(l.close_price, 0)}</td>
-                                        <td className="py-2.5 text-right font-black text-rose-500">{formatPercent(l.price_change_percent)}</td>
-                                        <td className="py-2.5 text-right text-slate-400">{formatCompact(l.volume)}</td>
+                    {market_leaders.losers.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr className="border-b border-slate-800 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
+                                        <th className="py-2">Symbol</th>
+                                        <th className="py-2">Company</th>
+                                        <th className="py-2 text-right">Price</th>
+                                        <th className="py-2 text-right">Change %</th>
+                                        <th className="py-2 text-right">Volume</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody className="divide-y divide-slate-800/50">
+                                    {market_leaders.losers.map((l) => (
+                                        <tr key={l.symbol} className="hover:bg-slate-800/10 transition-colors">
+                                            <td className="py-2.5 font-bold text-slate-200">
+                                                <Link to={`/stocks/${l.symbol}`} className="hover:text-blue-400 transition">{l.symbol}</Link>
+                                            </td>
+                                            <td className="py-2.5 text-slate-400 max-w-[150px] truncate">{l.company_name}</td>
+                                            <td className="py-2.5 text-right font-semibold text-slate-200">{formatNumber(l.close_price, 0)}</td>
+                                            <td className="py-2.5 text-right font-black text-rose-500">{formatPercent(l.price_change_percent)}</td>
+                                            <td className="py-2.5 text-right text-slate-400">{formatCompact(l.volume)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-10 border border-dashed border-slate-800 rounded-xl">
+                            <p className="text-slate-500 text-xs">No losers data for this date</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
