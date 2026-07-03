@@ -26,7 +26,10 @@ import { useNavigate } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/providers/AuthProvider"
-import { analyseOneStock, getAnalyseOneUrl } from "@/services/aiReportService"
+import { analyseOneStock, getAnalyseOneUrl, fetchVisualizationJson } from "@/services/aiReportService"
+import VisualizationTab from "@/components/visualization/VisualizationTab"
+import { buildZipExportPackage, downloadBlob } from "@/utils/visualizationExport"
+import { autoDownloadVisualizationExport } from "@/lib/config"
 import { getCurrentAccessToken, normalizeAuthToken } from "@/services/auth.service"
 import {
     getWatchlistStocks,
@@ -47,6 +50,7 @@ import type {
 import { AnalyseServiceError } from "@/types/aiReport"
 import { Breadcrumb } from "@/shared/components"
 import "./StockAnalysisPage.css"
+import DataFormulatorPanel from "@/components/data-formulator/DataFormulatorPanel"
 
 type AnalysisFormState = {
     provider: "openai" | "gemini"
@@ -86,6 +90,8 @@ type ResearchCard = {
     verify?: string
     url?: string
 }
+
+type ReportTab = "ai-report" | "visualization" | "data-formulator"
 
 const FALLBACK = "Chưa xác minh"
 const EMPTY_MESSAGE = "Chưa có dữ liệu phù hợp cho phần này."
@@ -2544,41 +2550,108 @@ function AiReportLayout({
     copyState: string
 }) {
     const priceHistory = getPriceHistory(report)
+    const [activeTab, setActiveTab] = useState<ReportTab>("ai-report")
+    const [visitedTabs, setVisitedTabs] = useState({ visualization: false, "data-formulator": false })
+
+    const handleTabChange = (tab: ReportTab) => {
+        setActiveTab(tab)
+        if (tab === "visualization" || tab === "data-formulator") {
+            setVisitedTabs((current) => ({ ...current, [tab]: true }))
+        }
+    }
 
     return (
         <div className="ai-report">
             <ReportTopbar report={report} onCopyReportId={onCopyReportId} copyState={copyState} />
-            <div className="ai-report__body">
-                <ReportSidebar />
+            <div className={`ai-report__body ${activeTab === "ai-report" ? "" : "ai-report__body--single"}`}>
+                {activeTab === "ai-report" ? <ReportSidebar /> : null}
                 <main className="ai-report__content">
                     <SummaryStrip report={report} />
-                    <CoverSection report={report} />
-                    <QuickOverviewSection report={report} />
-                    <ExecutiveSummarySection report={report} />
-                    <BusinessOverviewSection report={report} />
-                    <MarketContextSection report={report} />
-                    <StockQualityDashboardSection report={report} />
-                    <Section id="price-trend" title="Diễn biến giá" icon={<BarChart3 className="size-5" />}>
-                        <ChartCard
-                            title="Close price và volume"
-                            option={buildPriceOption(priceHistory)}
-                            hasData={priceHistory.length >= 2}
-                        />
-                    </Section>
-                    <FinancialStatementSection report={report} />
-                    <ValuationSection report={report} />
-                    <PeerComparisonSection report={report} />
-                    <ExternalResearchSection report={report} />
-                    <InvestmentMemoSection report={report} request={request} />
-                    <ActionPlanSection report={report} />
-                    <StrengthsSection report={report} />
-                    <RisksSection report={report} />
-                    <ScenarioSection report={report} />
-                    <ChecklistSection report={report} />
-                    <MetricDictionarySection />
-                    <DataCoverageSection report={report} />
-                    <DataSourcesSection sources={report.data_sources} />
-                    <div className="ai-report-disclaimer">{report.summary?.disclaimer || DISCLAIMER}</div>
+
+                    <div className="ai-report-tabs" role="tablist" aria-label="Các tab báo cáo AI">
+                        <button
+                            id="ai-report-tab"
+                            type="button"
+                            role="tab"
+                            aria-controls="ai-report-panel"
+                            aria-label="Mở tab Báo cáo AI"
+                            aria-selected={activeTab === "ai-report"}
+                            className={`ai-report-tab ${activeTab === "ai-report" ? "is-active" : ""}`}
+                            onClick={() => handleTabChange("ai-report")}
+                        >
+                            Báo cáo AI
+                        </button>
+                        <button
+                            id="visualization-tab"
+                            type="button"
+                            role="tab"
+                            aria-controls="visualization-panel"
+                            aria-label="Mở tab Biểu đồ trực quan"
+                            aria-selected={activeTab === "visualization"}
+                            className={`ai-report-tab ${activeTab === "visualization" ? "is-active" : ""}`}
+                            onClick={() => handleTabChange("visualization")}
+                        >
+                            Biểu đồ trực quan
+                        </button>
+                        <button
+                            id="data-formulator-tab"
+                            type="button"
+                            role="tab"
+                            aria-controls="data-formulator-panel"
+                            aria-label="Mở tab Data Formulator"
+                            aria-selected={activeTab === "data-formulator"}
+                            className={`ai-report-tab ${activeTab === "data-formulator" ? "is-active" : ""}`}
+                            onClick={() => handleTabChange("data-formulator")}
+                        >
+                            Data Formulator
+                        </button>
+                    </div>
+
+                    <div id="ai-report-tab-panels">
+                        {activeTab === "ai-report" && (
+                            <div id="ai-report-panel" role="tabpanel" aria-labelledby="ai-report-tab" data-panel="ai-report">
+                                <CoverSection report={report} />
+                                <QuickOverviewSection report={report} />
+                                <ExecutiveSummarySection report={report} />
+                                <BusinessOverviewSection report={report} />
+                                <MarketContextSection report={report} />
+                                <StockQualityDashboardSection report={report} />
+                                <Section id="price-trend" title="Diễn biến giá" icon={<BarChart3 className="size-5" />}>
+                                    <ChartCard
+                                        title="Close price và volume"
+                                        option={buildPriceOption(priceHistory)}
+                                        hasData={priceHistory.length >= 2}
+                                    />
+                                </Section>
+                                <FinancialStatementSection report={report} />
+                                <ValuationSection report={report} />
+                                <PeerComparisonSection report={report} />
+                                <ExternalResearchSection report={report} />
+                                <InvestmentMemoSection report={report} request={request} />
+                                <ActionPlanSection report={report} />
+                                <StrengthsSection report={report} />
+                                <RisksSection report={report} />
+                                <ScenarioSection report={report} />
+                                <ChecklistSection report={report} />
+                                <MetricDictionarySection />
+                                <DataCoverageSection report={report} />
+                                <DataSourcesSection sources={report.data_sources} />
+                                <div className="ai-report-disclaimer">{report.summary?.disclaimer || DISCLAIMER}</div>
+                            </div>
+                        )}
+
+                        {(activeTab === "visualization" || visitedTabs.visualization) && (
+                            <div id="visualization-panel" role="tabpanel" aria-labelledby="visualization-tab" data-panel="visualization" hidden={activeTab !== "visualization"}>
+                                <VisualizationTab report={report} request={request} />
+                            </div>
+                        )}
+
+                        {(activeTab === "data-formulator" || visitedTabs["data-formulator"]) && (
+                            <div id="data-formulator-panel" role="tabpanel" aria-labelledby="data-formulator-tab" data-panel="data-formulator" hidden={activeTab !== "data-formulator"}>
+                                <DataFormulatorPanel report={report} request={request} />
+                            </div>
+                        )}
+                    </div>
                 </main>
             </div>
         </div>
@@ -2662,6 +2735,7 @@ export default function StockAnalysisPage() {
     const endpoint = getAnalyseOneUrl()
     const watchlistsEndpoint = getWatchlistsUrl()
     const abortControllerRef = useRef<AbortController | null>(null)
+    const downloadedReportIdsRef = useRef<Set<string>>(new Set())
     const [form, setForm] = useState<AnalysisFormState>(DEFAULT_FORM)
     const [authToken, setAuthToken] = useState<string | null>(() => getCurrentAccessToken())
     const [watchlistStocks, setWatchlistStocks] = useState<WatchlistStock[]>([])
@@ -2732,7 +2806,10 @@ export default function StockAnalysisPage() {
     }, [syncAuthToken, watchlistsEndpoint])
 
     useEffect(() => {
-        void loadWatchlists()
+        const timer = window.setTimeout(() => {
+            void loadWatchlists()
+        }, 0)
+        return () => window.clearTimeout(timer)
     }, [loadWatchlists])
 
     useEffect(() => {
@@ -2827,6 +2904,36 @@ export default function StockAnalysisPage() {
             setReport(nextReport)
             setHistorySavedId(nextReport?.history_id?.trim() || null)
             setIsFormCollapsed(true)
+            // Auto-download visualization export package once after a successful analysis if enabled
+            if (nextReport && nextReport.report_id && autoDownloadVisualizationExport) {
+                const reportId = nextReport.report_id.trim()
+                if (!downloadedReportIdsRef.current.has(reportId)) {
+                    ;(async () => {
+                        try {
+                            const resp = await fetchVisualizationJson(request ?? undefined, nextReport?.history_id ?? undefined)
+                            const dataset = resp.data
+                            if (dataset) {
+                                try {
+                                    const zipBlob = await buildZipExportPackage(dataset, dataset.symbol || nextReport.symbol)
+                                    const filename = `${(dataset.symbol || nextReport.symbol || "visualization").replace(/\s+/g, "_")}_${new Date()
+                                        .toISOString()
+                                        .replace(/[:.]/g, "")}_visualization_export.zip`
+                                    downloadBlob(filename, zipBlob)
+                                    downloadedReportIdsRef.current.add(reportId)
+                                } catch {
+                                    // Fallback: download JSON only
+                                    const jsonBlob = new Blob([JSON.stringify(dataset, null, 2)], { type: "application/json" })
+                                    downloadBlob(`${(dataset.symbol || nextReport.symbol || "visualization").replace(/\s+/g, "_")}_visualization_data.json`, jsonBlob)
+                                    downloadedReportIdsRef.current.add(reportId)
+                                }
+                            }
+                        } catch {
+                            // ignore auto-download errors (show nothing); user can download manually in Data Formulator tab
+                            // Optionally, we could surface a toast here.
+                        }
+                    })()
+                }
+            }
         } catch (err) {
             if (err instanceof AnalyseServiceError && err.kind === "cancelled") {
                 setError({

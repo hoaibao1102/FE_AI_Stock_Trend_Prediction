@@ -14,7 +14,6 @@ import {
     TableEmpty,
     Breadcrumb,
     StatusBadge,
-    placeholder,
     formatNumber,
 } from "@/shared/components"
 import { getCrawlLogs, getCrawlLogById, type CrawlLog, type CrawlLogDetailResponse } from "@/services/crawl.service"

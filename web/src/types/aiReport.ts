@@ -14,6 +14,8 @@ export type AiReportOptions = {
     capitalVnd: number
     riskPerTradePct: number
     maxPositionPct: number
+    reportId?: string
+    report_id?: string
 }
 
 export type AnalyseOneRequest = {

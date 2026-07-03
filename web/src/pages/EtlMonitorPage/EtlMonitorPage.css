@@ -1,0 +1,565 @@
+.etl-monitor-page {
+    min-height: 100%;
+    padding: 28px;
+    background: #0b1018;
+    color: #f8fafc;
+}
+
+.etl-monitor-container {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+/* Header */
+
+.etl-monitor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.etl-monitor-title {
+    margin: 0;
+    color: #f8fafc;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.etl-monitor-subtitle {
+    margin: 8px 0 0;
+    color: #8fa4c4;
+    font-size: 15px;
+}
+
+.etl-refresh-button {
+    min-height: 42px;
+    padding: 9px 18px;
+    border: 1px solid #3b82f6;
+    border-radius: 9px;
+    background: #3b82f6;
+    color: #ffffff;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+    .etl-refresh-button:hover:not(:disabled) {
+        border-color: #60a5fa;
+        background: #2563eb;
+        transform: translateY(-1px);
+    }
+
+    .etl-refresh-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+    }
+
+/* Alerts */
+
+.etl-alert {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+    padding: 13px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.etl-alert-error {
+    border: 1px solid #7f1d1d;
+    background: rgb(127 29 29 / 22%);
+    color: #fca5a5;
+}
+
+.etl-alert-warning {
+    border: 1px solid #854d0e;
+    background: rgb(133 77 14 / 20%);
+    color: #fcd34d;
+}
+
+.etl-alert button {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    border: 1px solid currentColor;
+    border-radius: 7px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* KPI cards */
+
+.etl-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat( 3, minmax(0, 1fr) );
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.etl-kpi-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 132px;
+    padding: 20px;
+    border: 1px solid #22304a;
+    border-radius: 14px;
+    background: #101827;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+.etl-kpi-accent {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 3px;
+}
+
+.etl-kpi-blue .etl-kpi-accent {
+    background: #3b82f6;
+}
+
+.etl-kpi-green .etl-kpi-accent {
+    background: #10b981;
+}
+
+.etl-kpi-red .etl-kpi-accent {
+    background: #ef4444;
+}
+
+.etl-kpi-purple .etl-kpi-accent {
+    background: #8b5cf6;
+}
+
+.etl-kpi-cyan .etl-kpi-accent {
+    background: #06b6d4;
+}
+
+.etl-kpi-orange .etl-kpi-accent {
+    background: #f59e0b;
+}
+
+.etl-kpi-label {
+    margin: 0 0 12px;
+    color: #8fa4c4;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.etl-kpi-value {
+    display: block;
+    margin-bottom: 8px;
+    color: #f8fafc;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.etl-kpi-description {
+    margin: 0;
+    color: #7186a5;
+    font-size: 13px;
+}
+
+/* Main dashboard cards */
+
+.etl-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat( 2, minmax(0, 1fr) );
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.etl-chart-card,
+.etl-summary-card {
+    border: 1px solid #22304a;
+    border-radius: 14px;
+    background: #101827;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+.etl-chart-card {
+    min-height: 420px;
+    padding: 22px;
+}
+
+.etl-summary-card {
+    padding: 22px;
+}
+
+.etl-card-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+    .etl-card-heading h2 {
+        margin: 0;
+        color: #f1f5f9;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .etl-card-heading p {
+        margin: 6px 0 0;
+        color: #7f94b5;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .etl-card-heading > strong {
+        color: #60a5fa;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+.etl-card-count {
+    flex-shrink: 0;
+    padding: 5px 10px;
+    border: 1px solid #30415f;
+    border-radius: 999px;
+    background: #0e1625;
+    color: #8fa4c4;
+    font-size: 12px;
+}
+
+/* CSS bar charts */
+
+.etl-chart-list {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.etl-chart-row {
+    min-width: 0;
+}
+
+.etl-chart-row-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 9px;
+}
+
+    .etl-chart-row-header > div {
+        min-width: 0;
+    }
+
+    .etl-chart-row-header strong {
+        display: block;
+        overflow: hidden;
+        color: #e5edf9;
+        font-size: 14px;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .etl-chart-row-header span {
+        display: block;
+        margin-top: 4px;
+        color: #7186a5;
+        font-size: 12px;
+    }
+
+    .etl-chart-row-header > b {
+        flex-shrink: 0;
+        color: #c8d6eb;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+.etl-bar-track {
+    width: 100%;
+    height: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #1e293b;
+}
+
+.etl-bar-fill {
+    height: 100%;
+    border-radius: inherit;
+    transition: width 0.4s ease;
+}
+
+.etl-bar-good {
+    background: linear-gradient( 90deg, #059669, #34d399 );
+}
+
+.etl-bar-warning {
+    background: linear-gradient( 90deg, #d97706, #fbbf24 );
+}
+
+.etl-bar-danger {
+    background: linear-gradient( 90deg, #dc2626, #f87171 );
+}
+
+/* Job status */
+
+.etl-job-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.etl-job-status {
+    display: inline-flex !important;
+    flex-shrink: 0;
+    margin-top: 0 !important;
+    padding: 3px 7px;
+    border-radius: 999px;
+    font-size: 10px !important;
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: capitalize;
+}
+
+.etl-job-status-success {
+    border: 1px solid rgb(16 185 129 / 35%);
+    background: rgb(16 185 129 / 14%);
+    color: #34d399 !important;
+}
+
+.etl-job-status-failed {
+    border: 1px solid rgb(239 68 68 / 35%);
+    background: rgb(239 68 68 / 14%);
+    color: #f87171 !important;
+}
+
+.etl-job-status-running {
+    border: 1px solid rgb(59 130 246 / 35%);
+    background: rgb(59 130 246 / 14%);
+    color: #60a5fa !important;
+}
+
+.etl-job-status-neutral {
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #94a3b8 !important;
+}
+
+/* Overall quality progress */
+
+.quality-progress {
+    display: flex;
+    width: 100%;
+    height: 14px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #1e293b;
+}
+
+.quality-progress-valid {
+    background: linear-gradient( 90deg, #059669, #34d399 );
+}
+
+.quality-progress-invalid {
+    background: linear-gradient( 90deg, #b91c1c, #ef4444 );
+}
+
+.quality-progress-legend {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 16px;
+    color: #8fa4c4;
+    font-size: 13px;
+}
+
+    .quality-progress-legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+.legend-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+
+.legend-valid {
+    background: #34d399;
+}
+
+.legend-invalid {
+    background: #ef4444;
+}
+
+/* Empty state */
+
+.etl-empty-state {
+    display: flex;
+    min-height: 290px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: #7186a5;
+    text-align: center;
+}
+
+.etl-empty-icon {
+    display: flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    border: 1px solid #30415f;
+    border-radius: 50%;
+    background: #0e1625;
+    color: #8fa4c4;
+}
+
+.etl-empty-state p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Loading skeleton */
+
+.etl-skeleton-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.etl-skeleton {
+    border-radius: 6px;
+    background: linear-gradient( 90deg, #172033 25%, #22304a 50%, #172033 75% );
+    background-size: 200% 100%;
+    animation: etl-skeleton-loading 1.4s infinite;
+}
+
+.etl-skeleton-small {
+    width: 42%;
+    height: 13px;
+}
+
+.etl-skeleton-medium {
+    width: 65%;
+    height: 13px;
+}
+
+.etl-skeleton-large {
+    width: 52%;
+    height: 32px;
+}
+
+.etl-skeleton-title {
+    width: 35%;
+    height: 20px;
+    margin-bottom: 26px;
+}
+
+.etl-skeleton-bar {
+    width: 100%;
+    height: 10px;
+}
+
+.etl-loading-panel {
+    min-height: 420px;
+}
+
+.etl-loading-row {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    margin-bottom: 24px;
+}
+
+@keyframes etl-skeleton-loading {
+    from {
+        background-position: 200% 0;
+    }
+
+    to {
+        background-position: -200% 0;
+    }
+}
+
+/* Responsive */
+
+@media (max-width: 1100px) {
+    .etl-kpi-grid {
+        grid-template-columns: repeat( 2, minmax(0, 1fr) );
+    }
+
+    .etl-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .etl-monitor-page {
+        padding: 20px 16px;
+    }
+
+    .etl-monitor-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .etl-refresh-button {
+        width: 100%;
+    }
+
+    .etl-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quality-progress-legend {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .etl-monitor-page {
+        padding: 16px 12px;
+    }
+
+    .etl-monitor-title {
+        font-size: 25px;
+    }
+
+    .etl-chart-card,
+    .etl-summary-card {
+        padding: 17px;
+    }
+
+    .etl-card-heading {
+        flex-direction: column;
+    }
+
+    .etl-chart-row-header {
+        gap: 10px;
+    }
+
+    .etl-job-name-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+s
