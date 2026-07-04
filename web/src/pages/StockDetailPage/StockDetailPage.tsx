@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils"
 import { Breadcrumb } from "@/shared/components"
 import {
     getStockChart,
+    getStockDetail,
+    mockSnapshotToCandle,
     type StockCandle,
     type StockChartMeta,
     type StockChartRange,
@@ -178,6 +180,87 @@ export default function StockDetailPage() {
         })()
         return () => { cancelled = true }
     }, [isAuthenticated, symbol])
+
+    // ── Poll stock detail for mock/live tick data ──────────────────────────
+    const [mockPolling, setMockPolling] = useState(false)
+    const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+    // Start polling if the chart data has mock flag, or when range is "1m" (short window suitable for demo)
+    const isWithinMockWindow = range === "1m"
+
+    useEffect(() => {
+        // Only poll when viewing short range (mock sessions use this range)
+        if (!isWithinMockWindow || !symbol) {
+            if (pollTimerRef.current) {
+                clearInterval(pollTimerRef.current)
+                pollTimerRef.current = null
+            }
+            setMockPolling(false)
+            return
+        }
+
+        const poll = async () => {
+            try {
+                const detail = await getStockDetail(symbol)
+
+                // Check if we're in a mock session
+                if (detail._mock) {
+                    setMockPolling(true)
+
+                    const snapshot = detail.latest_price
+                    if (!snapshot) return
+
+                    // Convert to candle and append to existing chart data
+                    const candle = mockSnapshotToCandle(snapshot, detail._cursor)
+
+                    // Update current price display immediately
+                    setState((prev) => ({
+                        ...prev,
+                        candles: [...prev.candles, candle],
+                    }))
+
+                    // Show alert notification when threshold crossed
+                    if (detail.alert_triggered) {
+                        toast.info("Alert Triggered!", {
+                            description: `${symbol} crossed the threshold. Check Alerts page for details.`,
+                            duration: 6000,
+                        })
+                    }
+
+                    // Stop polling when done
+                    if (detail._done) {
+                        if (pollTimerRef.current) {
+                            clearInterval(pollTimerRef.current)
+                            pollTimerRef.current = null
+                        }
+                        setMockPolling(false)
+                        toast.success("Mock simulation complete", {
+                            description: `${symbol} price simulation finished. Data available until page reload.`,
+                        })
+                    }
+                } else if (mockPolling) {
+                    // Mock session ended externally (e.g. DELETE from Swagger)
+                    setMockPolling(false)
+                    if (pollTimerRef.current) {
+                        clearInterval(pollTimerRef.current)
+                        pollTimerRef.current = null
+                    }
+                }
+            } catch {
+                // Silently handle — auth token might not be set
+            }
+        }
+
+        // Start polling at 1.5s interval
+        pollTimerRef.current = setInterval(poll, 1500)
+        return () => {
+            if (pollTimerRef.current) {
+                clearInterval(pollTimerRef.current)
+                pollTimerRef.current = null
+            }
+            setMockPolling(false)
+        }
+    }, [symbol, isWithinMockWindow])
 
     const handleWatchToggle = async () => {
         if (!isAuthenticated) {
@@ -424,6 +507,7 @@ export default function StockDetailPage() {
                         <h1>{symbol}</h1>
                         <Badge variant="outline">{meta.exchange || "HOSE"}</Badge>
                         <Badge variant="secondary">{meta.marketStatus || "Market Open"}</Badge>
+                        {mockPolling && <Badge variant="default" className="animate-pulse">LIVE DEMO</Badge>}
                     </div>
                     <p>{meta.companyName || "Company name unavailable"}</p>
                     <div className="stock-detail__meta">

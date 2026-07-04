@@ -276,6 +276,71 @@ function mapStockItem(item: unknown): StockItem | null {
     }
 }
 
+export type StockPriceSnapshot = {
+  close_price: number
+  open_price?: number
+  high_price?: number
+  low_price?: number
+  volume?: number
+  time_id?: number
+  price_change?: number
+  price_change_percent?: number
+}
+
+export type StockDetailResponse = {
+  symbol: string
+  company_name: string
+  latest_price: StockPriceSnapshot | null
+  _mock?: boolean
+  _cursor?: number
+  _remaining?: number
+  _done?: boolean
+  alert_triggered?: boolean
+  alert_status?: string | null
+}
+
+/**
+ * Fetch stock detail (latest price snapshot).
+ * During mock sessions returns next tick each call.
+ */
+export async function getStockDetail(symbol: string): Promise<StockDetailResponse> {
+  const normalizedSymbol = symbol.trim().toUpperCase() || "FPT"
+  const response = await authenticatedRequest({
+    url: `/api/stocks/${encodeURIComponent(normalizedSymbol)}`,
+    method: "GET",
+  })
+
+  const payload = response.data
+  if (!payload || typeof payload !== "object") throw new Error("Invalid response")
+
+  const data = (payload as Record<string, unknown>).data as StockDetailResponse | undefined
+  if (!data) throw new Error("No stock data in response")
+
+  return data
+}
+
+/** Convert time_id number (YYYYMMDD) to "YYYY-MM-DD" string */
+function timeIdToDateString(timeId: number): string {
+  const s = String(timeId)
+  if (s.length !== 8) return String(timeId)
+  return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`
+}
+
+/** Convert mock tick from latest_price to a StockCandle */
+export function mockSnapshotToCandle(snapshot: StockPriceSnapshot, cursor?: number): StockCandle {
+  const time = snapshot.time_id
+    ? timeIdToDateString(snapshot.time_id)
+    : `mock-${cursor ?? Date.now()}`
+  return {
+    time,
+    open: snapshot.open_price ?? snapshot.close_price,
+    high: snapshot.high_price ?? snapshot.close_price,
+    low: snapshot.low_price ?? snapshot.close_price,
+    close: snapshot.close_price,
+    volume: snapshot.volume ?? 0,
+  }
+}
+
 export async function getStockChart(symbol: string, range: StockChartRange): Promise<StockChartResult> {
     const normalizedSymbol = symbol.trim().toUpperCase() || "FPT"
     const response = await authenticatedRequest<StockChartResponse | unknown[]>({
