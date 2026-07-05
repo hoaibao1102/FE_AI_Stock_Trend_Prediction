@@ -1,0 +1,67 @@
+.holdings-modal__table-wrap {
+    overflow: auto;
+    border: 1px solid rgba(51, 65, 85, 0.85);
+    border-radius: 10px;
+}
+
+.holdings-modal__table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+}
+
+.holdings-modal__table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #0f172a;
+}
+
+.holdings-modal__table th,
+.holdings-modal__table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(51, 65, 85, 0.72);
+    text-align: left;
+    font-size: 0.74rem;
+    white-space: nowrap;
+}
+
+.holdings-modal__table th {
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.holdings-modal__table td {
+    color: #e2e8f0;
+}
+
+.holdings-modal__table tbody tr:hover {
+    background: rgba(30, 41, 59, 0.45);
+}
+
+.holdings-metric-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.holdings-metric-card {
+    border: 1px solid rgba(51, 65, 85, 0.82);
+    border-radius: 12px;
+    background: #0f172a;
+    padding: 14px;
+}
+
+.holdings-metric-card span {
+    display: block;
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+.holdings-metric-card strong {
+    display: block;
+    margin-top: 8px;
+    color: #f8fafc;
+    font-size: 1rem;
+    font-weight: 700;
+}

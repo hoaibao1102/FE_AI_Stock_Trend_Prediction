@@ -19,7 +19,7 @@ export function getStatusTone(status?: string): "positive" | "warning" | "negati
 
 export function formatNumber(value?: number, digits = 2): string {
     if (value === undefined || !Number.isFinite(value)) return "--"
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("vi-VN", {
         minimumFractionDigits: digits,
         maximumFractionDigits: digits,
     }).format(value)
@@ -27,7 +27,7 @@ export function formatNumber(value?: number, digits = 2): string {
 
 export function formatCompact(value?: number): string {
     if (value === undefined || !Number.isFinite(value)) return "--"
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("vi-VN", {
         notation: "compact",
         maximumFractionDigits: 1,
     }).format(value)
