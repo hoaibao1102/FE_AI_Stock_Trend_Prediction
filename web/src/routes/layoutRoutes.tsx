@@ -11,6 +11,7 @@ import ComparisonPage from "@/pages/ComparisonPage"
 import SettingsPage from "@/pages/SettingsPage"
 import StockAnalysisPage from "@/pages/StockAnalysisPage"
 import StockDetailPage from "@/pages/StockDetailPage/StockDetailPage"
+import StockHoldingDetailPage from "@/pages/StockHoldingDetailPage/StockHoldingDetailPage"
 import StockListPage from "@/pages/StockListPage/StockListPage"
 import UserDashboard from "@/pages/UserDashboard/UserDashboard"
 import WatchlistPage from "@/pages/WatchlistPage/WatchList"
@@ -46,6 +47,7 @@ export const USER_ROUTES: LayoutRoute[] = [
     { path: "/stock-analysis/history", element: <AiReportHistoryPage /> },
     { path: "/stock-analysis/history/:historyId", element: <AiReportHistoryPage /> },
     { path: "/watchlist", element: <WatchlistPage /> },
+    { path: "/watchlist/:symbol/holding", element: <StockHoldingDetailPage /> },
     { path: "/alerts", element: <AlertsPage /> },
     { path: "/comparison", element: <ComparisonPage /> },
     { path: "/settings", element: <SettingsPage /> },

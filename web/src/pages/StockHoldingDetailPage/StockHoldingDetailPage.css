@@ -1,0 +1,218 @@
+.stock-holding-page {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    color: var(--foreground);
+}
+
+.stock-holding-page__section,
+.stock-holding-page__header {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #111827;
+}
+
+.stock-holding-page__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px;
+}
+
+.stock-holding-page__header-main {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stock-holding-page__header-card {
+    min-width: 220px;
+    border: 1px solid rgba(51, 65, 85, 0.85);
+    border-radius: 12px;
+    background: #0f172a;
+    padding: 14px;
+}
+
+.stock-holding-page__header-card-label {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.stock-holding-page__header-card-value {
+    margin-top: 8px;
+    color: #f8fafc;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.stock-holding-page__header-card-note {
+    margin-top: 8px;
+    color: #94a3b8;
+    font-size: 0.76rem;
+}
+
+.stock-holding-page__back {
+    align-self: flex-start;
+}
+
+.stock-holding-page__title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.stock-holding-page__title-row h1 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.stock-holding-page__subtitle {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+}
+
+.stock-holding-page__market {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(51, 65, 85, 0.85);
+    border-radius: 999px;
+    padding: 4px 10px;
+    color: #cbd5e1;
+    font-size: 0.72rem;
+}
+
+.stock-holding-page__section {
+    padding: 12px;
+}
+
+.stock-holding-page__section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.stock-holding-page__section-header h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.stock-holding-page__section-header p {
+    margin: 4px 0 0;
+    color: #94a3b8;
+    font-size: 0.78rem;
+}
+
+.stock-holding-page__helper {
+    margin-bottom: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 10px;
+    background: rgba(30, 41, 59, 0.65);
+    padding: 12px;
+    color: #cbd5e1;
+    font-size: 0.78rem;
+}
+
+.stock-holding-page__overview-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.stock-holding-page__form {
+    display: grid;
+    gap: 14px;
+}
+
+.stock-holding-page__form-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.stock-holding-page__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.stock-holding-page__field label {
+    color: #94a3b8;
+    font-size: 0.74rem;
+    font-weight: 600;
+}
+
+.stock-holding-page__field input,
+.stock-holding-page__textarea {
+    border: 1px solid rgba(51, 65, 85, 0.85);
+    border-radius: 8px;
+    background: #0f172a;
+    color: #f8fafc;
+    font-size: 0.82rem;
+    outline: none;
+}
+
+.stock-holding-page__textarea {
+    min-height: 112px;
+    padding: 12px;
+    resize: vertical;
+}
+
+.stock-holding-page__empty {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stock-holding-page__holding-banner {
+    border: 1px solid rgba(51, 65, 85, 0.85);
+    border-radius: 12px;
+    background: #0f172a;
+    padding: 14px;
+}
+
+.stock-holding-page__holding-banner p {
+    margin: 6px 0 0;
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+.stock-holding-page__actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+.stock-holding-page__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .stock-holding-page__header {
+        flex-direction: column;
+    }
+
+    .stock-holding-page__section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stock-holding-page__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

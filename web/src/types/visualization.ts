@@ -77,6 +77,11 @@ export type VisualizationResponse = {
     code?: number
     message?: string
     data?: VisualizationV1
+    error?: {
+        type?: string
+        message?: string
+        [key: string]: unknown
+    }
 }
 
 export type VisualizationCsvResponse = Blob
