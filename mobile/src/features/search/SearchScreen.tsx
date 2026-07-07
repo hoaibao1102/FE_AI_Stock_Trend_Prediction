@@ -5,7 +5,6 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
-  StyleSheet,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,12 +20,11 @@ import { SearchHeaderPanel } from '@/features/search/components/SearchHeaderPane
 import { EmptySearchState, ErrorSearchState } from '@/features/search/components/SearchStates';
 import { useSearchStocks } from '@/features/search/hooks/useSearchStocks';
 import type { StockListItem as SearchStockItem } from '@/features/stocks/types';
-import { palette, spacing } from '@/shared/design/tokens';
 import { StockListItem } from '@/shared/ui';
 import { useToggleWatchlist } from '@/features/stocks/hooks/useToggleWatchlist';
 
 function SearchResultSeparator() {
-  return <View style={styles.separator} />;
+  return <View className="ml-4 h-px border-t border-border" />;
 }
 
 function dedupeBySymbol(items: SearchStockItem[]) {
@@ -60,10 +58,10 @@ function SearchItem({ item, onPress }: { item: SearchStockItem; onPress: () => v
       priceChangePercent={item.changePercent}
       rightMeta={item.sector ?? item.industry}
       rightAccessory={
-        <Pressable onPress={handleToggleWatchlist} style={styles.addButton}>
+        <Pressable onPress={handleToggleWatchlist} className="items-center justify-center p-1">
           <Star
-            color={isWatched ? palette.warning : palette.textSecondary}
-            fill={isWatched ? palette.warning : 'none'}
+            color={isWatched ? '#F59E0B' : '#94A3B8'}
+            fill={isWatched ? '#F59E0B' : 'none'}
             size={18}
           />
         </Pressable>
@@ -189,8 +187,8 @@ export function SearchScreen() {
 
   if (error && items.length === 0) {
     return (
-      <View style={styles.shell}>
-        <View style={[styles.errorContent, { paddingTop: insets.top }]}>
+      <View className="flex-1 bg-background">
+        <View className="flex-1 px-4" style={{ paddingTop: insets.top }}>
           {header}
           <ErrorSearchState message={error} onRetry={() => void loadStocks()} />
         </View>
@@ -199,11 +197,10 @@ export function SearchScreen() {
   }
 
   return (
-    <View style={styles.shell}>
+    <View className="flex-1 bg-background">
       <FlatList
         contentContainerStyle={[
-          styles.listContent,
-          { paddingBottom: Math.max(insets.bottom, spacing.md) + spacing.lg, paddingTop: insets.top },
+          { paddingHorizontal: 16, paddingBottom: Math.max(insets.bottom, 16) + 24, paddingTop: insets.top },
         ]}
         data={isDirectoryVisible ? items : []}
         ItemSeparatorComponent={SearchResultSeparator}
@@ -216,7 +213,7 @@ export function SearchScreen() {
           <RefreshControl
             onRefresh={() => void loadStocks({ refresh: true })}
             refreshing={isRefreshing}
-            tintColor={palette.primary}
+            tintColor="#3B82F6"
           />
         }
         renderItem={({ item }) => (
@@ -225,42 +222,10 @@ export function SearchScreen() {
         showsVerticalScrollIndicator={false}
       />
       {isLoading ? (
-        <View pointerEvents="none" style={styles.loadingOverlay}>
-          <ActivityIndicator color={palette.primary} size="small" />
+        <View pointerEvents="none" className="absolute left-0 right-0 items-center justify-center" style={{ top: 64 }}>
+          <ActivityIndicator color="#3B82F6" size="small" />
         </View>
       ) : null}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  shell: {
-    backgroundColor: palette.background,
-    flex: 1,
-  },
-  listContent: {
-    paddingHorizontal: spacing.md,
-  },
-  errorContent: {
-    flex: 1,
-    paddingHorizontal: spacing.md,
-  },
-  separator: {
-    backgroundColor: palette.border,
-    height: StyleSheet.hairlineWidth,
-    marginLeft: spacing.md,
-  },
-  loadingOverlay: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: spacing.xl + 32,
-  },
-  addButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 4,
-  },
-});

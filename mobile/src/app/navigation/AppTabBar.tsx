@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Box, Text } from '@/shared/ui/primitives';
@@ -11,7 +11,6 @@ import {
   SearchIcon,
   WatchlistIcon,
 } from '@/app/navigation/NavigationIcons';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import { useAppShellStore } from '@/stores/app-shell.store';
 
 type AppTabBarProps = {
@@ -60,78 +59,32 @@ export function AppTabBar({ descriptors, navigation, state }: AppTabBarProps) {
       barMinHeight: Math.max(height * 0.11, 45),
       iconSize: Math.max(shortSide * 0.07, 22),
       paddingBottom: Math.max(insets.bottom, height * 0.018),
-      paddingHorizontal: Math.max(width * 0.04, spacing.sm),
-      paddingTop: Math.max(height * 0.018, spacing.sm),
-      railRadius: Math.max(radius.card, Math.min(shortSide * 0.045, 18)),
+      paddingHorizontal: Math.max(width * 0.04, 8),
+      paddingTop: Math.max(height * 0.018, 8),
+      railRadius: Math.max(14, Math.min(shortSide * 0.045, 18)),
       touchHeight: Math.max(height * 0.066, 54),
     };
   }, [height, insets.bottom, width]);
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        shell: {
-          backgroundColor: palette.background,
-          borderTopColor: palette.border,
-          borderTopWidth: StyleSheet.hairlineWidth,
-          minHeight: metrics.barMinHeight,
-          paddingBottom: metrics.paddingBottom,
-          paddingHorizontal: metrics.paddingHorizontal,
-          paddingTop: metrics.paddingTop,
-        },
-        row: {
-          alignItems: 'center',
-          borderRadius: metrics.railRadius,
-          flexDirection: 'row',
-          gap: spacing.xs,
-          justifyContent: 'space-between',
-          paddingHorizontal: Math.max(width * 0.016, spacing.xs),
-          paddingVertical: Math.max(height * 0.008, spacing.xs),
-        },
-        tabButton: {
-          alignItems: 'center',
-          borderRadius: radius.pill,
-          flex: 1,
-          justifyContent: 'center',
-          minHeight: metrics.touchHeight,
-          minWidth: 44,
-          overflow: 'hidden',
-          paddingVertical: Math.max(height * 0.012, spacing.sm),
-          position: 'relative',
-        },
-        tabActive: {
-          backgroundColor: 'rgba(173, 198, 255, 0.12)',
-        },
-        tabPressed: {
-          opacity: 0.8,
-        },
-        alertBadge: {
-          alignItems: 'center',
-          backgroundColor: palette.primary,
-          borderRadius: radius.pill,
-          borderWidth: 1,
-          borderColor: 'rgba(8, 17, 26, 0.12)',
-          justifyContent: 'center',
-          minWidth: 16,
-          paddingHorizontal: 4,
-          position: 'absolute',
-          right: '18%',
-          top: '12%',
-        },
-        alertBadgeText: {
-          color: '#08111A',
-          fontSize: 9,
-          fontWeight: '800',
-        },
-      }),
-    [metrics],
-  );
-
   const visibleRoutes = state.routes.filter((route) => route.name in TAB_META);
 
   return (
-    <Box style={styles.shell}>
-      <View style={styles.row}>
+    <Box
+      className="bg-background border-t border-t-border"
+      style={{
+        minHeight: metrics.barMinHeight,
+        paddingBottom: metrics.paddingBottom,
+        paddingHorizontal: metrics.paddingHorizontal,
+        paddingTop: metrics.paddingTop,
+      }}>
+      <View
+        className="flex-row items-center justify-between"
+        style={{
+          borderRadius: metrics.railRadius,
+          gap: 4,
+          paddingHorizontal: Math.max(width * 0.016, 4),
+          paddingVertical: Math.max(height * 0.008, 4),
+        }}>
         {visibleRoutes.map((route) => {
           const routeIndex = state.routes.findIndex((entry) => entry.key === route.key);
           const isFocused = state.index === routeIndex;
@@ -157,15 +110,21 @@ export function AppTabBar({ descriptors, navigation, state }: AppTabBarProps) {
                   navigation.navigate(route.name, route.params);
                 }
               }}
-              style={({ pressed }) => [
-                styles.tabButton,
-                isFocused && styles.tabActive,
-                pressed && styles.tabPressed,
-              ]}>
-              <Icon color={isFocused ? palette.primary : palette.textMuted} size={metrics.iconSize} />
+              className={`items-center justify-center flex-1 rounded-full overflow-hidden relative active:opacity-80 min-w-[44px] ${isFocused ? 'bg-[rgba(173,198,255,0.12)]' : ''}`}
+              style={{
+                minHeight: metrics.touchHeight,
+                paddingVertical: Math.max(height * 0.012, 8),
+              }}>
+              <Icon color={isFocused ? '#3B82F6' : '#94A3B8'} size={metrics.iconSize} />
               {route.name === 'Alerts' && unreadNotifications > 0 ? (
-                <View style={styles.alertBadge}>
-                  <Text style={styles.alertBadgeText}>
+                <View
+                  className="absolute items-center justify-center rounded-full min-w-4 px-1 right-[18%] top-[12%]"
+                  style={{
+                    backgroundColor: '#3B82F6',
+                    borderColor: 'rgba(8, 17, 26, 0.12)',
+                    borderWidth: 1,
+                  }}>
+                  <Text className="text-[#08111A] text-[9px] font-extrabold">
                     {unreadNotifications > 9 ? '9+' : unreadNotifications}
                   </Text>
                 </View>

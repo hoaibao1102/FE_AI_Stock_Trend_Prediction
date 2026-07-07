@@ -1,14 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
 
 function ListSeparator() {
-  return <View style={styles.separator} />;
+  return <View className="bg-border h-[0.5px] ml-4" />;
 }
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/shared/ui';
-import { palette, spacing } from '@/shared/design/tokens';
 import { useWatchlist } from '@/features/watchlist/hooks/useWatchlist';
 import { WatchlistHeader } from '@/features/watchlist/components/WatchlistHeader';
 import { WatchlistSearchBar } from '@/features/watchlist/components/WatchlistSearchBar';
@@ -25,9 +24,9 @@ import type {
 
 function EmptyWatchlistState() {
   return (
-    <View style={styles.emptyShell}>
-      <Text style={styles.emptyTitle}>No stocks tracked yet</Text>
-      <Text style={styles.emptyBody}>
+    <View className="items-center gap-2 px-6 pt-[60px]">
+      <Text className="text-typography text-base font-semibold leading-6">No stocks tracked yet</Text>
+      <Text className="text-typography-muted text-sm leading-5 text-center">
         Tap the + Add button to start following your favourite symbols.
       </Text>
     </View>
@@ -36,10 +35,10 @@ function EmptyWatchlistState() {
 
 function ErrorWatchlistState({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <View style={styles.emptyShell}>
-      <Text style={styles.emptyTitle}>Could not load watchlist</Text>
-      <Text style={styles.emptyBody}>{message}</Text>
-      <Text onPress={onRetry} style={styles.retryLink}>
+    <View className="items-center gap-2 px-6 pt-[60px]">
+      <Text className="text-typography text-base font-semibold leading-6">Could not load watchlist</Text>
+      <Text className="text-typography-muted text-sm leading-5 text-center">{message}</Text>
+      <Text onPress={onRetry} className="text-primary-500 text-sm font-semibold mt-2">
         Tap to retry
       </Text>
     </View>
@@ -145,18 +144,18 @@ export function WatchlistScreen() {
 
   if (isActuallyLoading) {
     return (
-      <View style={[styles.shell, { paddingTop: insets.top }]}>
-        <View style={styles.headerLoading}>
-          <Text style={styles.titleLoading}>My Watchlist</Text>
+      <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+        <View className="px-4">
+          <Text className="text-typography text-[24px] font-bold leading-[32px]">My Watchlist</Text>
         </View>
-        <ActivityIndicator color={palette.primary} size="small" />
+        <ActivityIndicator color="#3B82F6" size="small" />
       </View>
     );
   }
 
   if (error && items.length === 0) {
     return (
-      <View style={styles.shell}>
+      <View className="flex-1 bg-background">
         {renderListHeader()}
         <ErrorWatchlistState message={error} onRetry={refresh} />
       </View>
@@ -167,15 +166,15 @@ export function WatchlistScreen() {
   // This overrides the normal list to force user to trim
   if (overLimit && !isActuallyLoading) {
     return (
-      <View style={styles.shell}>
+      <View className="flex-1 bg-background">
         <View style={{ paddingTop: insets.top }}>
           {renderListHeader()}
         </View>
-        <View style={styles.overlimitNotice}>
-          <Text style={styles.overlimitNoticeTitle}>
+        <View className="items-center gap-2 px-6 pt-8">
+          <Text className="text-warning text-base font-semibold leading-6">
             Watchlist limit reached
           </Text>
-          <Text style={styles.overlimitNoticeBody}>
+          <Text className="text-typography-muted text-sm leading-5 text-center">
             Your current plan allows up to {limit} stocks. Please trim your
             watchlist to continue.
           </Text>
@@ -195,9 +194,9 @@ export function WatchlistScreen() {
   }
 
   return (
-    <View style={styles.shell}>
+    <View className="flex-1 bg-background">
       <FlatList
-        contentContainerStyle={{ paddingBottom: spacing.lg, paddingHorizontal: spacing.md, paddingTop: insets.top }}
+        contentContainerStyle={{ paddingBottom: 24, paddingHorizontal: 16, paddingTop: insets.top }}
         data={filteredItems}
         ItemSeparatorComponent={ListSeparator}
         keyExtractor={(item) => item.watchlist_id ?? item.stock.symbol}
@@ -207,7 +206,7 @@ export function WatchlistScreen() {
           <RefreshControl
             onRefresh={refresh}
             refreshing={isLoading}
-            tintColor={palette.primary}
+            tintColor="#3B82F6"
           />
         }
         renderItem={renderItem}
@@ -227,66 +226,3 @@ export function WatchlistScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  shell: {
-    backgroundColor: palette.background,
-    flex: 1,
-  },
-  headerLoading: {
-    paddingHorizontal: spacing.md,
-  },
-  titleLoading: {
-    color: palette.textPrimary,
-    fontSize: 24,
-    fontWeight: '700',
-    lineHeight: 32,
-  },
-  separator: {
-    backgroundColor: palette.border,
-    height: StyleSheet.hairlineWidth,
-    marginLeft: spacing.md,
-  },
-  emptyShell: {
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingTop: 60,
-  },
-  emptyTitle: {
-    color: palette.textPrimary,
-    fontSize: 16,
-    fontWeight: '600',
-    lineHeight: 24,
-  },
-  emptyBody: {
-    color: palette.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-    textAlign: 'center',
-  },
-  retryLink: {
-    color: palette.primary,
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: spacing.sm,
-  },
-  overlimitNotice: {
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-  },
-  overlimitNoticeTitle: {
-    color: palette.warning,
-    fontSize: 16,
-    fontWeight: '600',
-    lineHeight: 24,
-  },
-  overlimitNoticeBody: {
-    color: palette.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-    textAlign: 'center',
-  },
-});

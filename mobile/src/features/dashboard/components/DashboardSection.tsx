@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, spacing } from '@/shared/design/tokens';
 
 type DashboardSectionProps = {
   children: ReactNode;
@@ -20,15 +19,15 @@ export function DashboardSection({
   onActionPress,
 }: DashboardSectionProps) {
   return (
-    <View style={styles.section}>
-      <View style={styles.header}>
-        <View style={styles.copy}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.subtitle}>{subtitle}</Text>
+    <View className="gap-2">
+      <View className="flex-row items-center gap-4 justify-between">
+        <View className="flex-1 gap-1">
+          <Text className="text-xl font-bold leading-7 text-typography">{title}</Text>
+          <Text className="text-xs leading-4 text-typography-muted">{subtitle}</Text>
         </View>
         {actionLabel && onActionPress ? (
           <TouchableOpacity activeOpacity={0.82} onPress={onActionPress}>
-            <Text style={styles.action}>{actionLabel}</Text>
+            <Text className="text-xs font-bold leading-4 text-primary-500">{actionLabel}</Text>
           </TouchableOpacity>
         ) : null}
       </View>
@@ -36,36 +35,3 @@ export function DashboardSection({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    gap: spacing.sm,
-  },
-  header: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: spacing.md,
-    justifyContent: 'space-between',
-  },
-  copy: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  title: {
-    color: palette.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
-    lineHeight: 28,
-  },
-  subtitle: {
-    color: palette.textSecondary,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  action: {
-    color: palette.primary,
-    fontSize: 12,
-    fontWeight: '700',
-    lineHeight: 16,
-  },
-});

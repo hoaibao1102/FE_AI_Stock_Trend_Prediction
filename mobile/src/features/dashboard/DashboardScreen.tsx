@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { DashboardHeader } from '@/features/dashboard/components/DashboardHeader';
@@ -12,7 +12,6 @@ import {
   useDashboard,
 } from '@/features/dashboard/hooks/useDashboard';
 import { AppScreen } from '@/shared/ui';
-import { palette } from '@/shared/design/tokens';
 import type { MainTabScreenProps } from '@/app/navigation/navigation.types';
 
 export function DashboardScreen() {
@@ -27,7 +26,7 @@ export function DashboardScreen() {
   };
 
   return (
-    <View style={styles.shell}>
+    <View className="flex-1 bg-background">
       <DashboardHeader
         badgeLabel={summary.latestTradingDateLabel}
         onNotificationPress={() => navigation.navigate('Alerts')}
@@ -69,10 +68,3 @@ export function DashboardScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  shell: {
-    backgroundColor: palette.background,
-    flex: 1,
-  },
-});

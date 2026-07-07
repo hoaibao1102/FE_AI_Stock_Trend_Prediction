@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
-import { View, ViewProps, Text, StyleSheet, Animated, Dimensions, Platform } from 'react-native';
+import { View, Text, Animated } from 'react-native';
 import { useColorScheme } from 'nativewind';
 
 type ModeType = 'light' | 'dark' | 'system';
@@ -47,9 +47,9 @@ function ToastItem({ message, onHide }: { message: ToastMessage; onHide: () => v
 
     return (
         <Animated.View
+            className="rounded-lg p-3"
             style={[
-                styles.toast,
-                { opacity, backgroundColor: colors.bg },
+                { opacity, backgroundColor: colors.bg, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 6 },
             ]}
         >
             <Text style={[styles.toastTitle, { color: colors.text }]}>{message.title}</Text>
@@ -67,7 +67,7 @@ export function ThemeProvider({
 }: {
     mode?: ModeType;
     children?: React.ReactNode;
-    style?: ViewProps['style'];
+    style?: View['props']['style'];
 }) {
     const { setColorScheme } = useColorScheme();
     const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -88,16 +88,11 @@ export function ThemeProvider({
 
     return (
         <ToastContext.Provider value={{ showToast, hideToast }}>
-            <View
-                style={[
-                    { flex: 1, height: '100%', width: '100%' },
-                    style,
-                ]}
-            >
+            <View style={[{ flex: 1, height: '100%', width: '100%' }, style]}>
                 {children}
             </View>
             {/* Toast portal */}
-            <View style={styles.toastContainer} pointerEvents="box-none">
+            <View className="absolute left-4 right-4 z-[9999] gap-2" style={{ top: 60 }} pointerEvents="box-none">
                 {toasts.map(t => (
                     <ToastItem key={t.id} message={t} onHide={() => hideToast(t.id)} />
                 ))}
@@ -106,24 +101,7 @@ export function ThemeProvider({
     );
 }
 
-const styles = StyleSheet.create({
-    toastContainer: {
-        position: 'absolute',
-        top: Platform.OS === 'ios' ? 60 : 40,
-        left: 16,
-        right: 16,
-        zIndex: 9999,
-        gap: 8,
-    },
-    toast: {
-        borderRadius: 8,
-        padding: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 6,
-    },
+const styles = {
     toastTitle: {
         fontSize: 14,
         fontWeight: '600',
@@ -133,4 +111,4 @@ const styles = StyleSheet.create({
         marginTop: 2,
         opacity: 0.9,
     },
-});
+};

@@ -1,7 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { Pressable, View, Text, StyleSheet } from 'react-native';
-import { palette } from '@/shared/design/tokens';
+import { Pressable, View, Text } from 'react-native';
 
 type CheckboxProps = {
   value?: boolean;
@@ -41,22 +40,21 @@ function Checkbox({
     <Pressable
       disabled={disabled}
       onPress={handlePress}
-      style={[styles.container, { opacity: disabled ? 0.4 : 1 }]}
+      className="flex-row items-center gap-2"
+      style={{ opacity: disabled ? 0.4 : 1 }}
     >
       <View
-        style={[
-          styles.box,
-          {
-            width: dim,
-            height: dim,
-            borderRadius: 4,
-            borderWidth: 2,
-            borderColor: checked ? color : palette.border,
-            backgroundColor: checked ? color : 'transparent',
-            alignItems: 'center',
-            justifyContent: 'center',
-          },
-        ]}
+        style={{
+          width: dim,
+          height: dim,
+          borderRadius: 4,
+          borderWidth: 2,
+          borderColor: checked ? color : '#334155',
+          backgroundColor: checked ? color : 'transparent',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+        }}
       >
         {checked && (
           <Text style={{ color: '#FFFFFF', fontSize: dim * 0.7, lineHeight: dim }}>
@@ -65,28 +63,13 @@ function Checkbox({
         )}
       </View>
       {label && (
-        <Text style={[styles.label, { fontSize: FONT_SIZE[size] }]}>
+        <Text className="font-medium text-typography" style={{ fontSize: FONT_SIZE[size] }}>
           {label}
         </Text>
       )}
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  box: {
-    overflow: 'hidden',
-  },
-  label: {
-    color: palette.textPrimary,
-    fontWeight: '500',
-  },
-});
 
 Checkbox.displayName = 'Checkbox';
 export { Checkbox };

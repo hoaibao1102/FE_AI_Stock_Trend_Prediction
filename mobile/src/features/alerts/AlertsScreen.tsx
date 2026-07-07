@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 
 import { Text } from '@/shared/ui/primitives';
 import { FeaturePlaceholderScreen } from '@/shared/ui/components/FeaturePlaceholderScreen';
-import { palette } from '@/shared/design/tokens';
 import { useAppShellStore } from '@/stores/app-shell.store';
 
 export function AlertsScreen() {
@@ -18,7 +17,7 @@ export function AlertsScreen() {
     <FeaturePlaceholderScreen
       body="Alert workflows, anomaly rules, and notification history will land here while the shared shell already preserves navigation state and unread badge handling."
       eyebrow="Alerts"
-      footer={<Text style={{ color: palette.textMuted, fontSize: 12 }}>Notification center ready for future market triggers.</Text>}
+      footer={<Text style={{ color: '#94A3B8', fontSize: 12 }}>Notification center ready for future market triggers.</Text>}
       title="Signal escalation workspace"
     />
   );

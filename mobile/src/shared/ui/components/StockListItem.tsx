@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import {
     changeDirectionIcon,
     formatPercent,
@@ -58,11 +57,11 @@ export function StockListItem({
     rightAccessory,
     variant = 'default',
 }: StockListItemProps) {
-    const changeColor = useMemo(() => {
-        if (priceChangePercent == null) return palette.textMuted;
-        if (priceChangePercent > 0) return palette.positive;
-        if (priceChangePercent < 0) return palette.negative;
-        return palette.textMuted;
+    const changeColorClass = useMemo(() => {
+        if (priceChangePercent == null) return 'text-typography-disabled';
+        if (priceChangePercent > 0) return 'text-market-up';
+        if (priceChangePercent < 0) return 'text-market-down';
+        return 'text-typography-disabled';
     }, [priceChangePercent]);
 
     const icon = changeDirectionIcon(priceChangePercent);
@@ -74,168 +73,59 @@ export function StockListItem({
             accessibilityRole="button"
             onPress={onPress}
             onLongPress={onLongPress}
-            style={({ pressed }) => [
-                styles.row,
-                pressed && styles.rowPressed,
-            ]}>
-            <View style={styles.rowContent}>
+            className="min-h-[76px] px-4 py-2.5"
+            style={({ pressed }) => pressed ? { backgroundColor: '#1E293B' } : undefined}>
+            <View className="flex-row items-center justify-between">
                 {/* Left accessory */}
-                {leftAccessory && <View style={styles.leftAccessory}>{leftAccessory}</View>}
+                {leftAccessory && <View className="mr-2">{leftAccessory}</View>}
 
                 {/* Left: text column */}
-                <View style={styles.leftBlock}>
-                    <View style={styles.tickerRow}>
-                        <Text style={styles.symbol} numberOfLines={1}>
+                <View className="flex-1 justify-center min-w-0 pr-2">
+                    <View className="flex-row items-center gap-2">
+                        <Text className="text-base font-bold leading-[22px] text-typography" numberOfLines={1}>
                             {symbol}
                         </Text>
                         {exchangeCode ? (
-                            <View style={styles.exchangeBadge}>
-                                <Text style={styles.exchangeText}>{exchangeCode}</Text>
+                            <View className="bg-primary-500/20 rounded-full px-1.5 py-[1px]">
+                                <Text className="text-primary-500 text-2xs font-bold tracking-[0.3px]">{exchangeCode}</Text>
                             </View>
                         ) : null}
-                        {isPinned ? <Text style={styles.flagIcon}>📌</Text> : null}
-                        {hasAlert ? <Text style={styles.flagIcon}>🔔</Text> : null}
+                        {isPinned ? <Text className="text-[11px] leading-4">📌</Text> : null}
+                        {hasAlert ? <Text className="text-[11px] leading-4">🔔</Text> : null}
                     </View>
-                    <View style={styles.secondaryRow}>
-                        <Text numberOfLines={1} style={styles.companyName}>
+                    <View className="flex-row items-center gap-1">
+                        <Text className="text-xs font-normal leading-4 text-typography-muted flex-shrink" numberOfLines={1}>
                             {subtitle ?? companyName}
                         </Text>
                     </View>
                 </View>
 
                 {/* Right: price column */}
-                <View style={styles.rightBlock}>
+                <View className="items-end justify-center min-w-[96px]">
                     {price != null ? (
                         <>
-                            <Text style={styles.price}>{formatPrice(price)}</Text>
-                            <View style={styles.changeRow}>
-                                <Text style={[styles.changeText, { color: changeColor }]}>
+                            <Text className="text-base font-bold leading-[22px] text-typography">{formatPrice(price)}</Text>
+                            <View className="flex-row items-center gap-2">
+                                <Text className={`text-xs font-bold leading-4 ${changeColorClass}`}>
                                     {icon} {formatPercent(priceChangePercent)}
                                 </Text>
                                 {priceChange != null && (
-                                    <Text style={[styles.changeAbs, { color: changeColor }]}>
+                                    <Text className={`text-[11px] font-medium leading-[14px] ${changeColorClass}`}>
                                         {formatSignedNumber(priceChange)}
                                     </Text>
                                 )}
                             </View>
                             {volume != null && (
-                                <Text style={styles.volume}>Vol: {formatVolume(volume)}</Text>
+                                <Text className="text-2xs font-medium leading-[14px] text-typography-muted">Vol: {formatVolume(volume)}</Text>
                             )}
-                            {rightMeta && <Text style={styles.rightMeta}>{rightMeta}</Text>}
+                            {rightMeta && <Text className="text-2xs font-medium leading-[14px] text-typography-muted">{rightMeta}</Text>}
                         </>
                     ) : null}
                 </View>
 
                 {/* Right accessory */}
-                {rightAccessory && <View style={styles.rightAccessory}>{rightAccessory}</View>}
+                {rightAccessory && <View className="ml-2">{rightAccessory}</View>}
             </View>
         </Pressable>
     );
 }
-
-// ─── Styles ──────────────────────────────────────────────────────────
-
-const styles = StyleSheet.create({
-    row: {
-        minHeight: 76,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm + 2,
-    },
-    rowContent: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    rowPressed: {
-        backgroundColor: palette.elevated,
-    },
-    leftAccessory: {
-        marginRight: spacing.sm,
-    },
-    leftBlock: {
-        flex: 1,
-        justifyContent: 'center',
-        minWidth: 0,
-        paddingRight: spacing.sm,
-    },
-    tickerRow: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        gap: spacing.sm,
-    },
-    symbol: {
-        color: palette.textPrimary,
-        fontSize: 16,
-        fontWeight: '700',
-        lineHeight: 22,
-    },
-    exchangeBadge: {
-        backgroundColor: 'rgba(59, 130, 246, 0.12)',
-        borderRadius: radius.pill,
-        paddingHorizontal: spacing.xs + 2,
-        paddingVertical: 1,
-    },
-    exchangeText: {
-        color: palette.info,
-        fontSize: 10,
-        fontWeight: '700',
-        letterSpacing: 0.3,
-    },
-    flagIcon: {
-        fontSize: 11,
-        lineHeight: 16,
-    },
-    secondaryRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-    },
-    companyName: {
-        color: palette.textSecondary,
-        fontSize: 12,
-        fontWeight: '400',
-        lineHeight: 16,
-        flexShrink: 1,
-    },
-    rightBlock: {
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-        minWidth: 96,
-    },
-    price: {
-        color: palette.textPrimary,
-        fontSize: 16,
-        fontWeight: '700',
-        lineHeight: 22,
-    },
-    changeRow: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        gap: spacing.sm,
-    },
-    changeText: {
-        fontSize: 12,
-        fontWeight: '700',
-        lineHeight: 16,
-    },
-    changeAbs: {
-        fontSize: 11,
-        fontWeight: '500',
-        lineHeight: 14,
-    },
-    volume: {
-        color: palette.textSecondary,
-        fontSize: 10,
-        fontWeight: '500',
-        lineHeight: 14,
-    },
-    rightMeta: {
-        color: palette.textSecondary,
-        fontSize: 10,
-        fontWeight: '500',
-        lineHeight: 14,
-    },
-    rightAccessory: {
-        marginLeft: spacing.sm,
-    },
-});

@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { RootScreenProps } from '@/app/navigation/navigation.types';
@@ -12,7 +12,6 @@ import { RangeSelector } from '@/features/stocks/components/RangeSelector';
 import { StockHeader } from '@/features/stocks/components/StockHeader';
 import { TechnicalSummary } from '@/features/stocks/components/TechnicalSummary';
 import { useStockChart } from '@/features/stocks/hooks/useStockChart';
-import { palette, spacing } from '@/shared/design/tokens';
 
 const companyNameBySymbol: Record<string, string> = {
   FPT: 'FPT CORPORATION',
@@ -31,8 +30,8 @@ export function StockDetailScreen({
   const stockChart = useStockChart(symbol);
 
   return (
-    <View style={styles.shell}>
-      <View style={[styles.safeHeader, { paddingTop: insets.top }]}>
+    <View className="flex-1 bg-background">
+      <View className="bg-background" style={{ paddingTop: insets.top }}>
         <StockHeader
           companyName={companyName}
           onBack={navigation.goBack}
@@ -41,10 +40,11 @@ export function StockDetailScreen({
       </View>
 
       <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: Math.max(insets.bottom, spacing.md) + spacing.lg },
-        ]}
+        contentContainerStyle={{
+          gap: 16,
+          paddingTop: 8,
+          paddingBottom: Math.max(insets.bottom, 16) + 24,
+        }}
         showsVerticalScrollIndicator={false}>
         <PriceOverview stats={stockChart.priceStats} />
         <OHLCVCard stats={stockChart.priceStats} />
@@ -69,17 +69,3 @@ export function StockDetailScreen({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    gap: spacing.md,
-    paddingTop: spacing.sm,
-  },
-  safeHeader: {
-    backgroundColor: palette.background,
-  },
-  shell: {
-    backgroundColor: palette.background,
-    flex: 1,
-  },
-});

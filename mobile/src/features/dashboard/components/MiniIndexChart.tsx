@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 
 import type { DashboardIndexChartCandle } from '@/features/dashboard/types';
-import { palette } from '@/shared/design/tokens';
 
 type MiniIndexChartProps = {
   data: DashboardIndexChartCandle[];
@@ -19,14 +18,14 @@ export function MiniIndexChart({ data, isNegative = false }: MiniIndexChartProps
   const chart = useMemo(() => buildLineChart(data), [data]);
 
   if (!chart) {
-    return <View style={styles.emptyChart} />;
+    return <View className="h-24 w-full" />;
   }
 
-  const strokeColor = isNegative ? palette.negative : palette.positive;
+  const strokeColor = isNegative ? '#EF4444' : '#22C55E';
   const gradientId = isNegative ? 'miniChartNegative' : 'miniChartPositive';
 
   return (
-    <View style={styles.chartShell}>
+    <View className="h-24 w-full mt-0.5">
       <Svg height={CHART_HEIGHT} viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} width="100%">
         <Defs>
           <LinearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
@@ -78,15 +77,3 @@ function buildLineChart(data: DashboardIndexChartCandle[]) {
 
   return { areaPath, linePath };
 }
-
-const styles = StyleSheet.create({
-  chartShell: {
-    height: CHART_HEIGHT,
-    marginTop: 2,
-    width: '100%',
-  },
-  emptyChart: {
-    height: CHART_HEIGHT,
-    width: '100%',
-  },
-});

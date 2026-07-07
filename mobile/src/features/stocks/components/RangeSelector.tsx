@@ -1,7 +1,6 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import type { StockTimeframe } from '@/features/stocks/types';
 import {
   timeframeOptions,
@@ -15,7 +14,7 @@ type RangeSelectorProps = {
 
 export function RangeSelector({ active, onChange }: RangeSelectorProps) {
   return (
-    <View style={styles.shell}>
+    <View className="flex-row border border-border bg-surface rounded-cardxl gap-1 mx-4 p-1">
       {timeframeOptions.map((timeframe) => {
         const isActive = timeframe === active;
 
@@ -24,8 +23,11 @@ export function RangeSelector({ active, onChange }: RangeSelectorProps) {
             accessibilityRole="button"
             key={timeframe}
             onPress={() => onChange(timeframe)}
-            style={[styles.option, isActive && styles.optionActive]}>
-            <Text style={[styles.label, isActive && styles.labelActive]}>
+            style={[
+              { alignItems: 'center', flex: 1, height: 36, justifyContent: 'center', borderRadius: 4 },
+              isActive && { backgroundColor: '#1E293B', borderColor: '#3B82F6', borderWidth: 1 },
+            ]}>
+            <Text style={[isActive && { color: '#F8FAFC' }]} className="text-[12px] font-bold leading-4 text-typography-muted">
               {timeframeLabels[timeframe]}
             </Text>
           </Pressable>
@@ -34,37 +36,3 @@ export function RangeSelector({ active, onChange }: RangeSelectorProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  label: {
-    color: palette.textSecondary,
-    fontSize: 12,
-    fontWeight: '700',
-    lineHeight: 16,
-  },
-  labelActive: {
-    color: palette.textPrimary,
-  },
-  option: {
-    alignItems: 'center',
-    borderRadius: radius.control,
-    flex: 1,
-    height: 36,
-    justifyContent: 'center',
-  },
-  optionActive: {
-    backgroundColor: palette.elevated,
-    borderColor: palette.primary,
-    borderWidth: 1,
-  },
-  shell: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: spacing.xs,
-    marginHorizontal: spacing.md,
-    padding: spacing.xs,
-  },
-});

@@ -1,8 +1,7 @@
 import { BellPlus, MinusCircle, PlusCircle } from 'lucide-react-native';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import { useToggleWatchlist } from '@/features/stocks/hooks/useToggleWatchlist';
 
 type ActionButtonsProps = {
@@ -13,71 +12,29 @@ export function ActionButtons({ symbol }: ActionButtonsProps) {
   const { isWatched, toggle } = useToggleWatchlist(symbol);
 
   return (
-    <View style={styles.row}>
-      <Pressable accessibilityRole="button" style={styles.primaryButton}>
-        <BellPlus color={palette.textPrimary} size={18} />
-        <Text style={styles.primaryText}>Create Alert</Text>
+    <View className="flex-row gap-2 px-4">
+      <Pressable accessibilityRole="button" className="flex-1 flex-row items-center justify-center bg-primary-500 rounded-sm h-11 gap-2">
+        <BellPlus color="#F8FAFC" size={18} />
+        <Text className="text-sm font-extrabold text-typography">Create Alert</Text>
       </Pressable>
       <Pressable
         accessibilityRole="button"
         onPress={toggle}
-        style={[styles.secondaryButton, isWatched && styles.secondaryButtonActive]}>
+        style={[
+          { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 4, height: 44, gap: 8 },
+          isWatched
+            ? { backgroundColor: '#EF444420', borderColor: '#EF4444', borderWidth: 1 }
+            : { backgroundColor: '#1E293B', borderColor: '#334155', borderWidth: 1 },
+        ]}>
         {isWatched ? (
-          <MinusCircle color={palette.textPrimary} size={18} />
+          <MinusCircle color="#F8FAFC" size={18} />
         ) : (
-          <PlusCircle color={palette.textPrimary} size={18} />
+          <PlusCircle color="#F8FAFC" size={18} />
         )}
-        <Text style={[styles.secondaryText, isWatched && styles.secondaryTextActive]}>
+        <Text style={isWatched ? { color: '#EF4444' } : { color: '#F8FAFC' }} className="text-sm font-extrabold">
           {isWatched ? 'Remove' : 'Add to Watchlist'}
         </Text>
       </Pressable>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  primaryButton: {
-    alignItems: 'center',
-    backgroundColor: palette.primary,
-    borderRadius: radius.control,
-    flex: 1,
-    flexDirection: 'row',
-    gap: spacing.sm,
-    height: 44,
-    justifyContent: 'center',
-  },
-  primaryText: {
-    color: palette.textPrimary,
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  secondaryButton: {
-    alignItems: 'center',
-    backgroundColor: palette.elevated,
-    borderColor: palette.border,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    flex: 1,
-    flexDirection: 'row',
-    gap: spacing.sm,
-    height: 44,
-    justifyContent: 'center',
-  },
-  secondaryText: {
-    color: palette.textPrimary,
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  secondaryButtonActive: {
-    backgroundColor: palette.error + '20',
-    borderColor: palette.error,
-  },
-  secondaryTextActive: {
-    color: palette.error,
-  },
-});

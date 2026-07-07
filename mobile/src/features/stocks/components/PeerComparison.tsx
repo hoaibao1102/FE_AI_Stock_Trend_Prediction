@@ -1,7 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, spacing } from '@/shared/design/tokens';
 import {
   formatMoney,
   formatPercent,
@@ -15,22 +14,24 @@ const peers = [
 
 export function PeerComparison() {
   return (
-    <View style={styles.section}>
-      <View style={styles.header}>
-        <Text style={styles.sectionTitle}>Peer Comparison</Text>
-        <Text style={styles.viewAll}>View all</Text>
+    <View className="gap-2 px-4">
+      <View className="flex-row items-center justify-between">
+        <Text className="text-base font-bold leading-6 text-typography">Peer Comparison</Text>
+        <Text className="text-[12px] font-extrabold leading-4 text-primary-500">View all</Text>
       </View>
-      <View style={styles.row}>
+      <View className="flex-row gap-2">
         {peers.map((peer) => {
-          const color = peer.change >= 0 ? palette.positive : palette.negative;
+          const color = peer.change >= 0 ? '#22C55E' : '#EF4444';
 
           return (
-            <View key={peer.symbol} style={styles.card}>
-              <Text style={styles.symbol}>{peer.symbol}</Text>
-              <Text numberOfLines={1} style={styles.price}>
+            <View key={peer.symbol} className="flex-1 border border-border bg-surface rounded-md gap-1 p-2">
+              <Text className="text-[12px] font-extrabold leading-4 text-typography-muted">{peer.symbol}</Text>
+              <Text numberOfLines={1} className="text-sm font-extrabold leading-[18px] text-typography">
                 {formatMoney(peer.price)}
               </Text>
-              <Text style={[styles.change, { color }]}>{formatPercent(peer.change)}</Text>
+              <Text style={{ color }} className="text-[12px] font-extrabold leading-4">
+                {formatPercent(peer.change)}
+              </Text>
             </View>
           );
         })}
@@ -38,57 +39,3 @@ export function PeerComparison() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: 12,
-    borderWidth: 1,
-    flex: 1,
-    gap: spacing.xs,
-    padding: spacing.sm,
-  },
-  change: {
-    fontSize: 12,
-    fontWeight: '800',
-    lineHeight: 16,
-  },
-  header: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  price: {
-    color: palette.textPrimary,
-    fontSize: 14,
-    fontWeight: '800',
-    lineHeight: 18,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  section: {
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  sectionTitle: {
-    color: palette.textPrimary,
-    fontSize: 16,
-    fontWeight: '700',
-    lineHeight: 24,
-  },
-  symbol: {
-    color: palette.textSecondary,
-    fontSize: 12,
-    fontWeight: '800',
-    lineHeight: 16,
-  },
-  viewAll: {
-    color: palette.primary,
-    fontSize: 12,
-    fontWeight: '800',
-    lineHeight: 16,
-  },
-});

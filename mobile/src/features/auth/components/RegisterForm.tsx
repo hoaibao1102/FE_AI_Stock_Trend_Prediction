@@ -3,15 +3,12 @@ import {
   Platform,
   Pressable as RNPressable,
   TextInput,
-  TextStyle,
   TouchableOpacity,
-  ViewStyle,
 } from 'react-native';
 
 import { Mail, Lock, Eye, EyeOff, User, RefreshCw } from 'lucide-react-native';
 
 import { Box, HStack, Spinner, Text, VStack } from '@/shared/ui/primitives';
-import { palette, radius } from '@/shared/design/tokens';
 import { LoginField } from '@/features/auth/components/LoginField';
 import type { RegisterFormValues } from '@/features/auth/types';
 
@@ -44,11 +41,10 @@ type RegisterFormProps = {
 
 const FIELD_SURFACE = '#121A25';
 const FIELD_BORDER = 'rgba(66, 71, 84, 0.92)';
-const BRAND = palette.primary;
+const BRAND = '#3B82F6';
 const FORM_ERROR = '#F8B4B4';
 const FORM_ERROR_BORDER = 'rgba(239, 68, 68, 0.24)';
-const TEXT_MUTED = palette.textSecondary;
-const TEXT_PRIMARY = palette.textPrimary;
+const TEXT_MUTED = '#94A3B8';
 
 export function RegisterForm({
   formik,
@@ -77,134 +73,17 @@ export function RegisterForm({
     return null;
   };
 
-  const styles = {
-    labelText: {
-      color: palette.textSecondary,
-      fontSize: metrics.labelSize,
-      fontWeight: '700',
-      letterSpacing: metrics.labelSize * 0.12,
-    } as TextStyle,
-    inlineMessage: {
-      color: FORM_ERROR,
-      fontSize: metrics.bodySize * 0.84,
-      lineHeight: metrics.bodySize * 1.35,
-      marginTop: '2%',
-    } as TextStyle,
-    helperText: {
-      color: palette.textSecondary,
-      fontSize: metrics.bodySize * 0.78,
-      lineHeight: metrics.bodySize * 1.3,
-      marginTop: '1.5%',
-    } as TextStyle,
-    statusBanner: {
-      backgroundColor: 'rgba(239, 68, 68, 0.12)',
-      borderColor: FORM_ERROR_BORDER,
-      borderRadius: radius.card,
-      borderWidth: 1,
-      paddingHorizontal: '4.6%',
-      paddingVertical: '3.4%',
-    } as ViewStyle,
-    statusBannerText: {
-      color: FORM_ERROR,
-      fontSize: metrics.bodySize * 0.9,
-      lineHeight: metrics.bodySize * 1.45,
-      textAlign: 'center',
-    } as TextStyle,
-    successBanner: {
-      backgroundColor: 'rgba(34, 197, 94, 0.12)',
-      borderColor: 'rgba(34, 197, 94, 0.24)',
-      borderRadius: radius.card,
-      borderWidth: 1,
-      paddingHorizontal: '4.6%',
-      paddingVertical: '3.4%',
-    } as ViewStyle,
-    successBannerText: {
-      color: palette.positive,
-      fontSize: metrics.bodySize * 0.9,
-      lineHeight: metrics.bodySize * 1.45,
-      textAlign: 'center',
-    } as TextStyle,
-    buttonText: {
-      color: '#0F172A',
-      fontSize: metrics.bodySize * 1.03,
-      fontWeight: '800',
-      letterSpacing: metrics.bodySize * 0.02,
-    } as TextStyle,
-    buttonArrow: {
-      color: '#0F172A',
-      fontSize: metrics.bodySize * 1.12,
-      fontWeight: '800',
-      marginLeft: '2%',
-    } as TextStyle,
-    checkboxHitArea: {
-      alignItems: 'center',
-      flexDirection: 'row',
-      minHeight: metrics.fieldHeight * 0.72,
-    } as ViewStyle,
-    checkboxBox: {
-      alignItems: 'center',
-      backgroundColor: formik.values.agreeTerms ? palette.primarySoft : FIELD_SURFACE,
-      borderColor: formik.values.agreeTerms ? palette.primarySoft : FIELD_BORDER,
-      borderRadius: 4,
-      borderWidth: 1.2,
-      height: metrics.fieldHeight * 0.38,
-      justifyContent: 'center',
-      width: metrics.fieldHeight * 0.38,
-    } as ViewStyle,
-    checkboxTick: {
-      color: formik.values.agreeTerms ? '#0F172A' : 'transparent',
-      fontSize: metrics.bodySize,
-      fontWeight: '800',
-    } as TextStyle,
-    checkboxLabel: {
-      color: palette.textSecondary,
-      fontSize: metrics.bodySize * 0.88,
-      lineHeight: metrics.bodySize * 1.35,
-      marginLeft: '3.6%',
-      flexShrink: 1,
-    } as TextStyle,
-    linkText: {
-      color: BRAND,
-      fontSize: metrics.bodySize * 0.88,
-      lineHeight: metrics.bodySize * 1.35,
-      fontWeight: '700',
-    } as TextStyle,
-    bottomLink: {
-      color: palette.textSecondary,
-      fontSize: metrics.bodySize * 0.92,
-      lineHeight: metrics.bodySize * 1.5,
-      textAlign: 'center',
-    } as TextStyle,
-    eyeToggle: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      minWidth: '14%',
-      paddingVertical: '2%',
-    } as ViewStyle,
-    eyeIcon: {
-      color: BRAND,
-      fontSize: metrics.fieldHeight * 0.32,
-      fontWeight: '700',
-    } as TextStyle,
-    confirmIcon: {
-      color: TEXT_MUTED,
-      fontSize: metrics.fieldHeight * 0.32,
-      fontWeight: '700',
-      textAlign: 'center',
-    } as TextStyle,
-  };
-
   return (
     <VStack space="md">
       {/* Full Name Field */}
       <VStack space="xs">
-        <Text style={styles.labelText}>FULL NAME</Text>
+        <Text className="text-typography-muted font-bold" style={{ fontSize: metrics.labelSize, letterSpacing: metrics.labelSize * 0.12 }}>FULL NAME</Text>
         <LoginField
           accessibilityLabel="Full name"
           autoCapitalize="words"
           autoComplete="off"
           fieldHeight={metrics.fieldHeight}
-          icon={<User color={palette.textSecondary} size={metrics.fieldHeight * 0.33} />}
+          icon={<User color="#94A3B8" size={metrics.fieldHeight * 0.33} />}
           invalid={Boolean(getFieldError('fullName'))}
           keyboardType="default"
           onBlur={() => formik.setFieldTouched('fullName')}
@@ -216,18 +95,18 @@ export function RegisterForm({
           value={formik.values.fullName}
         />
         {getFieldError('fullName') ? (
-          <Text style={styles.inlineMessage}>{getFieldError('fullName')}</Text>
+          <Text className="text-[#F8B4B4]" style={{ fontSize: metrics.bodySize * 0.84, lineHeight: metrics.bodySize * 1.35, marginTop: '2%' }}>{getFieldError('fullName')}</Text>
         ) : null}
       </VStack>
 
       {/* Email Field */}
       <VStack space="xs">
-        <Text style={styles.labelText}>EMAIL ADDRESS</Text>
+        <Text className="text-typography-muted font-bold" style={{ fontSize: metrics.labelSize, letterSpacing: metrics.labelSize * 0.12 }}>EMAIL ADDRESS</Text>
         <LoginField
           accessibilityLabel="Email address"
           autoComplete="email"
           fieldHeight={metrics.fieldHeight}
-          icon={<Mail color={palette.textSecondary} size={metrics.fieldHeight * 0.33} />}
+          icon={<Mail color="#94A3B8" size={metrics.fieldHeight * 0.33} />}
           inputRef={emailRef}
           invalid={Boolean(getFieldError('email'))}
           keyboardType="email-address"
@@ -240,18 +119,18 @@ export function RegisterForm({
           value={formik.values.email}
         />
         {getFieldError('email') ? (
-          <Text style={styles.inlineMessage}>{getFieldError('email')}</Text>
+          <Text className="text-[#F8B4B4]" style={{ fontSize: metrics.bodySize * 0.84, lineHeight: metrics.bodySize * 1.35, marginTop: '2%' }}>{getFieldError('email')}</Text>
         ) : null}
       </VStack>
 
       {/* Password Field */}
       <VStack space="xs">
-        <Text style={styles.labelText}>PASSWORD</Text>
+        <Text className="text-typography-muted font-bold" style={{ fontSize: metrics.labelSize, letterSpacing: metrics.labelSize * 0.12 }}>PASSWORD</Text>
         <LoginField
           accessibilityLabel="Password"
           autoComplete="password"
           fieldHeight={metrics.fieldHeight}
-          icon={<Lock color={palette.textSecondary} size={metrics.fieldHeight * 0.33} />}
+          icon={<Lock color="#94A3B8" size={metrics.fieldHeight * 0.33} />}
           inputRef={passwordRef}
           invalid={Boolean(getFieldError('password'))}
           onBlur={() => formik.setFieldTouched('password')}
@@ -264,7 +143,8 @@ export function RegisterForm({
               accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
               accessibilityRole="button"
               onPress={onTogglePassword}
-              style={styles.eyeToggle}>
+              className="items-center justify-center"
+              style={{ minWidth: '14%', paddingVertical: '2%' }}>
               {showPassword ? <EyeOff color={BRAND} size={metrics.fieldHeight * 0.33} /> : <Eye color={BRAND} size={metrics.fieldHeight * 0.33} />}
             </RNPressable>
           }
@@ -273,20 +153,20 @@ export function RegisterForm({
           value={formik.values.password}
         />
         {getFieldError('password') ? (
-          <Text style={styles.inlineMessage}>{getFieldError('password')}</Text>
+          <Text className="text-[#F8B4B4]" style={{ fontSize: metrics.bodySize * 0.84, lineHeight: metrics.bodySize * 1.35, marginTop: '2%' }}>{getFieldError('password')}</Text>
         ) : (
-          <Text style={styles.helperText}>Must be at least 8 characters long.</Text>
+          <Text className="text-typography-muted" style={{ fontSize: metrics.bodySize * 0.78, lineHeight: metrics.bodySize * 1.3, marginTop: '1.5%' }}>Must be at least 8 characters long.</Text>
         )}
       </VStack>
 
       {/* Confirm Password Field */}
       <VStack space="xs">
-        <Text style={styles.labelText}>CONFIRM PASSWORD</Text>
+        <Text className="text-typography-muted font-bold" style={{ fontSize: metrics.labelSize, letterSpacing: metrics.labelSize * 0.12 }}>CONFIRM PASSWORD</Text>
         <LoginField
           accessibilityLabel="Confirm password"
           autoComplete="password"
           fieldHeight={metrics.fieldHeight}
-          icon={<RefreshCw color={palette.textSecondary} size={metrics.fieldHeight * 0.33} />}
+          icon={<RefreshCw color="#94A3B8" size={metrics.fieldHeight * 0.33} />}
           inputRef={confirmPasswordRef}
           invalid={Boolean(getFieldError('confirmPassword'))}
           onBlur={() => formik.setFieldTouched('confirmPassword')}
@@ -299,7 +179,8 @@ export function RegisterForm({
               accessibilityLabel={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
               accessibilityRole="button"
               onPress={onToggleConfirmPassword}
-              style={styles.eyeToggle}>
+              className="items-center justify-center"
+              style={{ minWidth: '14%', paddingVertical: '2%' }}>
               {showConfirmPassword ? <EyeOff color={BRAND} size={metrics.fieldHeight * 0.33} /> : <Eye color={BRAND} size={metrics.fieldHeight * 0.33} />}
             </RNPressable>
           }
@@ -308,43 +189,75 @@ export function RegisterForm({
           value={formik.values.confirmPassword}
         />
         {getFieldError('confirmPassword') ? (
-          <Text style={styles.inlineMessage}>{getFieldError('confirmPassword')}</Text>
+          <Text className="text-[#F8B4B4]" style={{ fontSize: metrics.bodySize * 0.84, lineHeight: metrics.bodySize * 1.35, marginTop: '2%' }}>{getFieldError('confirmPassword')}</Text>
         ) : null}
       </VStack>
 
       {/* Terms Checkbox */}
-      <HStack style={{ alignItems: 'center', justifyContent: 'flex-start' }}>
+      <HStack className="items-center justify-start">
         <RNPressable
           accessibilityRole="checkbox"
           accessibilityState={{ checked: formik.values.agreeTerms }}
           onPress={() => formik.setFieldValue('agreeTerms', !formik.values.agreeTerms)}
-          style={styles.checkboxHitArea}>
-          <Box style={styles.checkboxBox}>
-            <Text style={styles.checkboxTick}>✓</Text>
+          className="flex-row items-center"
+          style={{ minHeight: metrics.fieldHeight * 0.72 }}>
+          <Box
+            className="items-center justify-center border rounded-sm"
+            style={{
+              backgroundColor: formik.values.agreeTerms ? '#ADC6FF' : FIELD_SURFACE,
+              borderColor: formik.values.agreeTerms ? '#ADC6FF' : FIELD_BORDER,
+              borderWidth: 1.2,
+              height: metrics.fieldHeight * 0.38,
+              width: metrics.fieldHeight * 0.38,
+            }}>
+            <Text className="font-bold" style={{ color: formik.values.agreeTerms ? '#0F172A' : 'transparent', fontSize: metrics.bodySize }}>✓</Text>
           </Box>
-          <Text style={styles.checkboxLabel}>
+          <Text
+            className="text-typography-muted"
+            style={{
+              fontSize: metrics.bodySize * 0.88,
+              lineHeight: metrics.bodySize * 1.35,
+              marginLeft: '3.6%',
+              flexShrink: 1,
+            }}>
             I agree to the{' '}
-            <Text style={styles.linkText}>Terms of Service</Text>
+            <Text className="text-primary-500 font-bold" style={{ fontSize: metrics.bodySize * 0.88, lineHeight: metrics.bodySize * 1.35 }}>Terms of Service</Text>
             {' '}and{' '}
-            <Text style={styles.linkText}>Privacy Policy</Text>.
+            <Text className="text-primary-500 font-bold" style={{ fontSize: metrics.bodySize * 0.88, lineHeight: metrics.bodySize * 1.35 }}>Privacy Policy</Text>.
           </Text>
         </RNPressable>
       </HStack>
       {formik.touched.agreeTerms && formik.errors.agreeTerms ? (
-        <Text style={styles.inlineMessage}>{formik.errors.agreeTerms}</Text>
+        <Text className="text-[#F8B4B4]" style={{ fontSize: metrics.bodySize * 0.84, lineHeight: metrics.bodySize * 1.35, marginTop: '2%' }}>{formik.errors.agreeTerms}</Text>
       ) : null}
 
       {/* Error Banner */}
       {errorMessage ? (
-        <Box style={styles.statusBanner}>
-          <Text style={styles.statusBannerText}>{errorMessage}</Text>
+        <Box
+          className="border rounded-cardxl"
+          style={{
+            backgroundColor: 'rgba(239, 68, 68, 0.12)',
+            borderColor: FORM_ERROR_BORDER,
+            borderWidth: 1,
+            paddingHorizontal: '4.6%',
+            paddingVertical: '3.4%',
+          }}>
+          <Text className="text-center text-[#F8B4B4]" style={{ fontSize: metrics.bodySize * 0.9, lineHeight: metrics.bodySize * 1.45 }}>{errorMessage}</Text>
         </Box>
       ) : null}
 
       {/* Success Banner */}
       {successMessage ? (
-        <Box style={styles.successBanner}>
-          <Text style={styles.successBannerText}>{successMessage}</Text>
+        <Box
+          className="border rounded-cardxl"
+          style={{
+            backgroundColor: 'rgba(34, 197, 94, 0.12)',
+            borderColor: 'rgba(34, 197, 94, 0.24)',
+            borderWidth: 1,
+            paddingHorizontal: '4.6%',
+            paddingVertical: '3.4%',
+          }}>
+          <Text className="text-center text-market-up" style={{ fontSize: metrics.bodySize * 0.9, lineHeight: metrics.bodySize * 1.45 }}>{successMessage}</Text>
         </Box>
       ) : null}
 
@@ -354,38 +267,33 @@ export function RegisterForm({
         activeOpacity={0.88}
         disabled={isFormInvalid || successMessage !== null}
         onPress={() => formik.handleSubmit()}
+        className="w-full items-center justify-center px-6 py-3 rounded-cardxl"
         style={{
-          alignItems: 'center',
-          backgroundColor: isFormInvalid ? 'rgba(173, 198, 255, 0.4)' : palette.primarySoft,
-          borderRadius: radius.card,
-          justifyContent: 'center',
+          backgroundColor: isFormInvalid ? 'rgba(173, 198, 255, 0.4)' : '#ADC6FF',
           minHeight: metrics.buttonHeight,
-          paddingHorizontal: 24,
-          paddingVertical: 12,
-          width: '100%',
         }}>
-        <HStack style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <HStack className="items-center justify-center">
           {formik.isSubmitting ? (
             <>
               <Spinner color="#0F172A" size="small" />
-              <Text style={[styles.buttonText, { marginLeft: '3%' }]}>Creating account</Text>
+              <Text className="text-[#0F172A] font-extrabold" style={{ fontSize: metrics.bodySize * 1.03, letterSpacing: metrics.bodySize * 0.02, marginLeft: '3%' }}>Creating account</Text>
             </>
           ) : (
             <>
-              <Text style={styles.buttonText}>Register Account</Text>
-              <Text style={styles.buttonArrow}>→</Text>
+              <Text className="text-[#0F172A] font-extrabold" style={{ fontSize: metrics.bodySize * 1.03, letterSpacing: metrics.bodySize * 0.02 }}>Register Account</Text>
+              <Text className="text-[#0F172A] font-extrabold" style={{ fontSize: metrics.bodySize * 1.12, marginLeft: '2%' }}>→</Text>
             </>
           )}
         </HStack>
       </TouchableOpacity>
 
       {/* Navigate to Login */}
-      <HStack style={{ alignItems: 'center', justifyContent: 'center', paddingTop: '2%' }}>
-        <Text style={styles.bottomLink}>
+      <HStack className="items-center justify-center" style={{ paddingTop: '2%' }}>
+        <Text className="text-typography-muted text-center" style={{ fontSize: metrics.bodySize * 0.92, lineHeight: metrics.bodySize * 1.5 }}>
           Already have an account?{' '}
         </Text>
         <RNPressable onPress={onNavigateToLogin}>
-          <Text style={[styles.linkText, { fontSize: metrics.bodySize * 0.92 }]}>Log in</Text>
+          <Text className="text-primary-500 font-bold" style={{ fontSize: metrics.bodySize * 0.92 }}>Log in</Text>
         </RNPressable>
       </HStack>
     </VStack>

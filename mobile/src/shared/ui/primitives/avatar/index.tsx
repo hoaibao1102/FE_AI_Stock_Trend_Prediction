@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, Text, StyleSheet } from 'react-native';
+import { View, Image, Text } from 'react-native';
 
 type AvatarProps = {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
@@ -14,11 +14,11 @@ const SIZES: Record<string, number> = {
 function Avatar({ size = 'md', source, name }: AvatarProps) {
   const dim = SIZES[size] || 48;
   return (
-    <View style={[styles.base, { width: dim, height: dim, borderRadius: dim / 2 }]}>
+    <View className="items-center justify-center overflow-hidden bg-primary-500" style={{ width: dim, height: dim, borderRadius: dim / 2 }}>
       {source ? (
         <Image source={source} style={{ width: dim, height: dim, borderRadius: dim / 2 }} />
       ) : (
-        <Text style={[styles.fallback, { fontSize: dim * 0.4 }]}>
+        <Text className="text-white font-semibold uppercase" style={{ fontSize: dim * 0.4 }}>
           {name ? name.charAt(0).toUpperCase() : '?'}
         </Text>
       )}
@@ -27,21 +27,7 @@ function Avatar({ size = 'md', source, name }: AvatarProps) {
 }
 
 function AvatarBadge() { return null; }
-function AvatarGroup({ children }: { children?: React.ReactNode }) { return <View style={{ flexDirection: 'row-reverse' }}>{children}</View>; }
-
-const styles = StyleSheet.create({
-  base: {
-    alignItems: 'center',
-    backgroundColor: '#3B82F6',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  fallback: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-  },
-});
+function AvatarGroup({ children }: { children?: React.ReactNode }) { return <View className="flex-row-reverse">{children}</View>; }
 
 Avatar.displayName = 'Avatar';
 AvatarBadge.displayName = 'AvatarBadge';

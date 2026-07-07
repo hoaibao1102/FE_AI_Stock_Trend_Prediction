@@ -1,7 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, spacing } from '@/shared/design/tokens';
 import type { TechnicalStats } from '@/features/stocks/types';
 import { formatMoney } from '@/features/stocks/utils/stockDetailCalculations';
 
@@ -20,13 +19,13 @@ export function TechnicalSummary({ stats }: TechnicalSummaryProps) {
   ];
 
   return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Technical Summary</Text>
-      <View style={styles.row}>
+    <View className="gap-2 px-4">
+      <Text className="text-base font-bold leading-6 text-typography">Technical Summary</Text>
+      <View className="flex-row gap-2">
         {metrics.map((metric) => (
-          <View key={metric.label} style={styles.card}>
-            <Text style={styles.label}>{metric.label}</Text>
-            <Text numberOfLines={1} style={styles.value}>
+          <View key={metric.label} className="flex-1 border border-border bg-surface rounded-md gap-1 min-h-[72px] p-2">
+            <Text className="text-[11px] font-semibold leading-[14px] text-typography-muted">{metric.label}</Text>
+            <Text numberOfLines={1} className="text-[15px] font-extrabold leading-5 text-typography">
               {metric.value}
             </Text>
           </View>
@@ -35,42 +34,3 @@ export function TechnicalSummary({ stats }: TechnicalSummaryProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: 12,
-    borderWidth: 1,
-    flex: 1,
-    gap: spacing.xs,
-    minHeight: 72,
-    padding: spacing.sm,
-  },
-  label: {
-    color: palette.textSecondary,
-    fontSize: 11,
-    fontWeight: '600',
-    lineHeight: 14,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  section: {
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  sectionTitle: {
-    color: palette.textPrimary,
-    fontSize: 16,
-    fontWeight: '700',
-    lineHeight: 24,
-  },
-  value: {
-    color: palette.textPrimary,
-    fontSize: 15,
-    fontWeight: '800',
-    lineHeight: 20,
-  },
-});

@@ -1,7 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 
 function ProfileStatusChip({ status }: { status?: string }) {
   if (!status) {
@@ -10,64 +9,28 @@ function ProfileStatusChip({ status }: { status?: string }) {
 
   const tone =
     status === 'ACTIVE'
-      ? { borderColor: palette.positive, textColor: palette.positive }
+      ? { borderColor: '#22C55E', textColor: '#22C55E' }
       : status === 'INACTIVE'
-        ? { borderColor: palette.warning, textColor: palette.warning }
+        ? { borderColor: '#F59E0B', textColor: '#F59E0B' }
         : status === 'LOCKED' || status === 'BLOCKED'
-          ? { borderColor: palette.negative, textColor: palette.negative }
-          : { borderColor: palette.warning, textColor: palette.warning };
+          ? { borderColor: '#EF4444', textColor: '#EF4444' }
+          : { borderColor: '#F59E0B', textColor: '#F59E0B' };
 
   return (
-    <View style={[styles.statusChip, { borderColor: tone.borderColor }]}>
-      <Text style={[styles.statusChipText, { color: tone.textColor }]}>{status}</Text>
+    <View className="rounded-full border px-2 py-1" style={{ borderColor: tone.borderColor }}>
+      <Text className="text-[11px] font-bold leading-[14px]" style={{ color: tone.textColor, textTransform: 'uppercase' }}>{status}</Text>
     </View>
   );
 }
 
 export function ProfileScreenHeader({ status }: { status?: string }) {
   return (
-    <View style={styles.header}>
-      <View style={styles.headerCopy}>
-        <Text style={styles.title}>Profile</Text>
-        <Text style={styles.subtitle}>Account &amp; app preferences</Text>
+    <View className="flex-row items-start justify-between gap-2">
+      <View className="flex-1 gap-1">
+        <Text className="text-2xl text-typography font-bold leading-8">Profile</Text>
+        <Text className="text-sm text-typography-muted leading-5">Account &amp; app preferences</Text>
       </View>
       <ProfileStatusChip status={status} />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    gap: spacing.sm,
-    justifyContent: 'space-between',
-  },
-  headerCopy: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  statusChip: {
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  statusChipText: {
-    fontSize: 11,
-    fontWeight: '700',
-    lineHeight: 14,
-    textTransform: 'uppercase',
-  },
-  subtitle: {
-    color: palette.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  title: {
-    color: palette.textPrimary,
-    fontSize: 24,
-    fontWeight: '700',
-    lineHeight: 32,
-  },
-});

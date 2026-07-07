@@ -1,7 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Card, Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import type { UserProfile } from '@/features/profile/types';
 
 function getFallbackValue(value?: string | null) {
@@ -27,28 +26,28 @@ function getInitials(fullName?: string) {
 function getStatusTone(status?: string) {
   if (status === 'ACTIVE') {
     return {
-      borderColor: palette.positive,
-      textColor: palette.positive,
+      borderColor: '#22C55E',
+      textColor: '#22C55E',
     };
   }
 
   if (status === 'INACTIVE') {
     return {
-      borderColor: palette.warning,
-      textColor: palette.warning,
+      borderColor: '#F59E0B',
+      textColor: '#F59E0B',
     };
   }
 
   if (status === 'LOCKED' || status === 'BLOCKED') {
     return {
-      borderColor: palette.negative,
-      textColor: palette.negative,
+      borderColor: '#EF4444',
+      textColor: '#EF4444',
     };
   }
 
   return {
-    borderColor: palette.warning,
-    textColor: palette.warning,
+    borderColor: '#F59E0B',
+    textColor: '#F59E0B',
   };
 }
 
@@ -61,8 +60,8 @@ function getPlanTone(plan?: string) {
   }
 
   return {
-    borderColor: palette.primary,
-    textColor: palette.primarySoft,
+    borderColor: '#3B82F6',
+    textColor: '#3B82F6',
   };
 }
 
@@ -91,8 +90,8 @@ function ProfileBadge({
   tone: { borderColor: string; textColor: string };
 }) {
   return (
-    <View style={[styles.badge, { borderColor: tone.borderColor }]}>
-      <Text style={[styles.badgeText, { color: tone.textColor }]}>{label}</Text>
+    <View className="rounded-full border px-2 py-1" style={{ borderColor: tone.borderColor }}>
+      <Text className="text-[11px] font-bold leading-[14px]" style={{ color: tone.textColor, textTransform: 'uppercase' }}>{label}</Text>
     </View>
   );
 }
@@ -104,114 +103,31 @@ export function ProfileHeaderCard({ profile }: { profile: UserProfile | null }) 
   const planTone = getPlanTone(profile?.plan);
 
   return (
-    <Card style={styles.card}>
-      <View style={styles.row}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{getInitials(profile?.full_name)}</Text>
+    <Card className="bg-surface-elevated border-border rounded-cardxl border p-4 gap-4">
+      <View className="flex-row gap-4">
+        <View className="items-center justify-center w-14 h-14 rounded-full bg-background border border-border">
+          <Text className="text-lg text-typography font-bold leading-[22px]">{getInitials(profile?.full_name)}</Text>
         </View>
-        <View style={styles.identity}>
-          <Text style={styles.name}>{getFallbackValue(profile?.full_name)}</Text>
-          <Text style={styles.email}>{getFallbackValue(profile?.email)}</Text>
-          <View style={styles.badges}>
+        <View className="flex-1 gap-2">
+          <Text className="text-xl text-typography font-bold leading-7">{getFallbackValue(profile?.full_name)}</Text>
+          <Text className="text-sm text-typography-muted leading-5">{getFallbackValue(profile?.email)}</Text>
+          <View className="flex-row flex-wrap gap-2">
             <ProfileBadge label={planValue} tone={planTone} />
             <ProfileBadge
               label={getFallbackValue(profile?.role)}
-              tone={{ borderColor: palette.primary, textColor: palette.primary }}
+              tone={{ borderColor: '#3B82F6', textColor: '#3B82F6' }}
             />
             <ProfileBadge label={statusValue} tone={statusTone} />
           </View>
         </View>
       </View>
 
-      <View style={styles.metaRow}>
-        <View style={styles.metaItem}>
-          <Text style={styles.metaLabel}>Created</Text>
-          <Text style={styles.metaValue}>{formatCreatedDate(profile?.created_at)}</Text>
+      <View className="border-t pt-4" style={{ borderTopColor: '#334155', borderTopWidth: 0.5 }}>
+        <View className="flex-1 gap-1">
+          <Text className="text-2xs text-typography-muted leading-4">Created</Text>
+          <Text className="text-sm text-typography font-semibold leading-5">{formatCreatedDate(profile?.created_at)}</Text>
         </View>
       </View>
     </Card>
   );
 }
-
-const styles = StyleSheet.create({
-  avatar: {
-    alignItems: 'center',
-    backgroundColor: palette.background,
-    borderColor: palette.border,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    height: 56,
-    justifyContent: 'center',
-    width: 56,
-  },
-  avatarText: {
-    color: palette.textPrimary,
-    fontSize: 18,
-    fontWeight: '700',
-    lineHeight: 22,
-  },
-  badge: {
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    lineHeight: 14,
-    textTransform: 'uppercase',
-  },
-  badges: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  card: {
-    backgroundColor: palette.elevated,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    gap: spacing.md,
-    padding: spacing.md,
-  },
-  email: {
-    color: palette.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  identity: {
-    flex: 1,
-    gap: spacing.sm,
-  },
-  metaItem: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  metaLabel: {
-    color: palette.textSecondary,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  metaRow: {
-    borderTopColor: palette.border,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: spacing.md,
-  },
-  metaValue: {
-    color: palette.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
-    lineHeight: 20,
-  },
-  name: {
-    color: palette.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
-    lineHeight: 28,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-});

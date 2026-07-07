@@ -1,11 +1,10 @@
 import { View } from 'react-native';
 
 import { Card, Skeleton } from '@/shared/ui/primitives';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 
 export function LoadingSkeleton() {
   return (
-    <View style={{ gap: spacing.md }}>
+    <View style={{ gap: 16 }}>
       <Card style={styles.skeletonCard}>
         <Skeleton style={styles.skeletonHero} />
         <Skeleton style={styles.skeletonLineShort} />
@@ -25,49 +24,49 @@ export function LoadingSkeleton() {
 
 const styles = {
   skeletonCard: {
-    backgroundColor: palette.surfaceLow,
-    borderColor: palette.border,
-    borderRadius: radius.card,
+    backgroundColor: '#111827',
+    borderColor: '#334155',
+    borderRadius: 14,
     borderWidth: 1,
-    gap: spacing.md,
-    padding: spacing.md,
+    gap: 16,
+    padding: 16,
   } as const,
   skeletonHero: {
-    borderRadius: radius.card,
+    borderRadius: 14,
     height: 140,
     width: '100%',
   } as const,
   skeletonLineShort: {
-    borderRadius: radius.control,
+    borderRadius: 4,
     height: 14,
     width: '34%',
   } as const,
   skeletonLineLong: {
-    borderRadius: radius.control,
+    borderRadius: 4,
     height: 12,
     width: '78%',
   } as const,
   skeletonGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.md,
+    gap: 16,
   } as const,
   skeletonMetric: {
-    backgroundColor: palette.surfaceLow,
-    borderColor: palette.border,
-    borderRadius: radius.card,
+    backgroundColor: '#111827',
+    borderColor: '#334155',
+    borderRadius: 14,
     borderWidth: 1,
     flexBasis: '47%',
-    gap: spacing.sm,
-    padding: spacing.md,
+    gap: 8,
+    padding: 16,
   } as const,
   skeletonMetricTitle: {
-    borderRadius: radius.control,
+    borderRadius: 4,
     height: 11,
     width: '48%',
   } as const,
   skeletonMetricValue: {
-    borderRadius: radius.control,
+    borderRadius: 4,
     height: 22,
     width: '62%',
   } as const,

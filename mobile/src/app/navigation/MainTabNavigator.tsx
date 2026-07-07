@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
 import {
   clearPersistedSession,
@@ -18,15 +18,14 @@ import { SearchScreen } from '@/features/search/SearchScreen';
 import { WatchlistScreen } from '@/features/watchlist/WatchlistScreen';
 import type { MainTabParamList, RootScreenProps } from '@/app/navigation/navigation.types';
 import { AppTabBar } from '@/app/navigation/AppTabBar';
-import { palette } from '@/shared/design/tokens';
 import { useAuthStore } from '@/stores/auth.store';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 function ProtectedShellLoading() {
   return (
-    <View style={styles.loadingShell}>
-      <ActivityIndicator color={palette.primary} size="small" />
+    <View className="flex-1 items-center justify-center bg-background">
+      <ActivityIndicator color="#3B82F6" size="small" />
     </View>
   );
 }
@@ -105,7 +104,7 @@ export default function MainTabNavigator() {
         headerShown: false,
         lazy: true,
         sceneStyle: {
-          backgroundColor: palette.background,
+          backgroundColor: '#0F172A',
         },
       }}
       tabBar={(props) => <AppTabBar {...props} />}>
@@ -117,12 +116,3 @@ export default function MainTabNavigator() {
     </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingShell: {
-    alignItems: 'center',
-    backgroundColor: palette.background,
-    flex: 1,
-    justifyContent: 'center',
-  },
-});

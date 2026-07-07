@@ -3,7 +3,6 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -13,7 +12,6 @@ import { LockKeyhole, LogOut, UserRoundPen } from 'lucide-react-native';
 import type { MainTabScreenProps } from '@/app/navigation/navigation.types';
 import { Text } from '@/shared/ui';
 import { clearPersistedSession } from '@/shared/services/tokenStorage';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import { logoutCurrentSession } from '@/features/auth/services/auth.service';
 import { LogoutConfirmModal } from '@/features/profile/components/LogoutConfirmModal';
 import { ProfileHeaderCard } from '@/features/profile/components/ProfileHeaderCard';
@@ -69,41 +67,36 @@ export function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
   }, [navigation]);
 
   return (
-    <SafeAreaView edges={['left', 'right']} style={styles.safeArea}>
-      <View style={styles.shell}>
+    <SafeAreaView edges={['left', 'right']} className="flex-1 bg-background">
+      <View className="flex-1 bg-background">
         <ScrollView
-          contentContainerStyle={[
-            styles.contentContainer,
-            {
-              paddingBottom: spacing.xl + insets.bottom,
-              paddingTop: insets.top + spacing.sm,
-            },
-          ]}
+          contentContainerClassName="px-4"
+          contentContainerStyle={{ gap: 24, paddingBottom: 32 + insets.bottom, paddingTop: insets.top + 8 }}
           refreshControl={
             <RefreshControl
               onRefresh={refresh}
               refreshing={isRefreshing}
-              tintColor={palette.primary}
+              tintColor="#3B82F6"
             />
           }
           showsVerticalScrollIndicator={false}
-          style={styles.scrollView}>
+          className="flex-1 bg-background">
           <ProfileScreenHeader status={effectiveProfile?.status} />
 
           {showSkeleton ? <ProfileSkeleton /> : null}
 
           {!showSkeleton ? (
-            <View style={styles.sections}>
+            <View className="gap-6">
               <ProfileHeaderCard profile={effectiveProfile} />
               <ProfileUpgradeCard onPress={openUpgradePanel} profile={effectiveProfile} />
 
               {error ? (
-                <View style={styles.inlineError}>
-                  <Text style={styles.inlineErrorText}>
+                <View className="flex-row items-center justify-between gap-2 px-4 py-2 bg-surface border border-border rounded-cardxl">
+                  <Text className="text-2xs text-typography-muted leading-4 flex-1">
                     {error}
                   </Text>
                   <Pressable accessibilityRole="button" onPress={retry}>
-                    <Text style={styles.inlineRetryText}>Retry</Text>
+                    <Text className="text-2xs text-[#3B82F6] font-bold leading-4">Retry</Text>
                   </Pressable>
                 </View>
               ) : null}
@@ -111,7 +104,7 @@ export function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
               <ProfileSection
                 description="Account actions"
                 title="Actions">
-                <View style={styles.group}>
+                <View className="gap-2">
                   <ProfileRow
                     centered
                     icon={UserRoundPen}
@@ -130,9 +123,10 @@ export function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
                     accessibilityRole="button"
                     activeOpacity={1}
                     onPress={() => setShowLogoutModal(true)}
-                    style={styles.logoutButton}>
-                    <LogOut color={palette.negative} size={18} />
-                    <Text style={styles.logoutText}>Log out</Text>
+                    className="self-stretch items-center justify-center flex-row gap-2 mt-2 min-h-[56px] px-4 w-full rounded-full border-2"
+                    style={{ backgroundColor: '#2B1316', borderColor: '#EF4444', shadowColor: '#EF4444', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.18, shadowRadius: 8 }}>
+                    <LogOut color="#EF4444" size={18} />
+                    <Text className="text-sm text-market-down font-bold leading-5 text-center">Log out</Text>
                   </TouchableOpacity>
                 </View>
               </ProfileSection>
@@ -151,81 +145,3 @@ export function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    gap: spacing.lg,
-    paddingHorizontal: spacing.md,
-  },
-  group: {
-    gap: spacing.sm,
-  },
-  inlineError: {
-    alignItems: 'center',
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: spacing.sm,
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  inlineErrorText: {
-    color: palette.textSecondary,
-    flex: 1,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  inlineRetryText: {
-    color: palette.primary,
-    fontSize: 12,
-    fontWeight: '700',
-    lineHeight: 16,
-  },
-  logoutButton: {
-    alignSelf: 'stretch',
-    alignItems: 'center',
-    backgroundColor: '#2B1316',
-    borderColor: '#EF4444',
-    borderRadius: radius.pill,
-    borderWidth: 2,
-    flexDirection: 'row',
-    gap: spacing.sm,
-    justifyContent: 'center',
-    marginTop: spacing.sm,
-    minHeight: 56,
-    paddingHorizontal: spacing.md,
-    shadowColor: '#EF4444',
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    width: '100%',
-  },
-  logoutText: {
-    color: palette.negative,
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 20,
-    textAlign: 'center',
-  },
-  safeArea: {
-    backgroundColor: palette.background,
-    flex: 1,
-  },
-  scrollView: {
-    backgroundColor: palette.background,
-    flex: 1,
-  },
-  sections: {
-    gap: spacing.lg,
-  },
-  shell: {
-    backgroundColor: palette.background,
-    flex: 1,
-  },
-});

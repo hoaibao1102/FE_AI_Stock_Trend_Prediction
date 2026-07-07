@@ -10,34 +10,33 @@ import { UpgradePlanScreen } from '@/features/profile/screens/UpgradePlanScreen'
 import { StartupScreen } from '@/features/startup/screens/StartupScreen';
 import { StockDetailScreen } from '@/features/stocks/screens/StockDetailScreen';
 import type { RootStackParamList } from '@/app/navigation/navigation.types';
-import { palette } from '@/shared/design/tokens';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const profileChildScreenOptions: NativeStackNavigationOptions = {
   animation: 'slide_from_right',
   contentStyle: {
-    backgroundColor: palette.background,
+    backgroundColor: '#0F172A',
   },
   gestureEnabled: true,
   headerStyle: {
-    backgroundColor: palette.background,
+    backgroundColor: '#0F172A',
   },
-  navigationBarColor: palette.background,
-  statusBarBackgroundColor: palette.background,
+  navigationBarColor: '#0F172A',
+  statusBarBackgroundColor: '#0F172A',
 };
 
 const detailScreenOptions: NativeStackNavigationOptions = {
   animationDuration: 100,
   contentStyle: {
-    backgroundColor: palette.background,
+    backgroundColor: '#0F172A',
   },
   gestureEnabled: true,
   gestureDirection: 'vertical',
   headerShown: false,
-  navigationBarColor: palette.background,
+  navigationBarColor: '#0F172A',
   presentation: 'modal',
-  statusBarBackgroundColor: palette.background,
+  statusBarBackgroundColor: '#0F172A',
 };
 
 export function RootNavigator() {
@@ -47,14 +46,14 @@ export function RootNavigator() {
       screenOptions={{
         animation: 'slide_from_right',
         contentStyle: {
-          backgroundColor: palette.background,
+          backgroundColor: '#0F172A',
         },
         headerStyle: {
-          backgroundColor: palette.background,
+          backgroundColor: '#0F172A',
         },
         headerShown: false,
-        navigationBarColor: palette.background,
-        statusBarBackgroundColor: palette.background,
+        navigationBarColor: '#0F172A',
+        statusBarBackgroundColor: '#0F172A',
       }}>
       <Stack.Screen name="Startup" component={StartupScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />

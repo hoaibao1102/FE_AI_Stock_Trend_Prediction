@@ -1,7 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, spacing } from '@/shared/design/tokens';
 import type { PriceStats } from '@/features/stocks/types';
 import {
   formatMoney,
@@ -14,49 +13,18 @@ type PriceOverviewProps = {
 
 export function PriceOverview({ stats }: PriceOverviewProps) {
   const directionColor =
-    (stats.priceChange ?? 0) >= 0 ? palette.positive : palette.negative;
+    (stats.priceChange ?? 0) >= 0 ? '#22C55E' : '#EF4444';
 
   return (
-    <View style={styles.shell}>
-      <View style={styles.priceRow}>
-        <Text style={styles.price}>{formatMoney(stats.latestPrice)}</Text>
-        <Text style={styles.currency}>VND</Text>
+    <View className="px-4 pt-2">
+      <View className="flex-row items-end gap-2">
+        <Text className="text-[32px] font-extrabold leading-[38px] text-typography">{formatMoney(stats.latestPrice)}</Text>
+        <Text className="text-[12px] font-bold leading-4 text-typography-muted mb-[5px]">VND</Text>
       </View>
-      <Text style={[styles.change, { color: directionColor }]}>
+      <Text style={{ color: directionColor }} className="text-sm font-bold leading-5 mt-1">
         {stats.priceChange != null && stats.priceChange > 0 ? '+' : ''}
         {formatMoney(stats.priceChange)} ({formatPercent(stats.priceChangePercent)})
       </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  change: {
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 20,
-    marginTop: spacing.xs,
-  },
-  currency: {
-    color: palette.textSecondary,
-    fontSize: 12,
-    fontWeight: '700',
-    lineHeight: 16,
-    marginBottom: 5,
-  },
-  price: {
-    color: palette.textPrimary,
-    fontSize: 32,
-    fontWeight: '800',
-    lineHeight: 38,
-  },
-  priceRow: {
-    alignItems: 'flex-end',
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  shell: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-  },
-});

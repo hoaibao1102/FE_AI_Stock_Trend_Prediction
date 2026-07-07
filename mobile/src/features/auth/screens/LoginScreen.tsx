@@ -4,11 +4,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
   TouchableWithoutFeedback,
   useWindowDimensions,
   View,
-  ViewStyle,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -17,7 +15,6 @@ import { LoginHeader } from '@/features/auth/components/LoginHeader';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 import { useLoginForm } from '@/features/auth/hooks/useLoginForm';
 import type { RootScreenProps } from '@/app/navigation/navigation.types';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 
 export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
   const insets = useSafeAreaInsets();
@@ -44,41 +41,33 @@ export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
     };
   }, [height, width]);
 
-  const styles = StyleSheet.create({
-    root: { backgroundColor: palette.background, flex: 1 } as ViewStyle,
-    scrollContent: {
-      flexGrow: 1,
-      justifyContent: 'center',
-      paddingBottom: Math.max(metrics.cardTopBottomSpace, insets.bottom + spacing.lg),
-      paddingTop: Math.max(metrics.cardTopBottomSpace, insets.top + spacing.lg),
-    },
-    card: {
-      backgroundColor: palette.surface,
-      borderColor: palette.border,
-      borderRadius: Math.max(radius.card, Math.min(width * 0.045, 18)),
-      borderWidth: 1,
-      overflow: 'hidden',
-      paddingHorizontal: metrics.cardPadding,
-      paddingVertical: metrics.cardPadding * 1.02,
-      width: '100%',
-    },
-  });
-
   return (
-    <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={styles.root}>
+    <SafeAreaView edges={['top', 'right', 'bottom', 'left']} className="flex-1 bg-background">
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.root}>
+        <View className="flex-1 bg-background">
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
             <ScrollView
               bounces={false}
-              contentContainerStyle={styles.scrollContent}
               keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}>
-              <View style={{ alignItems: 'center' }}>
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+                flexGrow: 1,
+                justifyContent: 'center',
+                paddingBottom: Math.max(metrics.cardTopBottomSpace, insets.bottom + 24),
+                paddingTop: Math.max(metrics.cardTopBottomSpace, insets.top + 24),
+              }}>
+              <View className="items-center">
                 <Box style={{ width: metrics.cardWidth, alignItems: 'center' }}>
-                  <Card style={styles.card}>
+                  <Card
+                    className="w-full border border-border overflow-hidden"
+                    style={{
+                      backgroundColor: '#111827',
+                      borderRadius: Math.max(14, Math.min(width * 0.045, 18)),
+                      paddingHorizontal: metrics.cardPadding,
+                      paddingVertical: metrics.cardPadding * 1.02,
+                    }}>
                     <LoginHeader metrics={metrics} />
-                    <Box style={{ height: spacing.lg }} />
+                    <Box style={{ height: 24 }} />
                     <LoginForm
                       formik={formik}
                       errorMessage={errorMessage}

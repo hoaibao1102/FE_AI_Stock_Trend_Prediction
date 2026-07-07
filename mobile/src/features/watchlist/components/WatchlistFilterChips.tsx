@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 
 type Chip = {
     key: string;
@@ -33,12 +32,15 @@ export function WatchlistFilterChips({ activeChip, onChipChange }: WatchlistFilt
                     accessibilityRole="button"
                     accessibilityState={{ selected: isActive }}
                     onPress={() => onChipChange(chip.key)}
-                    style={({ pressed }) => [
-                        styles.chip,
-                        isActive && styles.chipActive,
-                        pressed && styles.chipPressed,
-                    ]}>
-                    <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
+                    className={`px-4 py-1.5 border rounded-full active:opacity-80 ${
+                        isActive
+                            ? 'bg-primary-500 border-primary-500'
+                            : 'bg-surface-elevated border-outline-300'
+                    }`}>
+                    <Text
+                        className={`text-xs font-semibold ${
+                            isActive ? 'text-white' : 'text-typography-400'
+                        }`}>
                         {chip.label}
                     </Text>
                 </Pressable>
@@ -48,45 +50,13 @@ export function WatchlistFilterChips({ activeChip, onChipChange }: WatchlistFilt
     );
 
     return (
-        <View style={styles.shell}>
+        <View className="mb-2">
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.scrollContent}>
+                contentContainerClassName="gap-2">
                 {FILTER_CHIPS.map(renderChip)}
             </ScrollView>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    shell: {
-        marginBottom: spacing.sm,
-    },
-    scrollContent: {
-        gap: spacing.sm,
-    },
-    chip: {
-        backgroundColor: palette.surface,
-        borderColor: palette.border,
-        borderRadius: radius.pill,
-        borderWidth: 1,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.xs + 2,
-    },
-    chipActive: {
-        backgroundColor: palette.primary,
-        borderColor: palette.primary,
-    },
-    chipPressed: {
-        opacity: 0.8,
-    },
-    chipText: {
-        color: palette.textSecondary,
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    chipTextActive: {
-        color: '#FFFFFF',
-    },
-});
