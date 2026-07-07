@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import ReactECharts from "echarts-for-react"
 import type { EChartsOption } from "echarts"
 import type EChartsReact from "echarts-for-react"
-import { Bell, Download, Eye, GitCompareArrows, RefreshCw, Star } from "lucide-react"
+import { Bell, Download, Edit3, Eye, GitCompareArrows, RefreshCw, Star, Trash2, ToggleLeft, ToggleRight } from "lucide-react"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 
@@ -18,7 +18,9 @@ import {
     type StockChartMeta,
     type StockChartRange,
 } from "@/services/stock.service"
-import { getWatchlist, addToWatchlist, removeFromWatchlist } from "@/services/watchlist.service"
+import { getWatchlist, addToWatchlist, removeFromWatchlist, getWatchlistStocks } from "@/services/watchlist.service"
+import { getAlertsByStock, deleteAlert, updateAlert, type AlertItem } from "@/services/alert.service"
+import CreateAlertModal from "./CreateAlertModal"
 import { useAuthStore } from "@/stores/auth.store"
 import "./StockDetailPage.css"
 
@@ -164,6 +166,11 @@ export default function StockDetailPage() {
     const [isWatched, setIsWatched] = useState(false)
     const [watchlistLoading, setWatchlistLoading] = useState(false)
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+    const [stockAlerts, setStockAlerts] = useState<AlertItem[]>([])
+    const [alertsLoading, setAlertsLoading] = useState(false)
+    const [showCreateAlert, setShowCreateAlert] = useState(false)
+    const [editingAlert, setEditingAlert] = useState<AlertItem | null>(null)
+    const [watchlistSymbols, setWatchlistSymbols] = useState<string[]>([])
 
     useEffect(() => {
         if (!isAuthenticated || !symbol) return
@@ -177,6 +184,28 @@ export default function StockDetailPage() {
             } catch {
                 // non-blocking
             }
+        })()
+        return () => { cancelled = true }
+    }, [isAuthenticated, symbol])
+
+    useEffect(() => {
+        if (!isAuthenticated || !symbol) return
+        let cancelled = false
+        setAlertsLoading(true)
+        void (async () => {
+            try {
+                const [alerts, stocks] = await Promise.all([
+                    getAlertsByStock(symbol),
+                    getWatchlistStocks(),
+                ])
+                if (!cancelled) {
+                    setStockAlerts(alerts)
+                    setWatchlistSymbols(stocks.map((s) => s.symbol))
+                }
+            } catch {
+                // non-blocking
+            }
+            if (!cancelled) setAlertsLoading(false)
         })()
         return () => { cancelled = true }
     }, [isAuthenticated, symbol])
@@ -383,8 +412,36 @@ export default function StockDetailPage() {
             return deviation === undefined ? undefined : mid - deviation * 2
         })
 
-        const series: EChartsOption["series"] = [
-            {
+        const series: EChartsOption["series"] = []
+
+        // Build alert markLines, collect thresholds for yAxis range
+        const activeAlertThresholds: number[] = []
+        const alertMarkLineData = stockAlerts
+            .filter((a) => a.status === "ACTIVE" || a.status === "TRIGGERED")
+            .map((a) => {
+                activeAlertThresholds.push(a.threshold)
+                const color =
+                    a.alert_type === "PRICE_ABOVE" ? "#22c55e"
+                        : a.alert_type === "PRICE_BELOW" ? "#ef4444"
+                            : "#f97316" // VOLUME_SPIKE
+                return {
+                    yAxis: a.threshold,
+                    name: `${a.alert_type === "PRICE_ABOVE" ? "↑" : a.alert_type === "PRICE_BELOW" ? "↓" : "●"} ${a.threshold.toLocaleString()}`,
+                    label: {
+                        formatter: "{b}",
+                        color,
+                        fontSize: 10,
+                        fontWeight: 600 as const,
+                        position: "insideEndTop" as const,
+                        backgroundColor: "rgba(17,24,39,0.85)",
+                        padding: [2, 6],
+                        borderRadius: 3,
+                    },
+                    lineStyle: { color, width: 1.5, type: "dashed" as const },
+                    symbol: "none",
+                }
+            })
+            series.push({
                 type: "candlestick",
                 name: "OHLC",
                 data: candles.map((candle) => [candle.open, candle.close, candle.low, candle.high]),
@@ -396,16 +453,16 @@ export default function StockDetailPage() {
                 },
                 xAxisIndex: 0,
                 yAxisIndex: 0,
-            },
-            {
+                ...(alertMarkLineData.length ? { markLine: { data: alertMarkLineData, silent: true } } : {}),
+            })
+            series.push({
                 type: "bar",
                 name: "Volume",
                 data: candles.map((candle) => candle.volume),
                 xAxisIndex: 1,
                 yAxisIndex: 1,
                 itemStyle: { color: "rgba(59, 130, 246, 0.45)" },
-            },
-        ]
+            })
 
         if (activeIndicators.has("SMA")) {
             series.push({ type: "line", name: "SMA 10", data: sma, smooth: true, showSymbol: false, lineStyle: { color: "#f59e0b", width: 1.4 } })
@@ -419,6 +476,17 @@ export default function StockDetailPage() {
                 { type: "line", name: "BB Lower", data: bollingerLower, smooth: true, showSymbol: false, lineStyle: { color: "#a78bfa", width: 1, opacity: 0.8 } }
             )
         }
+
+        // Compute price range including all alert thresholds so yAxis shows every markLine
+        const allPrices = candles.flatMap((c) => [c.high, c.low])
+        const dataMin = allPrices.length ? Math.min(...allPrices) : 0
+        const dataMax = allPrices.length ? Math.max(...allPrices) : 0
+        const alertMin = activeAlertThresholds.length ? Math.min(...activeAlertThresholds) : dataMin
+        const alertMax = activeAlertThresholds.length ? Math.max(...activeAlertThresholds) : dataMax
+        const range = dataMax - dataMin || 1
+        const padding = Math.max(range * 0.15, (alertMax - alertMin) * 0.1 || 100)
+        const yMin = Math.min(dataMin, alertMin) - padding
+        const yMax = Math.max(dataMax, alertMax) + padding
 
         return {
             backgroundColor: "transparent",
@@ -471,6 +539,8 @@ export default function StockDetailPage() {
             yAxis: [
                 {
                     scale: true,
+                    min: yMin,
+                    max: yMax,
                     axisLabel: { color: "#94a3b8", fontSize: 10 },
                     splitLine: { lineStyle: { color: "rgba(51, 65, 85, 0.5)" } },
                 },
@@ -487,7 +557,7 @@ export default function StockDetailPage() {
             ],
             series,
         }
-    }, [activeIndicators, state.candles])
+    }, [activeIndicators, state.candles, stockAlerts])
 
     const currentPrice = analytics.latest?.close
     const isPositive = (analytics.change ?? 0) >= 0
@@ -565,7 +635,7 @@ export default function StockDetailPage() {
                         <Download className="size-3.5" /> Export
                     </Button>
                     <Button type="button" variant="outline" size="sm"><GitCompareArrows className="size-3.5" /> Compare</Button>
-                    <Button type="button" variant="outline" size="sm"><Bell className="size-3.5" /> Alert</Button>
+                    <Button type="button" variant="outline" size="sm" disabled={!isWatched} onClick={() => setShowCreateAlert(true)} title={!isWatched ? "Add stock to watchlist first" : "Create alert"}><Bell className="size-3.5" /> Alert</Button>
                     <Button type="button" variant={isWatched ? "default" : "outline"} size="sm" onClick={handleWatchToggle} disabled={watchlistLoading}>
                         <Star className={`size-3.5 ${isWatched ? "fill-amber-400 text-amber-400" : ""} ${watchlistLoading ? "animate-pulse" : ""}`} /> {watchlistLoading ? "Processing..." : isWatched ? "Watching" : "Watch"}
                     </Button>
@@ -640,11 +710,109 @@ export default function StockDetailPage() {
 
                     <div className="stock-detail__card">
                         <div className="stock-detail__card-header"><h2>Alert Configuration</h2></div>
-                        <div className="stock-detail__alert-list">
-                            <span>Active rules <strong>--</strong></span>
-                            <span>Triggered status <Badge variant="outline">--</Badge></span>
-                            <span>Channels <strong>--</strong></span>
-                        </div>
+                        {alertsLoading ? (
+                            <SkeletonBlock className="stock-detail__panel-skeleton" />
+                        ) : stockAlerts.length === 0 ? (
+                            <div className="stock-detail__alert-empty">
+                                <span>No alerts configured</span>
+                                <button
+                                    type="button"
+                                    className="stock-detail__alert-create-btn"
+                                    disabled={!isWatched}
+                                    onClick={() => setShowCreateAlert(true)}
+                                >
+                                    + Create Alert
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="stock-detail__alert-list">
+                                <div className="stock-detail__alert-list-row">Active rules <strong>{stockAlerts.filter((a) => a.status === "ACTIVE").length}</strong></div>
+                                <div className="stock-detail__alert-list-row">Triggered <Badge variant={stockAlerts.some((a) => a.status === "TRIGGERED") ? "destructive" : "outline"}>
+                                    {stockAlerts.filter((a) => a.status === "TRIGGERED").length}
+                                </Badge></div>
+                                {stockAlerts.map((alert) => {
+                                    const alertColor =
+                                        alert.alert_type === "PRICE_ABOVE" ? "#22c55e"
+                                            : alert.alert_type === "PRICE_BELOW" ? "#ef4444"
+                                                : "#f97316"
+                                    return (
+                                        <div key={alert.id} className="stock-detail__alert-item">
+                                            <div className="stock-detail__alert-info">
+                                                <span className="stock-detail__alert-type-badge" style={{ borderColor: alertColor, color: alertColor }}>
+                                                    {alert.alert_type === "PRICE_ABOVE" ? "↑ Above" : alert.alert_type === "PRICE_BELOW" ? "↓ Below" : "● Volume"}
+                                                </span>
+                                                <span className="stock-detail__alert-threshold">{alert.threshold.toLocaleString()}</span>
+                                                <Badge variant={alert.status === "ACTIVE" ? "default" : alert.status === "TRIGGERED" ? "destructive" : "outline"}>
+                                                    {alert.status}
+                                                </Badge>
+                                            </div>
+                                            <div className="stock-detail__alert-actions">
+                                                {alert.status === "DISABLED" ? (
+                                                    <button
+                                                        type="button"
+                                                        className="stock-detail__alert-action-btn"
+                                                        title="Enable"
+                                                        onClick={() => void (async () => {
+                                                            try {
+                                                                await updateAlert(alert.id, { status: "ACTIVE" })
+                                                                const refreshed = await getAlertsByStock(symbol)
+                                                                setStockAlerts(refreshed)
+                                                                toast.success("Alert enabled")
+                                                            } catch { toast.error("Failed to enable alert") }
+                                                        })()}
+                                                    >
+                                                        <ToggleLeft className="size-3.5 text-slate-500" />
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        className="stock-detail__alert-action-btn"
+                                                        title={alert.status === "TRIGGERED" ? "Reset" : "Disable"}
+                                                        onClick={() => void (async () => {
+                                                            try {
+                                                                const nextStatus = alert.status === "TRIGGERED" ? "ACTIVE" : "DISABLED"
+                                                                await updateAlert(alert.id, { status: nextStatus })
+                                                                const refreshed = await getAlertsByStock(symbol)
+                                                                setStockAlerts(refreshed)
+                                                                toast.success(nextStatus === "ACTIVE" ? "Alert reset" : "Alert disabled")
+                                                            } catch { toast.error("Failed to update alert") }
+                                                        })()}
+                                                    >
+                                                        <ToggleRight className="size-3.5 text-green-400" />
+                                                    </button>
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    className="stock-detail__alert-action-btn"
+                                                    title="Edit"
+                                                    onClick={() => {
+                                                        setEditingAlert(alert)
+                                                        setShowCreateAlert(true)
+                                                    }}
+                                                >
+                                                    <Edit3 className="size-3.5 text-slate-400" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="stock-detail__alert-action-btn"
+                                                    title="Delete"
+                                                    onClick={() => void (async () => {
+                                                        try {
+                                                            await deleteAlert(alert.id)
+                                                            const refreshed = await getAlertsByStock(symbol)
+                                                            setStockAlerts(refreshed)
+                                                            toast.success("Alert deleted")
+                                                        } catch { toast.error("Failed to delete alert") }
+                                                    })()}
+                                                >
+                                                    <Trash2 className="size-3.5 text-red-400" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
                     </div>
                 </aside>
             </section>
@@ -709,6 +877,20 @@ export default function StockDetailPage() {
                     ) : <EmptyState message="No volume buckets available." />}
                 </div>
             </section>
+
+            {showCreateAlert && (
+                <CreateAlertModal
+                    open={showCreateAlert}
+                    onOpenChange={(v) => { setShowCreateAlert(v); if (!v) setEditingAlert(null) }}
+                    preSelectedSymbol={editingAlert ? undefined : symbol}
+                    watchlistSymbols={watchlistSymbols}
+                    editingAlert={editingAlert}
+                    onAlertCreated={() => {
+                        setEditingAlert(null)
+                        void getAlertsByStock(symbol).then(setStockAlerts).catch(() => {})
+                    }}
+                />
+            )}
         </div>
     )
 }
