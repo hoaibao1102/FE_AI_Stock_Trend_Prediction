@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { AlertTriangle, Crown, Landmark, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react"
+import { AlertTriangle, BarChart3, Crown, Landmark, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
@@ -30,6 +30,7 @@ import {
     formatPercent,
     placeholder,
 } from "@/shared/components"
+import WatchlistAnalysisModal from "./WatchlistAnalysisModal"
 import "@/shared/components/shared-stock.css"
 import "./WatchlistPage.css"
 
@@ -223,6 +224,7 @@ export default function WatchlistPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [isOpen, setIsOpen] = useState(false)
+    const [isAnalysisOpen, setIsAnalysisOpen] = useState(false)
 
     const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
     const [isCheckingHolding, setIsCheckingHolding] = useState(false)
@@ -348,6 +350,22 @@ export default function WatchlistPage() {
                             watchedSymbols={watchedSymbols}
                             onWatchlistChange={() => void loadWatchlist()}
                             onStockAdded={(stock) => setAddedStockPrompt(stock)}
+                        />
+
+                        <Button
+                            type="button"
+                            variant="default"
+                            size="sm"
+                            onClick={() => setIsAnalysisOpen(true)}
+                            disabled={isLoading || watchlist.length === 0}
+                        >
+                            <BarChart3 className="mr-1.5 size-3.5" />
+                            Analyze Watchlist
+                        </Button>
+
+                        <WatchlistAnalysisModal
+                            open={isAnalysisOpen}
+                            onOpenChange={setIsAnalysisOpen}
                         />
 
                         <Button
