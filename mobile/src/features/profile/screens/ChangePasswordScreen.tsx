@@ -16,6 +16,7 @@ import {
   ProfileRequestError,
 } from '@/features/profile/services/profile.service';
 import { Text, Card } from '@/shared/ui';
+import { SwipeBackGesture } from '@/shared/ui/components/SwipeBackGesture';
 import { useAuthStore } from '@/stores/auth.store';
 
 export function ChangePasswordScreen({ navigation }: RootScreenProps<'ChangePassword'>) {
@@ -70,6 +71,7 @@ export function ChangePasswordScreen({ navigation }: RootScreenProps<'ChangePass
   }, [canSubmit, clearSession, currentPassword, navigation, newPassword, returnToProfile, session]);
 
   return (
+    <SwipeBackGesture onGoBack={returnToProfile}>
     <SafeAreaView edges={['left', 'right']} className="flex-1 bg-background">
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-background">
         <ProfileChildHeader
@@ -140,5 +142,6 @@ export function ChangePasswordScreen({ navigation }: RootScreenProps<'ChangePass
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </SwipeBackGesture>
   );
 }

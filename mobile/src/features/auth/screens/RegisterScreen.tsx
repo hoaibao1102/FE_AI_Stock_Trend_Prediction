@@ -11,6 +11,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Box, Text, Pressable } from '@/shared/ui/primitives';
+import { SwipeBackGesture } from '@/shared/ui/components/SwipeBackGesture';
 import { RegisterForm } from '@/features/auth/components/RegisterForm';
 import { useRegisterForm } from '@/features/auth/hooks/useRegisterForm';
 import type { RootScreenProps } from '@/app/navigation/navigation.types';
@@ -47,6 +48,7 @@ export function RegisterScreen({ navigation }: RootScreenProps<'Register'>) {
     }, [height, width]);
 
     return (
+        <SwipeBackGesture onGoBack={navigation.goBack}>
         <SafeAreaView edges={['top', 'right', 'bottom', 'left']} className="flex-1 bg-background">
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View className="flex-1 bg-background">
@@ -121,5 +123,6 @@ export function RegisterScreen({ navigation }: RootScreenProps<'Register'>) {
                 </View>
             </TouchableWithoutFeedback>
         </SafeAreaView>
+        </SwipeBackGesture>
     );
 }

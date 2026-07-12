@@ -32,7 +32,6 @@ const detailScreenOptions: NativeStackNavigationOptions = {
     backgroundColor: '#0F172A',
   },
   gestureEnabled: true,
-  gestureDirection: 'vertical',
   headerShown: false,
   navigationBarColor: '#0F172A',
   presentation: 'modal',
@@ -48,6 +47,7 @@ export function RootNavigator() {
         contentStyle: {
           backgroundColor: '#0F172A',
         },
+        gestureEnabled: true,
         headerStyle: {
           backgroundColor: '#0F172A',
         },

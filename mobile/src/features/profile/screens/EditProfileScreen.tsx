@@ -13,6 +13,7 @@ import type { AuthSession } from '@/features/auth/types';
 import { ProfileChildHeader } from '@/features/profile/components/ProfileChildHeader';
 import { ProfileRequestError, updateProfile } from '@/features/profile/services/profile.service';
 import { persistRememberedSession } from '@/shared/services/tokenStorage';
+import { SwipeBackGesture } from '@/shared/ui/components/SwipeBackGesture';
 import { Card, Text } from '@/shared/ui';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -75,6 +76,7 @@ export function EditProfileScreen({ navigation }: RootScreenProps<'EditProfile'>
   }, [canSubmit, clearSession, fullName, navigation, returnToProfile, session, setSession]);
 
   return (
+    <SwipeBackGesture onGoBack={returnToProfile}>
     <SafeAreaView edges={['left', 'right']} className="flex-1 bg-background">
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-background">
         <ProfileChildHeader
@@ -118,5 +120,6 @@ export function EditProfileScreen({ navigation }: RootScreenProps<'EditProfile'>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </SwipeBackGesture>
   );
 }

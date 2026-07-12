@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { RootScreenProps } from '@/app/navigation/navigation.types';
 import { clearPersistedSession } from '@/shared/services/tokenStorage';
+import { SwipeBackGesture } from '@/shared/ui/components/SwipeBackGesture';
 import { Card, Text, useToast } from '@/shared/ui';
 import { useAuthStore } from '@/stores/auth.store';
 import { useProfile } from '@/features/profile/hooks/useProfile';
@@ -136,6 +137,7 @@ export function UpgradePlanScreen({ navigation }: RootScreenProps<'UpgradePlan'>
   }, [clearSession, navigation, refresh, showToast]);
 
   return (
+    <SwipeBackGesture onGoBack={() => navigation.goBack()}>
     <SafeAreaView edges={['top', 'right', 'bottom', 'left']} className="flex-1 bg-background">
       <ScrollView
         contentContainerClassName="grow gap-6 px-4"
@@ -229,5 +231,6 @@ export function UpgradePlanScreen({ navigation }: RootScreenProps<'UpgradePlan'>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
+    </SwipeBackGesture>
   );
 }
