@@ -12,6 +12,7 @@ import { PriceOverview } from '@/features/stocks/components/PriceOverview';
 import { RangeSelector } from '@/features/stocks/components/RangeSelector';
 import { StockHeader } from '@/features/stocks/components/StockHeader';
 import { TechnicalSummary } from '@/features/stocks/components/TechnicalSummary';
+import { SwipeBackGesture } from '@/shared/ui/components/SwipeBackGesture';
 import { useStockChart } from '@/features/stocks/hooks/useStockChart';
 import { Text } from '@/shared/ui';
 import { useToast } from '@/shared/ui/utils/ThemeProvider';
@@ -119,6 +120,7 @@ export function StockDetailScreen({
       )[0] ?? null;
 
   return (
+    <SwipeBackGesture onGoBack={() => navigation.goBack()}>
     <View className="flex-1 bg-background">
       <View className="bg-background" style={{ paddingTop: insets.top }}>
         <StockHeader
@@ -291,5 +293,6 @@ export function StockDetailScreen({
         onSuccess={() => void loadStockAlerts()}
       />
     </View>
+    </SwipeBackGesture>
   );
 }
