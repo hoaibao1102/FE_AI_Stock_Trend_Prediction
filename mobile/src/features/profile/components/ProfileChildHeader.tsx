@@ -1,9 +1,8 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, spacing } from '@/shared/design/tokens';
 
 type ProfileChildHeaderProps = {
   onBack: () => void;
@@ -15,53 +14,16 @@ export function ProfileChildHeader({ onBack, subtitle, title }: ProfileChildHead
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.shell, { paddingTop: insets.top + spacing.sm }]}>
-      <View style={styles.row}>
-        <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
-          <ArrowLeft color={palette.textPrimary} size={18} />
+    <View className="bg-background px-4" style={{ paddingTop: insets.top + 8, paddingBottom: 16 }}>
+      <View className="flex-row items-center gap-4">
+        <Pressable accessibilityRole="button" onPress={onBack} className="items-center justify-center w-10 h-10 border border-border" style={{ borderRadius: 999 }}>
+          <ArrowLeft color="#F8FAFC" size={18} />
         </Pressable>
-        <View style={styles.copy}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.subtitle}>{subtitle}</Text>
+        <View className="flex-1 gap-1">
+          <Text className="text-xl text-typography font-bold leading-7">{title}</Text>
+          <Text className="text-2xs text-typography-muted leading-4">{subtitle}</Text>
         </View>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  backButton: {
-    alignItems: 'center',
-    borderColor: palette.border,
-    borderRadius: 999,
-    borderWidth: 1,
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  copy: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  row: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  shell: {
-    backgroundColor: palette.background,
-    paddingBottom: spacing.md,
-    paddingHorizontal: spacing.md,
-  },
-  subtitle: {
-    color: palette.textSecondary,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  title: {
-    color: palette.textPrimary,
-    fontSize: 22,
-    fontWeight: '700',
-    lineHeight: 28,
-  },
-});

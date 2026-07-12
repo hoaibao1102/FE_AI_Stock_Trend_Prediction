@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     useAnimatedStyle,
@@ -8,7 +8,6 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Text } from '@/shared/ui';
-import { palette, radius } from '@/shared/design/tokens';
 
 const DELETE_WIDTH = 88;
 const THRESHOLD = -60;
@@ -74,60 +73,24 @@ export function SwipeableRow({ children, symbol, onDelete }: SwipeableRowProps) 
     }));
 
     return (
-        <View style={styles.wrapper}>
+        <View className="relative overflow-hidden bg-market-down">
             {/* Delete action — sits behind the row */}
-            <View style={styles.deleteContainer}>
+            <View className="absolute right-0 top-0 bottom-0 w-[88px] justify-center items-center">
                 <Pressable
                     onPress={onDeletePress}
-                    style={({ pressed }) => [styles.deleteButton, pressed && styles.deletePressed]}
+                    className="bg-market-down rounded-cardxl items-center justify-center"
+                    style={{ width: DELETE_WIDTH - 8, height: '80%' }}
                 >
-                    <Text style={styles.deleteLabel}>Delete</Text>
+                    <Text className="text-white font-semibold text-[13px]">Delete</Text>
                 </Pressable>
             </View>
 
             {/* Sliding row */}
             <GestureDetector gesture={panGesture}>
-                <Animated.View style={[styles.row, rowAnimatedStyle]}>
+                <Animated.View className="bg-surface" style={rowAnimatedStyle}>
                     {children}
                 </Animated.View>
             </GestureDetector>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    wrapper: {
-        position: 'relative',
-        overflow: 'hidden',
-        backgroundColor: palette.negative,
-    },
-    deleteContainer: {
-        position: 'absolute',
-        right: 0,
-        top: 0,
-        bottom: 0,
-        width: DELETE_WIDTH,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    deleteButton: {
-        backgroundColor: palette.negative,
-        borderRadius: radius.card,
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: DELETE_WIDTH - 8,
-        height: '80%',
-    },
-    deletePressed: {
-        opacity: 0.8,
-    },
-    deleteLabel: {
-        color: '#FFFFFF',
-        fontWeight: '600',
-        fontSize: 13,
-    },
-    row: {
-        backgroundColor: palette.surface,
-    },
-});
-

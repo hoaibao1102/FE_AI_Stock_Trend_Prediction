@@ -1,9 +1,8 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { SearchDiscoverySections } from '@/features/search/components/SearchDiscoverySections';
 import { SearchGlassIcon } from '@/features/search/components/SearchIcons';
 import type { StockListItem } from '@/features/stocks/types';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import { Input, Text } from '@/shared/ui';
 
 type SearchHeaderPanelProps = {
@@ -32,15 +31,20 @@ export function SearchHeaderPanel({
   trendingItems,
 }: SearchHeaderPanelProps) {
   return (
-    <View style={styles.headerShell}>
-      <Text style={styles.screenTitle}>Search</Text>
-      <View style={styles.discoveryShell}>
+    <View className="pb-4">
+      <Text className="text-[24px] font-bold leading-8 text-typography mb-4">Search</Text>
+      <View className="border border-border bg-surface rounded-cardxl p-4">
         <Input
           autoCapitalize="characters"
-          leftIcon={<SearchGlassIcon color={palette.primarySoft} />}
+          leftIcon={<SearchGlassIcon color="#ADC6FF" />}
           onChangeText={onChangeQuery}
           placeholder="Search tickers, companies..."
-          style={styles.inputWrapper}
+          style={{
+            backgroundColor: '#0F172A',
+            borderColor: '#334155',
+            borderRadius: 4,
+            marginBottom: 24,
+          }}
           value={query}
         />
         <SearchDiscoverySections
@@ -52,57 +56,12 @@ export function SearchHeaderPanel({
           trendingItems={trendingItems}
         />
         {isDirectoryVisible ? (
-          <View style={styles.resultsHeader}>
-            <Text style={styles.resultsTitle}>Search Results</Text>
-            <Text style={styles.resultLabel}>{resultLabel}</Text>
+          <View className="border-t border-border mt-2 pt-4 gap-1">
+            <Text className="text-lg font-bold leading-6 text-typography">Search Results</Text>
+            <Text className="text-xs font-medium leading-4 text-typography-muted">{resultLabel}</Text>
           </View>
         ) : null}
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerShell: {
-    paddingBottom: spacing.md,
-  },
-  screenTitle: {
-    color: palette.textPrimary,
-    fontSize: 24,
-    fontWeight: '700',
-    lineHeight: 32,
-    marginBottom: spacing.md,
-  },
-  discoveryShell: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    padding: spacing.md,
-  },
-  inputWrapper: {
-    backgroundColor: palette.background,
-    borderColor: palette.border,
-    borderRadius: radius.control,
-    marginBottom: spacing.lg,
-  },
-  resultsHeader: {
-    borderTopColor: palette.border,
-    borderTopWidth: 1,
-    gap: spacing.xs,
-    marginTop: spacing.sm,
-    paddingTop: spacing.md,
-  },
-  resultsTitle: {
-    color: palette.textPrimary,
-    fontSize: 18,
-    fontWeight: '700',
-    lineHeight: 24,
-  },
-  resultLabel: {
-    color: palette.textSecondary,
-    fontSize: 12,
-    fontWeight: '500',
-    lineHeight: 16,
-  },
-});

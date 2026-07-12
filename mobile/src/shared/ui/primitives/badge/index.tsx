@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 
 type BadgeProps = {
   children?: React.ReactNode;
@@ -15,12 +15,12 @@ const COLORS: Record<string, { bg: string; text: string; border: string }> = {
   muted: { bg: 'transparent', text: '#64748B', border: '#64748B' },
 };
 
-function Badge({ children, action = 'muted', size = 'md' }: BadgeProps) {
+function Badge({ children, action = 'muted' }: BadgeProps) {
   const c = COLORS[action];
   return (
-    <View style={[styles.badge, { borderColor: c.border }]}>
+    <View className="items-center self-start rounded-full border flex-row gap-1 px-2 py-0.5" style={{ borderColor: c.border }}>
       {typeof children === 'string' ? (
-        <Text style={[styles.text, { color: c.text }]}>{children}</Text>
+        <Text className="text-[11px] font-semibold uppercase tracking-[0.5px]" style={{ color: c.text }}>{children}</Text>
       ) : (
         children
       )}
@@ -29,30 +29,11 @@ function Badge({ children, action = 'muted', size = 'md' }: BadgeProps) {
 }
 
 function BadgeText({ children, style }: { children: React.ReactNode; style?: any }) {
-  return <Text style={[styles.text, style]}>{children}</Text>;
+  return <Text className="text-[11px] font-semibold uppercase tracking-[0.5px]" style={style}>{children}</Text>;
 }
 function BadgeIcon({ children }: { children?: React.ReactNode }) {
   return <View style={{ width: 14, height: 14 }}>{children}</View>;
 }
-
-const styles = StyleSheet.create({
-  badge: {
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    borderRadius: 999,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  text: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-});
 
 Badge.displayName = 'Badge';
 BadgeText.displayName = 'BadgeText';

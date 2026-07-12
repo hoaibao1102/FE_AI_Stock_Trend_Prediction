@@ -1,9 +1,8 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { DashboardSection } from '@/features/dashboard/components/DashboardSection';
 import type { DashboardMarketLeaderItem } from '@/features/dashboard/types';
 import { Card, StockListItem, Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 
 type DashboardMoversSectionProps = {
   gainers: DashboardMarketLeaderItem[];
@@ -20,9 +19,9 @@ export function DashboardMoversSection({
     <DashboardSection
       subtitle="Strongest and weakest names in the latest market leader snapshot"
       title="Top movers">
-      <View style={styles.grid}>
-        <Card style={styles.card}>
-          <Text style={styles.cardTitle}>Top gainers</Text>
+      <View className="gap-4">
+        <Card className="bg-surface border-border rounded-cardxl border overflow-hidden py-2">
+          <Text className="text-base font-bold leading-5 text-typography px-4 pt-2">Top gainers</Text>
           {gainers.slice(0, 3).map((item) => (
             <StockListItem
               companyName={item.company_name}
@@ -38,8 +37,8 @@ export function DashboardMoversSection({
           ))}
         </Card>
 
-        <Card style={styles.card}>
-          <Text style={styles.cardTitle}>Top losers</Text>
+        <Card className="bg-surface border-border rounded-cardxl border overflow-hidden py-2">
+          <Text className="text-base font-bold leading-5 text-typography px-4 pt-2">Top losers</Text>
           {losers.slice(0, 3).map((item) => (
             <StockListItem
               companyName={item.company_name}
@@ -58,25 +57,3 @@ export function DashboardMoversSection({
     </DashboardSection>
   );
 }
-
-const styles = StyleSheet.create({
-  grid: {
-    gap: spacing.md,
-  },
-  card: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    overflow: 'hidden',
-    paddingVertical: spacing.sm,
-  },
-  cardTitle: {
-    color: palette.textPrimary,
-    fontSize: 15,
-    fontWeight: '700',
-    lineHeight: 20,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-  },
-});

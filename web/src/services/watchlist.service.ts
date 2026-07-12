@@ -351,6 +351,10 @@ export async function removeFromWatchlist(symbol: string): Promise<void> {
     })
 }
 
+export async function deleteWatchlistItem(symbol: string): Promise<void> {
+    await removeFromWatchlist(symbol)
+}
+
 export async function trimWatchlist(keepStockIds: string[]): Promise<TrimWatchlistResult> {
     const response = await authenticatedRequest<{ success: boolean; message: string; data: TrimWatchlistResult }>({
         url: "/api/watchlists/trim",

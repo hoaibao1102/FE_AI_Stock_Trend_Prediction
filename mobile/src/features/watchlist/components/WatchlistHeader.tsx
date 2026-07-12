@@ -1,7 +1,6 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import { useMarketStore } from '@/stores/market.store';
 
 type WatchlistHeaderProps = {
@@ -11,16 +10,16 @@ type WatchlistHeaderProps = {
 
 export function WatchlistHeader({ title, onAddStock }: WatchlistHeaderProps) {
     const { marketStatus } = useMarketStore();
-    const statusColor = marketStatus === 'OPEN' ? palette.positive : palette.textMuted;
-    const statusDot = marketStatus === 'OPEN' ? palette.positive : palette.warning;
+    const statusDotColor = marketStatus === 'OPEN' ? '#22C55E' : '#F59E0B';
+    const statusColor = marketStatus === 'OPEN' ? 'text-market-up' : 'text-typography-disabled';
 
     return (
-        <View style={styles.header}>
-            <View style={styles.titleCol}>
-                <Text style={styles.title}>{title}</Text>
-                <View style={styles.subtitleRow}>
-                    <View style={[styles.statusDot, { backgroundColor: statusDot }]} />
-                    <Text style={[styles.subtitle, { color: statusColor }]}>
+        <View className="flex-row items-start justify-between pt-4 pb-2">
+            <View className="flex-shrink gap-1">
+                <Text className="text-typography text-[24px] font-bold leading-[32px]">{title}</Text>
+                <View className="flex-row items-center gap-1">
+                    <View style={{ backgroundColor: statusDotColor, width: 6, height: 6, borderRadius: 999 }} />
+                    <Text className={`text-[11px] font-semibold tracking-[0.3px] ${statusColor}`}>
                         AI Stock Trend · {marketStatus === 'OPEN' ? 'Market Open' : 'Latest session'}
                     </Text>
                 </View>
@@ -30,59 +29,10 @@ export function WatchlistHeader({ title, onAddStock }: WatchlistHeaderProps) {
                 accessibilityLabel="Add stock"
                 accessibilityRole="button"
                 onPress={onAddStock}
-                style={({ pressed }) => [styles.addButton, pressed && styles.addButtonPressed]}>
-                <Text style={styles.addButtonText}>+ Add</Text>
+                className="bg-primary-500 rounded-lg px-4 py-2.5"
+                style={({ pressed }) => pressed ? { opacity: 0.8 } : undefined}>
+                <Text className="text-white text-[13px] font-bold">+ Add</Text>
             </Pressable>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    header: {
-        alignItems: 'flex-start',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingTop: spacing.md,
-        paddingBottom: spacing.sm,
-    },
-    titleCol: {
-        flexShrink: 1,
-        gap: spacing.xs,
-    },
-    title: {
-        color: palette.textPrimary,
-        fontSize: 24,
-        fontWeight: '700',
-        lineHeight: 32,
-    },
-    subtitleRow: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        gap: spacing.xs,
-    },
-    statusDot: {
-        borderRadius: radius.pill,
-        height: 6,
-        width: 6,
-    },
-    subtitle: {
-        color: palette.textMuted,
-        fontSize: 11,
-        fontWeight: '600',
-        letterSpacing: 0.3,
-    },
-    addButton: {
-        backgroundColor: palette.primary,
-        borderRadius: 8,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm + 2,
-    },
-    addButtonPressed: {
-        opacity: 0.8,
-    },
-    addButtonText: {
-        color: '#FFFFFF',
-        fontSize: 13,
-        fontWeight: '700',
-    },
-});

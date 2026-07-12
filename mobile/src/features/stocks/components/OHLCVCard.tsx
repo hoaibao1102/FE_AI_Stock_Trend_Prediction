@@ -1,7 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, spacing } from '@/shared/design/tokens';
 import type { PriceStats } from '@/features/stocks/types';
 import {
   formatCompactVolume,
@@ -23,7 +22,7 @@ type OHLCVCardProps = {
 
 export function OHLCVCard({ stats }: OHLCVCardProps) {
   return (
-    <View style={styles.card}>
+    <View className="flex-row flex-wrap border border-border bg-surface rounded-md mx-4 p-4 gap-y-4">
       {rows.map(([label, key]) => {
         const isVolume = key === 'volume' || key === 'avgVolume';
         const value = isVolume
@@ -31,9 +30,9 @@ export function OHLCVCard({ stats }: OHLCVCardProps) {
           : formatMoney(stats[key]);
 
         return (
-          <View key={key} style={styles.metric}>
-            <Text style={styles.label}>{label}</Text>
-            <Text numberOfLines={1} style={styles.value}>
+          <View key={key} className="gap-1 w-[33.333%]">
+            <Text className="text-[11px] font-semibold leading-[14px] text-typography-muted">{label}</Text>
+            <Text numberOfLines={1} className="text-sm font-bold leading-[18px] text-typography pr-2">
               {value}
             </Text>
           </View>
@@ -42,34 +41,3 @@ export function OHLCVCard({ stats }: OHLCVCardProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: 12,
-    borderWidth: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginHorizontal: spacing.md,
-    padding: spacing.md,
-    rowGap: spacing.md,
-  },
-  label: {
-    color: palette.textSecondary,
-    fontSize: 11,
-    fontWeight: '600',
-    lineHeight: 14,
-  },
-  metric: {
-    gap: spacing.xs,
-    width: '33.333%',
-  },
-  value: {
-    color: palette.textPrimary,
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 18,
-    paddingRight: spacing.sm,
-  },
-});

@@ -4,7 +4,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,8 +13,8 @@ import type { AuthSession } from '@/features/auth/types';
 import { ProfileChildHeader } from '@/features/profile/components/ProfileChildHeader';
 import { ProfileRequestError, updateProfile } from '@/features/profile/services/profile.service';
 import { persistRememberedSession } from '@/shared/services/tokenStorage';
+import { SwipeBackGesture } from '@/shared/ui/components/SwipeBackGesture';
 import { Card, Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import { useAuthStore } from '@/stores/auth.store';
 
 export function EditProfileScreen({ navigation }: RootScreenProps<'EditProfile'>) {
@@ -77,8 +76,9 @@ export function EditProfileScreen({ navigation }: RootScreenProps<'EditProfile'>
   }, [canSubmit, clearSession, fullName, navigation, returnToProfile, session, setSession]);
 
   return (
-    <SafeAreaView edges={['left', 'right']} style={styles.safeArea}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.safeArea}>
+    <SwipeBackGesture onGoBack={returnToProfile}>
+    <SafeAreaView edges={['left', 'right']} className="flex-1 bg-background">
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-background">
         <ProfileChildHeader
           onBack={returnToProfile}
           subtitle="Update the name shown on your account"
@@ -86,20 +86,20 @@ export function EditProfileScreen({ navigation }: RootScreenProps<'EditProfile'>
         />
 
         <ScrollView
-          contentContainerStyle={styles.content}
+          contentContainerClassName="pb-8 px-4"
           keyboardShouldPersistTaps="handled"
-          style={styles.scrollView}>
-          <Card style={styles.card}>
-            <Text style={styles.label}>FULL NAME</Text>
+          className="flex-1 bg-background">
+          <Card className="bg-surface border-border rounded-cardxl border p-4 gap-4">
+            <Text className="text-2xs text-typography-muted font-bold leading-4">FULL NAME</Text>
             <TextInput
               onChangeText={setFullName}
               placeholder="Enter your full name"
-              placeholderTextColor={palette.textSecondary}
-              style={styles.input}
+              placeholderTextColor="#64748B"
+              className="bg-background border border-border rounded-sm text-typography text-sm min-h-[48px] px-4"
               value={fullName}
             />
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? <Text className="text-2xs text-market-down leading-4">{error}</Text> : null}
 
             <Pressable
               accessibilityRole="button"
@@ -107,11 +107,12 @@ export function EditProfileScreen({ navigation }: RootScreenProps<'EditProfile'>
               onPress={() => {
                 void handleSave();
               }}
+              className="items-center justify-center min-h-[48px] rounded-sm"
               style={({ pressed }) => [
-                styles.primaryButton,
-                (pressed || isSubmitting) && styles.primaryButtonPressed,
+                { backgroundColor: '#3B82F6' },
+                { opacity: (pressed || isSubmitting) ? 0.8 : 1 },
               ]}>
-              <Text style={styles.primaryButtonText}>
+              <Text className="text-sm text-[#F8FAFC] font-bold leading-5">
                 {isSubmitting ? 'Saving...' : 'Save changes'}
               </Text>
             </Pressable>
@@ -119,65 +120,6 @@ export function EditProfileScreen({ navigation }: RootScreenProps<'EditProfile'>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </SwipeBackGesture>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    gap: spacing.md,
-    padding: spacing.md,
-  },
-  content: {
-    paddingBottom: spacing.xl,
-    paddingHorizontal: spacing.md,
-  },
-  errorText: {
-    color: palette.negative,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  input: {
-    backgroundColor: palette.background,
-    borderColor: palette.border,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    color: palette.textPrimary,
-    fontSize: 14,
-    minHeight: 48,
-    paddingHorizontal: spacing.md,
-  },
-  label: {
-    color: palette.textSecondary,
-    fontSize: 12,
-    fontWeight: '700',
-    lineHeight: 16,
-  },
-  primaryButton: {
-    alignItems: 'center',
-    backgroundColor: palette.primary,
-    borderRadius: radius.control,
-    justifyContent: 'center',
-    minHeight: 48,
-  },
-  primaryButtonPressed: {
-    opacity: 0.8,
-  },
-  primaryButtonText: {
-    color: palette.textPrimary,
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 20,
-  },
-  safeArea: {
-    backgroundColor: palette.background,
-    flex: 1,
-  },
-  scrollView: {
-    backgroundColor: palette.background,
-    flex: 1,
-  },
-});

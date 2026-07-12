@@ -1,8 +1,7 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import { BrandTrendIcon, BellIcon } from '@/app/navigation/NavigationIcons';
 import { useAppShellStore } from '@/stores/app-shell.store';
 
@@ -16,17 +15,17 @@ export function DashboardHeader({ badgeLabel, onNotificationPress }: DashboardHe
     const { unreadNotifications } = useAppShellStore();
 
     return (
-        <View style={[styles.shell, { paddingTop: insets.top + spacing.sm }]}>
-            <View style={styles.row}>
-                <View style={styles.brandCol}>
-                    <BrandTrendIcon color={palette.primary} size={20} />
-                    <Text style={styles.brandText}>AI STOCK TREND</Text>
+        <View style={{ paddingTop: insets.top + 8 }} className="bg-background pb-2 px-4">
+            <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-2">
+                    <BrandTrendIcon color={'#F8FAFC'} size={20} />
+                    <Text className="text-base font-bold text-primary-500">AI STOCK TREND</Text>
                 </View>
 
-                <View style={styles.actions}>
+                <View className="flex-row items-center gap-2">
                     {badgeLabel ? (
-                        <View style={styles.marketBadge}>
-                            <Text style={styles.marketLabel}>{badgeLabel}</Text>
+                        <View className="items-center bg-surface border-border rounded-full border px-[10px] py-[6px]">
+                            <Text className="text-2xs font-bold text-primary-500">{badgeLabel}</Text>
                         </View>
                     ) : null}
 
@@ -35,11 +34,11 @@ export function DashboardHeader({ badgeLabel, onNotificationPress }: DashboardHe
                         accessibilityLabel="Notifications"
                         accessibilityRole="button"
                         onPress={onNotificationPress}
-                        style={({ pressed }) => [styles.bellButton, pressed && styles.bellPressed]}>
-                        <BellIcon color={palette.textSecondary} size={18} />
+                        className="items-center bg-surface border-border rounded-full border w-[38px] h-[38px] active:opacity-[0.74]">
+                        <BellIcon color={'#94A3B8'} size={18} />
                         {unreadNotifications > 0 ? (
-                            <View style={styles.badgeBubble}>
-                                <Text style={styles.badgeText}>
+                            <View className="items-center bg-primary-500 rounded-full justify-center min-w-4 px-[3px] absolute -right-0.5 -top-0.5">
+                                <Text style={{ color: '#08111A' }} className="text-2xs font-bold">
                                     {unreadNotifications > 9 ? '9+' : unreadNotifications}
                                 </Text>
                             </View>
@@ -50,76 +49,3 @@ export function DashboardHeader({ badgeLabel, onNotificationPress }: DashboardHe
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    shell: {
-        backgroundColor: palette.background,
-        paddingBottom: spacing.sm,
-        paddingHorizontal: spacing.md,
-    },
-    row: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    brandCol: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        gap: spacing.sm,
-    },
-    brandText: {
-        color: palette.primary,
-        fontSize: 16,
-        fontWeight: '800',
-        letterSpacing: 1.28,
-    },
-    actions: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        gap: spacing.sm,
-    },
-    marketBadge: {
-        alignItems: 'center',
-        backgroundColor: palette.surface,
-        borderColor: palette.border,
-        borderRadius: radius.pill,
-        borderWidth: 1,
-        paddingHorizontal: spacing.sm + 2,
-        paddingVertical: spacing.xs + 2,
-    },
-    marketLabel: {
-        color: palette.primarySoft,
-        fontSize: 11,
-        fontWeight: '700',
-        letterSpacing: 0.5,
-    },
-    bellButton: {
-        alignItems: 'center',
-        backgroundColor: palette.surface,
-        borderColor: palette.border,
-        borderRadius: radius.pill,
-        borderWidth: 1,
-        height: 38,
-        justifyContent: 'center',
-        width: 38,
-    },
-    bellPressed: {
-        opacity: 0.74,
-    },
-    badgeBubble: {
-        alignItems: 'center',
-        backgroundColor: palette.primary,
-        borderRadius: radius.pill,
-        justifyContent: 'center',
-        minWidth: 16,
-        paddingHorizontal: 3,
-        position: 'absolute',
-        right: -2,
-        top: -2,
-    },
-    badgeText: {
-        color: '#08111A',
-        fontSize: 9,
-        fontWeight: '800',
-    },
-});

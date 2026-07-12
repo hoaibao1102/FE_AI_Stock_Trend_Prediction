@@ -1,7 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { View, TextInput, Text, StyleSheet, ViewStyle } from 'react-native';
-import { palette, radius, spacing } from '@/shared/design/tokens';
+import { View, TextInput, Text, ViewStyle } from 'react-native';
 
 type InputProps = {
   value?: string;
@@ -39,78 +38,43 @@ function Input({
   const [isFocused, setIsFocused] = useState(false);
 
   return (
-    <View style={[styles.wrapper, style]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+    <View className="gap-1" style={style}>
+      {label && <Text className="text-[13px] font-medium text-typography-muted mb-0.5">{label}</Text>}
       <View
+        className="flex-row items-center bg-surface border border-border rounded-sm min-h-[44px]"
         style={[
-          styles.container,
-          isFocused && styles.containerFocused,
-          error && styles.containerError,
-          disabled && styles.containerDisabled,
+          isFocused && { borderColor: '#3B82F6', borderWidth: 2 },
+          error && { borderColor: '#EF4444' },
+          disabled && { opacity: 0.4 },
         ]}
       >
-        {leftIcon && <View style={styles.iconLeft}>{leftIcon}</View>}
+        {leftIcon && <View className="pl-2">{leftIcon}</View>}
         <TextInput
           editable={!disabled}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={palette.textMuted}
+          placeholderTextColor="#64748B"
           secureTextEntry={secureTextEntry}
           multiline={multiline}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          className="flex-1 text-[15px] text-typography px-4 py-2"
           style={[
-            styles.input,
-            leftIcon ? styles.inputWithLeftIcon : null,
-            rightIcon ? styles.inputWithRightIcon : null,
-            multiline ? styles.multiline : null,
+            leftIcon && { paddingLeft: 4 },
+            rightIcon && { paddingRight: 4 },
+            multiline && { minHeight: 80, textAlignVertical: 'top' },
             inputStyle,
           ]}
         />
-        {rightIcon && <View style={styles.iconRight}>{rightIcon}</View>}
+        {rightIcon && <View className="pr-2">{rightIcon}</View>}
       </View>
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text className="text-market-down text-xs mt-0.5">{error}</Text>}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: { gap: 4 },
-  label: {
-    color: palette.textSecondary,
-    fontSize: 13,
-    fontWeight: '500',
-    marginBottom: 2,
-  },
-  container: {
-    alignItems: 'center',
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    flexDirection: 'row',
-    minHeight: 44,
-  },
-  containerFocused: { borderColor: palette.primary, borderWidth: 2 },
-  containerError: { borderColor: palette.negative },
-  containerDisabled: { opacity: 0.4 },
-  input: {
-    color: palette.textPrimary,
-    flex: 1,
-    fontSize: 15,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  inputWithLeftIcon: { paddingLeft: spacing.xs },
-  inputWithRightIcon: { paddingRight: spacing.xs },
-  multiline: { minHeight: 80, textAlignVertical: 'top' },
-  iconLeft: { paddingLeft: spacing.sm },
-  iconRight: { paddingRight: spacing.sm },
-  error: { color: palette.negative, fontSize: 12, marginTop: 2 },
-});
 
 Input.displayName = 'Input';
 export { Input };

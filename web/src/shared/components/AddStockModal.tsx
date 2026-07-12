@@ -17,6 +17,7 @@ interface AddStockModalProps {
     onOpenChange: (open: boolean) => void
     watchedSymbols: Set<string>
     onWatchlistChange: () => void
+    onStockAdded?: (stock: Pick<StockItem, "symbol" | "companyName" | "market">) => void
 }
 
 export default function AddStockModal({
@@ -24,6 +25,7 @@ export default function AddStockModal({
     onOpenChange,
     watchedSymbols,
     onWatchlistChange,
+    onStockAdded,
 }: AddStockModalProps) {
     const [stocks, setStocks] = useState<StockItem[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -77,7 +79,8 @@ export default function AddStockModal({
     }, [stocks, searchText])
 
     const handleAdd = useCallback(
-        async (symbol: string) => {
+        async (stock: StockItem) => {
+            const symbol = stock.symbol
             if (addingSymbols.has(symbol)) return
             setAddingSymbols((prev) => new Set(prev).add(symbol))
 
@@ -87,6 +90,12 @@ export default function AddStockModal({
                     description: `${symbol} has been added`,
                 })
                 onWatchlistChange()
+                onOpenChange(false)
+                onStockAdded?.({
+                    symbol: stock.symbol,
+                    companyName: stock.companyName,
+                    market: stock.market,
+                })
             } catch (err: any) {
                 toast.error("Failed to add", {
                     description: err.message || `Could not add ${symbol}`,
@@ -99,7 +108,7 @@ export default function AddStockModal({
                 })
             }
         },
-        [addingSymbols, onWatchlistChange],
+        [addingSymbols, onOpenChange, onStockAdded, onWatchlistChange],
     )
 
     return (
@@ -190,7 +199,7 @@ export default function AddStockModal({
                                                     ? "text-white opacity-50 cursor-not-allowed"
                                                     : "text-white/60 hover:text-white"
                                             }
-                                            onClick={() => handleAdd(stock.symbol)}
+                                            onClick={() => handleAdd(stock)}
                                         >
                                             {isAdding ? (
                                                 <Loader2 className="size-3 animate-spin" />

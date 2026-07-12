@@ -3,7 +3,6 @@ import {
     History,
     LayoutDashboard,
     Menu,
-    Scale,
     Settings,
     ShieldAlert,
     Sparkles,
@@ -58,7 +57,7 @@ const NAV_ITEMS: NavItem[] = [
     { label: "Lịch sử báo cáo AI", path: "stock-analysis/history", icon: History },
     { label: "Watchlist", path: "watchlist", icon: Users },
     { label: "Alerts", path: "alerts", icon: ShieldAlert },
-    { label: "Comparison", path: "comparison", icon: Scale },
+    // { label: "Comparison", path: "comparison", icon: Scale },
     { label: "Settings", path: "settings", icon: Settings },
 ]
 

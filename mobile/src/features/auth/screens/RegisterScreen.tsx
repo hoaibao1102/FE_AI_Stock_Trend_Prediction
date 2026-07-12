@@ -4,16 +4,14 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    StyleSheet,
     TouchableWithoutFeedback,
     useWindowDimensions,
     View,
-    ViewStyle,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Box, Text, Pressable } from '@/shared/ui/primitives';
-import { palette, spacing } from '@/shared/design/tokens';
+import { SwipeBackGesture } from '@/shared/ui/components/SwipeBackGesture';
 import { RegisterForm } from '@/features/auth/components/RegisterForm';
 import { useRegisterForm } from '@/features/auth/hooks/useRegisterForm';
 import type { RootScreenProps } from '@/app/navigation/navigation.types';
@@ -49,77 +47,40 @@ export function RegisterScreen({ navigation }: RootScreenProps<'Register'>) {
         };
     }, [height, width]);
 
-    const styles = StyleSheet.create({
-        root: {
-            backgroundColor: palette.background,
-            flex: 1,
-        } as ViewStyle,
-        header: {
-            alignItems: 'center',
-            backgroundColor: palette.surfaceLow,
-            borderBottomColor: palette.border,
-            borderBottomWidth: StyleSheet.hairlineWidth,
-            flexDirection: 'row',
-            minHeight: metrics.headerHeight,
-            paddingBottom: Math.max(height * 0.014, spacing.sm),
-            paddingHorizontal: metrics.safeHorizontal,
-            paddingTop: Math.max(insets.top, spacing.sm),
-        } as ViewStyle,
-        backButton: {
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: 40,
-            minHeight: 40,
-            marginRight: spacing.xs,
-        } as ViewStyle,
-        backChevron: {
-            color: palette.textSecondary,
-            fontSize: Math.max(metrics.titleSize * 0.7, 20),
-            fontWeight: '600',
-        } as TextStyle,
-        headerTitle: {
-            color: palette.primary,
-            flex: 1,
-            fontSize: metrics.titleSize * 0.52,
-            fontWeight: '800',
-            letterSpacing: metrics.titleSize * 0.08,
-            textAlign: 'center',
-            marginRight: 40, // Balance the back button
-        } as TextStyle,
-        scrollContent: {
-            flexGrow: 1,
-            paddingBottom: Math.max(insets.bottom + spacing.lg, 40),
-            paddingTop: spacing.lg,
-            paddingHorizontal: metrics.safeHorizontal,
-        } as ViewStyle,
-        titleText: {
-            color: palette.textPrimary,
-            fontSize: metrics.titleSize,
-            fontWeight: '800',
-            lineHeight: metrics.titleSize * 1.2,
-        } as TextStyle,
-        subtitleText: {
-            color: palette.textSecondary,
-            fontSize: metrics.subtitleSize,
-            lineHeight: metrics.subtitleSize * 1.55,
-            marginTop: spacing.sm,
-        } as TextStyle,
-    });
-
     return (
-        <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={styles.root}>
+        <SwipeBackGesture onGoBack={navigation.goBack}>
+        <SafeAreaView edges={['top', 'right', 'bottom', 'left']} className="flex-1 bg-background">
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View style={styles.root}>
+                <View className="flex-1 bg-background">
                     {/* Compact Header */}
-                    <View style={styles.header}>
+                    <View
+                        className="flex-row items-center bg-surface-low"
+                        style={{
+                            borderBottomColor: '#334155',
+                            borderBottomWidth: 1,
+                            minHeight: metrics.headerHeight,
+                            paddingBottom: Math.max(height * 0.014, 8),
+                            paddingHorizontal: metrics.safeHorizontal,
+                            paddingTop: Math.max(insets.top, 8),
+                        }}>
                         <Pressable
                             accessibilityLabel="Go back"
                             accessibilityRole="button"
                             onPress={() => navigation.goBack()}
-                            style={styles.backButton}>
-                            <Text style={styles.backChevron}>←</Text>
+                            className="items-center justify-center"
+                            style={{ minWidth: 40, minHeight: 40, marginRight: 4 }}>
+                            <Text className="text-typography-muted font-semibold" style={{ fontSize: Math.max(metrics.titleSize * 0.7, 20) }}>←</Text>
                         </Pressable>
-                        <Text style={styles.headerTitle}>AI STOCK TREND</Text>
+                        <Text
+                            className="text-primary-500 font-extrabold text-center"
+                            style={{
+                                flex: 1,
+                                fontSize: metrics.titleSize * 0.52,
+                                letterSpacing: metrics.titleSize * 0.08,
+                                marginRight: 40,
+                            }}>
+                            AI STOCK TREND
+                        </Text>
                     </View>
 
                     {/* Form Area */}
@@ -128,17 +89,22 @@ export function RegisterScreen({ navigation }: RootScreenProps<'Register'>) {
                         style={{ flex: 1 }}>
                         <ScrollView
                             bounces={false}
-                            contentContainerStyle={styles.scrollContent}
                             keyboardShouldPersistTaps="handled"
-                            showsVerticalScrollIndicator={false}>
+                            showsVerticalScrollIndicator={false}
+                            contentContainerStyle={{
+                                flexGrow: 1,
+                                paddingBottom: Math.max(insets.bottom + 24, 40),
+                                paddingTop: 24,
+                                paddingHorizontal: metrics.safeHorizontal,
+                            }}>
                             <Box>
-                                <Text style={styles.titleText}>Create Account</Text>
-                                <Text style={styles.subtitleText}>
+                                <Text className="text-typography font-extrabold" style={{ fontSize: metrics.titleSize, lineHeight: metrics.titleSize * 1.2 }}>Create Account</Text>
+                                <Text className="text-typography-muted" style={{ fontSize: metrics.subtitleSize, lineHeight: metrics.subtitleSize * 1.55, marginTop: 8 }}>
                                     Register to access professional trading dashboards and real-time alerts.
                                 </Text>
                             </Box>
 
-                            <Box style={{ height: spacing.xl }} />
+                            <Box style={{ height: 32 }} />
 
                             <RegisterForm
                                 formik={formik}
@@ -157,5 +123,6 @@ export function RegisterScreen({ navigation }: RootScreenProps<'Register'>) {
                 </View>
             </TouchableWithoutFeedback>
         </SafeAreaView>
+        </SwipeBackGesture>
     );
 }

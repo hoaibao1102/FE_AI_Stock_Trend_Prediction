@@ -1,9 +1,6 @@
-import { StyleSheet } from 'react-native';
-
 import { DashboardSection } from '@/features/dashboard/components/DashboardSection';
 import type { DashboardWatchlistItem } from '@/features/dashboard/types';
 import { Card, StockListItem, Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 
 type DashboardWatchlistSectionProps = {
   items: DashboardWatchlistItem[];
@@ -24,7 +21,7 @@ export function DashboardWatchlistSection({
       onActionPress={onOpenFirst}
       subtitle={`${trackedStocks} tracked symbols on your mobile watchlist`}
       title="Watchlist snapshot">
-      <Card style={styles.card}>
+      <Card className="bg-surface border-border rounded-cardxl border overflow-hidden">
         {items.length > 0 ? (
           items.map((item) => (
             <StockListItem
@@ -41,25 +38,9 @@ export function DashboardWatchlistSection({
             />
           ))
         ) : (
-          <Text style={styles.emptyText}>No watchlist symbols available yet.</Text>
+          <Text className="text-xs leading-5 text-typography-muted p-4">No watchlist symbols available yet.</Text>
         )}
       </Card>
     </DashboardSection>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  emptyText: {
-    color: palette.textSecondary,
-    fontSize: 13,
-    lineHeight: 19,
-    padding: spacing.md,
-  },
-});

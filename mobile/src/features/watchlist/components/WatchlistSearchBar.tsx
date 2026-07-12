@@ -1,6 +1,4 @@
-import { StyleSheet, TextInput, View } from 'react-native';
-
-import { palette, radius, spacing } from '@/shared/design/tokens';
+import { TextInput, View } from 'react-native';
 
 type WatchlistSearchBarProps = {
     value: string;
@@ -14,31 +12,14 @@ export function WatchlistSearchBar({
     placeholder = 'Search ticker...',
 }: WatchlistSearchBarProps) {
     return (
-        <View style={styles.shell}>
+        <View className="bg-surface border border-border rounded-sm mb-2">
             <TextInput
                 onChangeText={onChangeText}
                 placeholder={placeholder}
-                placeholderTextColor={palette.textSecondary}
-                style={styles.input}
+                placeholderTextColor="#64748B"
+                className="text-typography text-sm leading-5 px-4 py-2.5"
                 value={value}
             />
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    shell: {
-        backgroundColor: palette.surface,
-        borderColor: palette.border,
-        borderRadius: radius.control,
-        borderWidth: 1,
-        marginBottom: spacing.sm,
-    },
-    input: {
-        color: palette.textPrimary,
-        fontSize: 14,
-        lineHeight: 20,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm + 2,
-    },
-});

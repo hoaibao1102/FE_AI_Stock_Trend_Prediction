@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import Svg, { Line, Rect } from 'react-native-svg';
 
 import { Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import type { StockChartPoint } from '@/features/stocks/types';
 import { formatMoney } from '@/features/stocks/utils/stockDetailCalculations';
 
@@ -33,20 +32,23 @@ export function CandlestickChart({
   return (
     <View
       onLayout={(event) => setContainerWidth(event.nativeEvent.layout.width)}
-      style={styles.card}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Price Chart</Text>
-        <Text style={styles.caption}>OHLCV</Text>
+      className="border border-border bg-surface rounded-md mx-4 p-4">
+      <View className="flex-row items-center justify-between mb-2">
+        <Text className="text-base font-bold leading-6 text-typography">Price Chart</Text>
+        <Text className="text-[11px] font-bold leading-[14px] text-typography-muted">OHLCV</Text>
       </View>
 
       {isLoading ? (
         <ChartState title="Loading price history">
-          <ActivityIndicator color={palette.primary} size="small" />
+          <ActivityIndicator color="#3B82F6" size="small" />
         </ChartState>
       ) : error ? (
         <ChartState body={error} title="Chart unavailable">
-          <Pressable accessibilityRole="button" onPress={onRetry} style={styles.retryButton}>
-            <Text style={styles.retryText}>Retry</Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={onRetry}
+            className="items-center justify-center bg-primary-500 rounded-sm h-9 px-4 mt-2">
+            <Text className="text-[13px] font-bold text-typography">Retry</Text>
           </Pressable>
         </ChartState>
       ) : data.length === 0 ? (
@@ -57,7 +59,7 @@ export function CandlestickChart({
             {chart.gridLines.map((y) => (
               <Line
                 key={y}
-                stroke={palette.border}
+                stroke="#334155"
                 strokeOpacity={0.35}
                 strokeWidth={1}
                 x1={0}
@@ -67,7 +69,7 @@ export function CandlestickChart({
               />
             ))}
             {chart.candles.map((candle) => {
-              const color = candle.isUp ? palette.positive : palette.negative;
+              const color = candle.isUp ? '#22C55E' : '#EF4444';
 
               return (
                 <Svg key={candle.key}>
@@ -104,9 +106,9 @@ export function CandlestickChart({
       )}
 
       {!isLoading && !error && data.length > 0 ? (
-        <View style={styles.axisRow}>
-          <Text style={styles.axisText}>{formatMoney(chart.minPrice)}</Text>
-          <Text style={styles.axisText}>{formatMoney(chart.maxPrice)}</Text>
+        <View className="flex-row justify-between mt-1">
+          <Text className="text-[11px] leading-[14px] text-typography-muted">{formatMoney(chart.minPrice)}</Text>
+          <Text className="text-[11px] leading-[14px] text-typography-muted">{formatMoney(chart.maxPrice)}</Text>
         </View>
       ) : null}
     </View>
@@ -121,10 +123,10 @@ type ChartStateProps = {
 
 function ChartState({ body, children, title }: ChartStateProps) {
   return (
-    <View style={styles.stateShell}>
+    <View className="items-center justify-center gap-2 min-h-[210px]">
       {children}
-      <Text style={styles.stateTitle}>{title}</Text>
-      {body ? <Text style={styles.stateBody}>{body}</Text> : null}
+      <Text className="text-sm font-bold leading-5 text-typography text-center">{title}</Text>
+      {body ? <Text className="text-xs leading-[18px] text-typography-muted text-center">{body}</Text> : null}
     </View>
   );
 }
@@ -166,74 +168,3 @@ function buildChart(data: StockChartPoint[], containerWidth: number) {
     width,
   };
 }
-
-const styles = StyleSheet.create({
-  axisRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: spacing.xs,
-  },
-  axisText: {
-    color: palette.textSecondary,
-    fontSize: 11,
-    lineHeight: 14,
-  },
-  caption: {
-    color: palette.textSecondary,
-    fontSize: 11,
-    fontWeight: '700',
-    lineHeight: 14,
-  },
-  card: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginHorizontal: spacing.md,
-    padding: spacing.md,
-  },
-  header: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
-  retryButton: {
-    alignItems: 'center',
-    backgroundColor: palette.primary,
-    borderRadius: radius.control,
-    height: 36,
-    justifyContent: 'center',
-    marginTop: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  retryText: {
-    color: palette.textPrimary,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  stateBody: {
-    color: palette.textSecondary,
-    fontSize: 12,
-    lineHeight: 18,
-    textAlign: 'center',
-  },
-  stateShell: {
-    alignItems: 'center',
-    gap: spacing.sm,
-    justifyContent: 'center',
-    minHeight: CHART_HEIGHT,
-  },
-  stateTitle: {
-    color: palette.textPrimary,
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 20,
-  },
-  title: {
-    color: palette.textPrimary,
-    fontSize: 16,
-    fontWeight: '700',
-    lineHeight: 24,
-  },
-});

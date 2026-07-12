@@ -1,12 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Box, Text } from '@/shared/ui/primitives';
 import type { MainTabScreenProps } from '@/app/navigation/navigation.types';
 import { BellIcon, BrandTrendIcon } from '@/app/navigation/NavigationIcons';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import { useAppShellStore } from '@/stores/app-shell.store';
 import { useMarketStore } from '@/stores/market.store';
 
@@ -32,113 +31,58 @@ export function AppHeader() {
     };
   }, [height, width]);
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        shell: {
-          backgroundColor: palette.surfaceLow,
-          borderBottomColor: palette.border,
-          borderBottomWidth: StyleSheet.hairlineWidth,
-          minHeight: metrics.shellHeight,
-          paddingBottom: Math.max(height * 0.014, spacing.sm),
-          paddingHorizontal: Math.max(width * 0.045, spacing.md),
-          paddingTop: Math.max(insets.top, height * 0.014),
-        },
-        row: {
-          alignItems: 'center',
-          flexDirection: 'row',
-          gap: spacing.sm,
-          justifyContent: 'space-between',
-        },
-        brand: {
-          alignItems: 'center',
-          flexDirection: 'row',
-          flexShrink: 1,
-          gap: spacing.sm,
-          minWidth: 0,
-        },
-        brandText: {
-          color: palette.primary,
-          flexShrink: 1,
-          fontSize: metrics.titleSize,
-          fontWeight: '800',
-          letterSpacing: metrics.titleSize * 0.08,
-        },
-        rightCluster: {
-          alignItems: 'center',
-          flexDirection: 'row',
-          gap: spacing.sm,
-        },
-        marketBadge: {
-          alignItems: 'center',
-          backgroundColor: 'rgba(25, 28, 30, 0.96)',
-          borderColor: 'rgba(34, 197, 94, 0.2)',
-          borderRadius: radius.pill,
-          borderWidth: 1,
-          flexDirection: 'row',
-          gap: spacing.xs,
-          paddingHorizontal: Math.max(width * 0.028, spacing.sm),
-          paddingVertical: Math.max(height * 0.008, 6),
-        },
-        dot: {
-          backgroundColor: marketStatus === 'OPEN' ? palette.up : palette.warning,
-          borderRadius: radius.pill,
-          height: Math.max(metrics.badgeText * 0.62, 7),
-          width: Math.max(metrics.badgeText * 0.62, 7),
-        },
-        marketText: {
-          color: marketStatus === 'OPEN' ? palette.up : palette.warning,
-          fontSize: metrics.badgeText,
-          fontWeight: '700',
-          letterSpacing: metrics.badgeText * 0.1,
-        },
-        bellButton: {
-          alignItems: 'center',
-          backgroundColor: palette.surface,
-          borderColor: palette.border,
-          borderRadius: radius.pill,
-          borderWidth: 1,
-          height: Math.max(height * 0.052, 42),
-          justifyContent: 'center',
-          width: Math.max(height * 0.052, 42),
-        },
-        bellPressed: {
-          opacity: 0.74,
-        },
-        badgeBubble: {
-          alignItems: 'center',
-          backgroundColor: palette.primary,
-          borderRadius: radius.pill,
-          justifyContent: 'center',
-          minWidth: Math.max(metrics.badgeText * 1.7, 16),
-          paddingHorizontal: 4,
-          position: 'absolute',
-          right: -3,
-          top: -3,
-        },
-        badgeBubbleText: {
-          color: '#08111A',
-          fontSize: Math.max(metrics.badgeText * 0.82, 9),
-          fontWeight: '800',
-        },
-      }),
-    [height, insets.top, marketStatus, metrics, width],
-  );
-
   return (
-    <Box style={styles.shell}>
-      <View style={styles.row}>
-        <View style={styles.brand}>
-          <BrandTrendIcon color={palette.primary} size={metrics.iconSize} />
-          <Text adjustsFontSizeToFit numberOfLines={1} style={styles.brandText}>
+    <Box
+      className="bg-surface border-b border-b-border"
+      style={{
+        minHeight: metrics.shellHeight,
+        paddingBottom: Math.max(height * 0.014, 8),
+        paddingHorizontal: Math.max(width * 0.045, 16),
+        paddingTop: Math.max(insets.top, height * 0.014),
+      }}>
+      <View className="flex-row items-center justify-between gap-2">
+        <View className="shrink flex-row items-center gap-2 min-w-0">
+          <BrandTrendIcon color="#3B82F6" size={metrics.iconSize} />
+          <Text
+            adjustsFontSizeToFit
+            numberOfLines={1}
+            className="shrink font-extrabold"
+            style={{
+              color: '#3B82F6',
+              fontSize: metrics.titleSize,
+              letterSpacing: metrics.titleSize * 0.08,
+            }}>
             AI STOCK TREND
           </Text>
         </View>
 
-        <View style={styles.rightCluster}>
-          <View style={styles.marketBadge}>
-            <View style={styles.dot} />
-            <Text style={styles.marketText}>{marketStatus}</Text>
+        <View className="flex-row items-center gap-2">
+          <View
+            className="flex-row items-center gap-1 rounded-full"
+            style={{
+              backgroundColor: 'rgba(25, 28, 30, 0.96)',
+              borderColor: 'rgba(34, 197, 94, 0.2)',
+              borderWidth: 1,
+              paddingHorizontal: Math.max(width * 0.028, 8),
+              paddingVertical: Math.max(height * 0.008, 6),
+            }}>
+            <View
+              className="rounded-full"
+              style={{
+                backgroundColor: marketStatus === 'OPEN' ? '#22C55E' : '#F59E0B',
+                height: Math.max(metrics.badgeText * 0.62, 7),
+                width: Math.max(metrics.badgeText * 0.62, 7),
+              }}
+            />
+            <Text
+              className="font-bold"
+              style={{
+                color: marketStatus === 'OPEN' ? '#22C55E' : '#F59E0B',
+                fontSize: metrics.badgeText,
+                letterSpacing: metrics.badgeText * 0.1,
+              }}>
+              {marketStatus}
+            </Text>
           </View>
 
           <Pressable
@@ -146,11 +90,28 @@ export function AppHeader() {
             accessibilityLabel="Notifications"
             accessibilityRole="button"
             onPress={() => navigation.navigate('Alerts')}
-            style={({ pressed }) => [styles.bellButton, pressed && styles.bellPressed]}>
-            <BellIcon color={palette.textMuted} size={metrics.iconSize * 0.76} />
+            className="items-center justify-center rounded-full border border-border bg-surface active:opacity-[0.74]"
+            style={{
+              height: Math.max(height * 0.052, 42),
+              width: Math.max(height * 0.052, 42),
+            }}>
+            <BellIcon color="#94A3B8" size={metrics.iconSize * 0.76} />
             {unreadNotifications > 0 ? (
-              <View style={styles.badgeBubble}>
-                <Text style={styles.badgeBubbleText}>
+              <View
+                className="absolute items-center justify-center rounded-full"
+                style={{
+                  backgroundColor: '#3B82F6',
+                  minWidth: Math.max(metrics.badgeText * 1.7, 16),
+                  paddingHorizontal: 4,
+                  right: -3,
+                  top: -3,
+                }}>
+                <Text
+                  className="font-extrabold"
+                  style={{
+                    color: '#08111A',
+                    fontSize: Math.max(metrics.badgeText * 0.82, 9),
+                  }}>
                   {unreadNotifications > 9 ? '9+' : unreadNotifications}
                 </Text>
               </View>

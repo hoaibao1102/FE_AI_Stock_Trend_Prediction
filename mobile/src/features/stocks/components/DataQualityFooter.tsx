@@ -1,7 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, spacing } from '@/shared/design/tokens';
 
 type DataQualityFooterProps = {
   fetchedAt: Date | null;
@@ -12,59 +11,19 @@ export function DataQualityFooter({ fetchedAt, lastUpdated }: DataQualityFooterP
   const timestamp = lastUpdated ?? fetchedAt?.toLocaleString() ?? '--';
 
   return (
-    <View style={styles.card}>
-      <View style={styles.item}>
-        <Text style={styles.label}>Source</Text>
-        <Text style={styles.value}>HOSE</Text>
+    <View className="flex-row flex-wrap border border-border bg-surface rounded-md mx-4 p-4 gap-y-2">
+      <View className="gap-1 w-1/2">
+        <Text className="text-[11px] font-bold leading-[14px] text-typography-muted">Source</Text>
+        <Text className="text-[13px] font-bold leading-[18px] text-typography">HOSE</Text>
       </View>
-      <View style={styles.item}>
-        <Text style={styles.label}>Status</Text>
-        <Text style={styles.status}>Stable</Text>
+      <View className="gap-1 w-1/2">
+        <Text className="text-[11px] font-bold leading-[14px] text-typography-muted">Status</Text>
+        <Text className="text-[13px] font-extrabold leading-[18px] text-market-up">Stable</Text>
       </View>
-      <View style={styles.itemWide}>
-        <Text style={styles.label}>Last updated</Text>
-        <Text style={styles.value}>{timestamp}</Text>
+      <View className="gap-1 w-full">
+        <Text className="text-[11px] font-bold leading-[14px] text-typography-muted">Last updated</Text>
+        <Text className="text-[13px] font-bold leading-[18px] text-typography">{timestamp}</Text>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: 12,
-    borderWidth: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginHorizontal: spacing.md,
-    padding: spacing.md,
-    rowGap: spacing.sm,
-  },
-  item: {
-    gap: spacing.xs,
-    width: '50%',
-  },
-  itemWide: {
-    gap: spacing.xs,
-    width: '100%',
-  },
-  label: {
-    color: palette.textSecondary,
-    fontSize: 11,
-    fontWeight: '700',
-    lineHeight: 14,
-  },
-  status: {
-    color: palette.positive,
-    fontSize: 13,
-    fontWeight: '800',
-    lineHeight: 18,
-  },
-  value: {
-    color: palette.textPrimary,
-    fontSize: 13,
-    fontWeight: '700',
-    lineHeight: 18,
-  },
-});

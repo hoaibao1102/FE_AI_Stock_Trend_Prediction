@@ -1,8 +1,7 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { HStack, Spinner, Text } from '@/shared/ui/primitives';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 
 type GoogleAuthButtonProps = {
   bodySize: number;
@@ -25,21 +24,28 @@ export function GoogleAuthButton({
       activeOpacity={0.88}
       disabled={disabled}
       onPress={onPress}
-      style={[styles.button, { minHeight: buttonHeight, opacity: disabled ? 0.6 : 1 }]}>
-      <HStack style={styles.content}>
+      className="w-full items-center justify-center border bg-[#F8FAFC] rounded-cardxl px-6 py-3"
+      style={{
+        borderColor: 'rgba(173, 198, 255, 0.18)',
+        minHeight: buttonHeight,
+        opacity: disabled ? 0.6 : 1,
+      }}>
+      <HStack className="items-center justify-center">
         {isSubmitting ? (
           <>
-            <Spinner color={palette.textPrimary} size="small" />
-            <Text style={[styles.text, { fontSize: bodySize, marginLeft: spacing.sm }]}>
+            <Spinner color="#F8FAFC" size="small" />
+            <Text className="text-[#08111A] font-extrabold" style={{ fontSize: bodySize, marginLeft: 8 }}>
               Connecting Google
             </Text>
           </>
         ) : (
           <>
-            <View style={styles.iconWrap}>
+            <View className="mr-2">
               <GoogleMark />
             </View>
-            <Text style={[styles.text, { fontSize: bodySize }]}>Sign in with Google</Text>
+            <Text className="text-[#08111A] font-extrabold" style={{ fontSize: bodySize }}>
+              Sign in with Google
+            </Text>
           </>
         )}
       </HStack>
@@ -69,29 +75,3 @@ function GoogleMark() {
     </Svg>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderColor: 'rgba(173, 198, 255, 0.18)',
-    borderRadius: radius.card,
-    borderWidth: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    width: '100%',
-  },
-  content: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconWrap: {
-    marginRight: spacing.sm,
-  },
-  text: {
-    color: '#08111A',
-    fontWeight: '800',
-    letterSpacing: 0.1,
-  },
-});

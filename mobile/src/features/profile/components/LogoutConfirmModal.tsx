@@ -1,7 +1,6 @@
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, View } from 'react-native';
 
 import { Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 
 type LogoutConfirmModalProps = {
   onCancel: () => void;
@@ -16,19 +15,19 @@ export function LogoutConfirmModal({
 }: LogoutConfirmModalProps) {
   return (
     <Modal animationType="fade" visible={visible} transparent>
-      <View style={styles.backdrop}>
-        <View style={styles.sheet}>
-          <Text style={styles.title}>Log out?</Text>
-          <Text style={styles.body}>
+      <View className="flex-1 items-center justify-center px-4" style={{ backgroundColor: 'rgba(2, 6, 23, 0.72)' }}>
+        <View className="bg-surface-elevated border-border rounded-cardxl border p-4 gap-4 w-full">
+          <Text className="text-xl text-typography font-bold leading-7">Log out?</Text>
+          <Text className="text-sm text-typography-muted leading-5">
             You will need to sign in again to access your watchlist and market dashboard.
           </Text>
 
-          <View style={styles.actions}>
-            <Pressable accessibilityRole="button" onPress={onCancel} style={styles.secondaryButton}>
-              <Text style={styles.secondaryButtonText}>Cancel</Text>
+          <View className="flex-row gap-2 justify-end">
+            <Pressable accessibilityRole="button" onPress={onCancel} className="items-center justify-center min-h-[44px] px-4 rounded-sm border border-border">
+              <Text className="text-sm text-typography font-semibold leading-5">Cancel</Text>
             </Pressable>
-            <Pressable accessibilityRole="button" onPress={onConfirm} style={styles.dangerButton}>
-              <Text style={styles.dangerButtonText}>Log out</Text>
+            <Pressable accessibilityRole="button" onPress={onConfirm} className="items-center justify-center min-h-[44px] px-4 rounded-sm" style={{ backgroundColor: '#EF4444' }}>
+              <Text className="text-sm text-[#F8FAFC] font-bold leading-5">Log out</Text>
             </Pressable>
           </View>
         </View>
@@ -36,67 +35,3 @@ export function LogoutConfirmModal({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  actions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(2, 6, 23, 0.72)',
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-  },
-  body: {
-    color: palette.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  dangerButton: {
-    alignItems: 'center',
-    backgroundColor: palette.negative,
-    borderRadius: radius.control,
-    justifyContent: 'center',
-    minHeight: 44,
-    paddingHorizontal: spacing.md,
-  },
-  dangerButtonText: {
-    color: palette.textPrimary,
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 20,
-  },
-  secondaryButton: {
-    alignItems: 'center',
-    borderColor: palette.border,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    justifyContent: 'center',
-    minHeight: 44,
-    paddingHorizontal: spacing.md,
-  },
-  secondaryButtonText: {
-    color: palette.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
-    lineHeight: 20,
-  },
-  sheet: {
-    backgroundColor: palette.elevated,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    gap: spacing.md,
-    padding: spacing.md,
-    width: '100%',
-  },
-  title: {
-    color: palette.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
-    lineHeight: 28,
-  },
-});

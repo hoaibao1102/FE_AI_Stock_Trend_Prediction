@@ -1,6 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
-
-import { palette, radius, spacing } from '@/shared/design/tokens';
+import { Text, View } from 'react-native';
 
 type MetricCardProps = {
   label: string;
@@ -9,45 +7,21 @@ type MetricCardProps = {
   tone?: 'neutral' | 'up' | 'down' | 'warning';
 };
 
+const TONE_CLASSES: Record<string, string> = {
+  neutral: 'text-typography-disabled',
+  up: 'text-market-up',
+  down: 'text-market-down',
+  warning: 'text-warning',
+};
+
 export function MetricCard({ label, value, detail, tone = 'neutral' }: MetricCardProps) {
-  const toneColor =
-    tone === 'up' ? palette.up : tone === 'down' ? palette.down : tone === 'warning' ? palette.warning : palette.textMuted;
+  const toneClass = TONE_CLASSES[tone] ?? TONE_CLASSES.neutral;
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value}>{value}</Text>
-      <Text style={[styles.detail, { color: toneColor }]}>{detail}</Text>
+    <View className="flex-1 min-w-[150px] gap-1 border border-border rounded-cardxl bg-surface p-4">
+      <Text className="text-[11px] font-semibold uppercase tracking-[0.6px] text-typography-disabled">{label}</Text>
+      <Text className="text-[24px] font-bold leading-[32px] text-typography">{value}</Text>
+      <Text className={`text-xs font-medium ${toneClass}`}>{detail}</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    flex: 1,
-    minWidth: 150,
-    gap: spacing.xs,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    backgroundColor: palette.surface,
-    padding: spacing.md,
-  },
-  label: {
-    color: palette.textMuted,
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-  },
-  value: {
-    color: palette.textPrimary,
-    fontSize: 24,
-    fontWeight: '700',
-    lineHeight: 32,
-  },
-  detail: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-});

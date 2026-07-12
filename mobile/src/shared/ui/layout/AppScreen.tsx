@@ -2,7 +2,6 @@ import { PropsWithChildren, ReactNode, useMemo } from 'react';
 import {
   RefreshControl,
   ScrollView,
-  StyleSheet,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -10,7 +9,7 @@ import {
 import { Box, Card, Text } from '@/shared/ui/primitives';
 import { AppBanner } from '@/shared/ui/feedback/AppBanner';
 import { LoadingSkeleton } from '@/shared/ui/feedback/LoadingSkeleton';
-import { palette, radius, spacing } from '@/shared/design/tokens';
+import { palette } from '@/shared/design/tokens';
 import { useAppShellStore } from '@/stores/app-shell.store';
 
 type AppScreenProps = PropsWithChildren<{
@@ -23,10 +22,10 @@ type AppScreenProps = PropsWithChildren<{
 
 function EmptyDashboardState() {
   return (
-    <Card style={styles.emptyCard}>
-      <Text style={styles.emptyEyebrow}>Dashboard Surface</Text>
-      <Text style={styles.emptyTitle}>Operational modules will mount here.</Text>
-      <Text style={styles.emptyBody}>
+    <Card className="bg-surface-low border border-border rounded-cardxl min-h-[240px] p-4">
+      <Text className="text-primary-500 text-[11px] font-bold uppercase tracking-[0.84px]">Dashboard Surface</Text>
+      <Text className="text-typography text-[20px] font-bold leading-[28px] mt-2">Operational modules will mount here.</Text>
+      <Text className="text-typography-disabled text-sm leading-[21px] mt-2 max-w-[88%]">
         This shell keeps navigation, refresh handling, banners, and screen persistence ready
         while data panels are connected in later phases.
       </Text>
@@ -54,38 +53,38 @@ export function AppScreen({
   const responsiveStyles = useMemo(() => {
     const shortSide = Math.min(width, height);
 
-    return StyleSheet.create({
+    return {
       content: {
         flexGrow: 1,
         gap: shortSide * 0.05,
-        paddingBottom: Math.max(height * 0.032, spacing.lg),
-        paddingHorizontal: Math.max(width * 0.045, spacing.md),
-        paddingTop: Math.max(height * 0.024, spacing.md),
+        paddingBottom: Math.max(height * 0.032, 24),
+        paddingHorizontal: Math.max(width * 0.045, 16),
+        paddingTop: Math.max(height * 0.024, 16),
       },
       footer: {
         borderTopColor: palette.border,
-        borderTopWidth: StyleSheet.hairlineWidth,
-        paddingHorizontal: Math.max(width * 0.045, spacing.md),
-        paddingVertical: Math.max(height * 0.015, spacing.sm),
+        borderTopWidth: 0.5,
+        paddingHorizontal: Math.max(width * 0.045, 16),
+        paddingVertical: Math.max(height * 0.015, 8),
       },
       overlay: {
         backgroundColor: 'rgba(11, 18, 32, 0.78)',
         borderColor: 'rgba(255, 183, 134, 0.24)',
-        borderRadius: radius.card,
+        borderRadius: 14,
         borderWidth: 1,
-        bottom: Math.max(height * 0.024, spacing.md),
-        left: Math.max(width * 0.045, spacing.md),
-        paddingHorizontal: Math.max(width * 0.04, spacing.md),
-        paddingVertical: Math.max(height * 0.016, spacing.sm),
+        bottom: Math.max(height * 0.024, 16),
+        left: Math.max(width * 0.045, 16),
+        paddingHorizontal: Math.max(width * 0.04, 16),
+        paddingVertical: Math.max(height * 0.016, 8),
         position: 'absolute',
-        right: Math.max(width * 0.045, spacing.md),
+        right: Math.max(width * 0.045, 16),
       },
       overlayText: {
         color: palette.textPrimary,
         fontSize: Math.max(shortSide * 0.033, 13),
         lineHeight: Math.max(shortSide * 0.045, 18),
       },
-    });
+    } as const;
   }, [height, width]);
 
   const effectiveRefreshing = isRefreshing ?? shellRefreshing;
@@ -117,7 +116,7 @@ export function AppScreen({
   ].filter(Boolean);
 
   return (
-    <View style={styles.root}>
+    <View className="flex-1 bg-background">
       <ScrollView
         contentContainerStyle={responsiveStyles.content}
         refreshControl={
@@ -144,39 +143,3 @@ export function AppScreen({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    backgroundColor: palette.background,
-    flex: 1,
-  },
-  emptyCard: {
-    backgroundColor: palette.surfaceLow,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    minHeight: 240,
-    padding: spacing.md,
-  },
-  emptyEyebrow: {
-    color: palette.primary,
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.84,
-    textTransform: 'uppercase',
-  },
-  emptyTitle: {
-    color: palette.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
-    lineHeight: 28,
-    marginTop: spacing.sm,
-  },
-  emptyBody: {
-    color: palette.textMuted,
-    fontSize: 14,
-    lineHeight: 21,
-    marginTop: spacing.sm,
-    maxWidth: '88%',
-  },
-});

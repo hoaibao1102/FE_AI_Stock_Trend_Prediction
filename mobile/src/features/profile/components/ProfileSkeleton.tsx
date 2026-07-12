@@ -1,16 +1,15 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Card, Skeleton } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 
 function SkeletonRow() {
   return (
-    <Card style={styles.listCard}>
-      <View style={styles.row}>
-        <Skeleton style={styles.icon} />
-        <View style={styles.copy}>
-          <Skeleton style={styles.lineShort} />
-          <Skeleton style={styles.lineLong} />
+    <Card className="bg-surface border-border rounded-cardxl border p-4">
+      <View className="flex-row gap-2">
+        <Skeleton className="w-9 h-9 rounded-sm" />
+        <View className="flex-1 gap-2">
+          <Skeleton className="h-[14px] w-[48%] rounded-sm" />
+          <Skeleton className="h-[14px] w-[72%] rounded-sm" />
         </View>
       </View>
     </Card>
@@ -19,22 +18,22 @@ function SkeletonRow() {
 
 export function ProfileSkeleton() {
   return (
-    <View style={styles.shell}>
-      <Card style={styles.heroCard}>
-        <View style={styles.headerRow}>
-          <Skeleton style={styles.avatar} />
-          <View style={styles.copy}>
-            <Skeleton style={styles.name} />
-            <Skeleton style={styles.lineLong} />
-            <View style={styles.badges}>
-              <Skeleton style={styles.badge} />
-              <Skeleton style={styles.badge} />
+    <View className="gap-4">
+      <Card className="bg-surface-elevated border-border rounded-cardxl border p-4 gap-4">
+        <View className="flex-row gap-4">
+          <Skeleton className="w-14 h-14 rounded-full" />
+          <View className="flex-1 gap-2">
+            <Skeleton className="h-5 w-[56%] rounded-sm" />
+            <Skeleton className="h-[14px] w-[72%] rounded-sm" />
+            <View className="flex-row gap-2">
+              <Skeleton className="h-[22px] w-[72px] rounded-full" />
+              <Skeleton className="h-[22px] w-[72px] rounded-full" />
             </View>
           </View>
         </View>
-        <View style={styles.metaRow}>
-          <Skeleton style={styles.metaLine} />
-          <Skeleton style={styles.metaLine} />
+        <View className="flex-row gap-4 justify-between">
+          <Skeleton className="h-[14px] w-[42%] rounded-sm" />
+          <Skeleton className="h-[14px] w-[42%] rounded-sm" />
         </View>
       </Card>
 
@@ -44,80 +43,3 @@ export function ProfileSkeleton() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  avatar: {
-    borderRadius: radius.pill,
-    height: 56,
-    width: 56,
-  },
-  badge: {
-    borderRadius: radius.pill,
-    height: 22,
-    width: 72,
-  },
-  badges: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  copy: {
-    flex: 1,
-    gap: spacing.sm,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  heroCard: {
-    backgroundColor: palette.elevated,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    gap: spacing.md,
-    padding: spacing.md,
-  },
-  icon: {
-    borderRadius: radius.control,
-    height: 36,
-    width: 36,
-  },
-  lineLong: {
-    borderRadius: radius.control,
-    height: 14,
-    width: '72%',
-  },
-  lineShort: {
-    borderRadius: radius.control,
-    height: 14,
-    width: '48%',
-  },
-  listCard: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    padding: spacing.md,
-  },
-  metaLine: {
-    borderRadius: radius.control,
-    height: 14,
-    width: '42%',
-  },
-  metaRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    justifyContent: 'space-between',
-  },
-  name: {
-    borderRadius: radius.control,
-    height: 20,
-    width: '56%',
-  },
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  shell: {
-    gap: spacing.md,
-  },
-});

@@ -3,14 +3,12 @@ import {
     Modal,
     Pressable,
     ScrollView,
-    StyleSheet,
     Text,
     View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AlertCircle, ChevronLeft } from '@/shared/ui/primitives/icon';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import type { WatchlistOverlimitItem } from '@/features/watchlist/types';
 
 type WatchlistOverlimitModalProps = {
@@ -102,42 +100,38 @@ export function WatchlistOverlimitModal({
             onRequestClose={handleClose}
             onDismiss={handleClose}
         >
-            <View style={styles.overlay}>
+            <View className="flex-1 bg-black/78 justify-center items-center p-4">
                 {/* Back button — top-left corner of the dim overlay */}
-                <View style={[styles.backButtonContainer, { top: insets.top + spacing.sm }]}>
+                <View className="absolute left-4 z-10" style={{ top: insets.top + 8 }}>
                     <Pressable
                         accessibilityHint="Go back to dashboard"
                         accessibilityLabel="Back"
                         accessibilityRole="button"
                         hitSlop={12}
                         onPress={onBackToDashboard}
-                        style={({ pressed }) => [
-                            styles.backButton,
-                            pressed && styles.backButtonPressed,
-                        ]}
+                        className="w-11 h-11 rounded-full items-center justify-center bg-[rgba(15,23,42,0.85)] border border-[rgba(51,65,85,0.7)]"
+                        style={({ pressed }) => pressed ? { opacity: 0.7, backgroundColor: 'rgba(30,41,59,0.95)' } : undefined}
                     >
-                        <ChevronLeft size={22} color={palette.textPrimary} strokeWidth={2.5} />
+                        <ChevronLeft size={22} color="#F1F5F9" strokeWidth={2.5} />
                     </Pressable>
                 </View>
 
                 <View
-                    style={[
-                        styles.panel,
-                        { paddingTop: insets.top + spacing.md },
-                    ]}
+                    className="w-full max-w-[600px] max-h-[88%] bg-surface overflow-hidden"
+                    style={{ borderWidth: 1, borderColor: 'rgba(51, 65, 85, 0.9)', borderRadius: 20, paddingTop: insets.top + 16 }}
                 >
                     {/* Header */}
-                    <View style={styles.header}>
-                        <View style={styles.headerContent}>
-                            <View style={styles.titleRow}>
+                    <View className="px-6 pb-4 border-b border-[rgba(51,65,85,0.8)]">
+                        <View className="gap-2">
+                            <View className="flex-row items-center gap-2">
                                 <AlertCircle size={20} color="#FCD34D" />
-                                <Text style={styles.title}>
+                                <Text className="text-typography text-[20px] font-bold">
                                     Watchlist limit reached
                                 </Text>
                             </View>
-                            <Text style={styles.description}>
+                            <Text className="text-typography-muted text-sm leading-[22px]">
                                 Your current plan only allows you to keep up to{' '}
-                                <Text style={styles.descriptionBold}>
+                                <Text className="text-typography font-bold">
                                     {limit}
                                 </Text>{' '}
                                 stocks. Select the stocks you want to keep, or
@@ -148,23 +142,26 @@ export function WatchlistOverlimitModal({
                     </View>
 
                     {/* Select box */}
-                    <View style={styles.selectBox}>
-                        <View style={styles.selectHeader}>
-                            <Text style={styles.selectHeaderLabel}>
+                    <View
+                        className="mx-6 mt-4 overflow-hidden bg-background"
+                        style={{ borderWidth: 1, borderColor: 'rgba(51, 65, 85, 0.85)', borderRadius: 14 }}
+                    >
+                        <View className="flex-row items-center justify-between px-4 border-b border-[rgba(51,65,85,0.85)]" style={{ paddingVertical: 12 }}>
+                            <Text className="text-typography text-sm font-semibold">
                                 Select stocks to keep
                             </Text>
-                            <Text style={styles.selectHeaderCount}>
+                            <Text className="text-typography-muted text-xs font-medium">
                                 {selectionLabel}
                             </Text>
                         </View>
 
                         <ScrollView
-                            style={styles.selectList}
-                            contentContainerStyle={styles.selectListContent}
+                            className="max-h-[300px]"
+                            contentContainerClassName="p-3"
                         >
                             {items.length === 0 ? (
-                                <View style={styles.emptyState}>
-                                    <Text style={styles.emptyStateText}>
+                                <View className="py-8 items-center">
+                                    <Text className="text-typography-muted text-sm">
                                         No watchlist items found.
                                     </Text>
                                 </View>
@@ -186,42 +183,37 @@ export function WatchlistOverlimitModal({
                                             onPress={() =>
                                                 toggleStock(stockId)
                                             }
-                                            style={({ pressed }) => [
-                                                styles.stockItem,
-                                                selected &&
-                                                styles.stockItemSelected,
-                                                pressed &&
-                                                styles.stockItemPressed,
-                                            ]}
+                                            className="flex-row items-center bg-background mb-1.5"
+                                            style={({ pressed }) => ({
+                                                paddingVertical: 12,
+                                                paddingHorizontal: 10,
+                                                borderWidth: 1,
+                                                borderColor: selected ? 'rgba(59, 130, 246, 0.95)' : 'rgba(51, 65, 85, 0.9)',
+                                                borderRadius: 12,
+                                                backgroundColor: selected ? 'rgba(59, 130, 246, 0.12)' : '#0F172A',
+                                                opacity: pressed ? 0.8 : 1,
+                                            })}
                                         >
                                             <View
-                                                style={[
-                                                    styles.checkbox,
-                                                    selected &&
-                                                    styles.checkboxSelected,
-                                                ]}
+                                                className="w-[22px] h-[22px] rounded-full border items-center justify-center mr-2"
+                                                style={{
+                                                    borderColor: selected ? '#3B82F6' : '#64748B',
+                                                    backgroundColor: selected ? '#3B82F6' : 'transparent',
+                                                }}
                                             >
                                                 {selected && (
-                                                    <Text
-                                                        style={
-                                                            styles.checkboxMark
-                                                        }
-                                                    >
+                                                    <Text className="text-white text-[13px] font-bold">
                                                         ✓
                                                     </Text>
                                                 )}
                                             </View>
 
-                                            <View style={styles.stockItemInfo}>
-                                                <Text
-                                                    style={styles.stockItemSymbol}
-                                                >
+                                            <View className="flex-1 ml-2 gap-0.5">
+                                                <Text className="text-typography text-sm font-bold">
                                                     {getStockSymbol(item)}
                                                 </Text>
                                                 <Text
-                                                    style={
-                                                        styles.stockItemName
-                                                    }
+                                                    className="text-typography-muted text-xs"
                                                     numberOfLines={1}
                                                 >
                                                     {getStockName(item)}
@@ -236,15 +228,18 @@ export function WatchlistOverlimitModal({
 
                     {/* Error message */}
                     {errorMessage && (
-                        <View style={styles.errorContainer}>
-                            <Text style={styles.errorText}>
+                        <View
+                            className="mx-6 mt-3 px-3 py-2 border rounded-xl"
+                            style={{ borderColor: 'rgba(248, 113, 113, 0.35)', backgroundColor: 'rgba(127, 29, 29, 0.25)' }}
+                        >
+                            <Text className="text-[#FECACA] text-[13px]">
                                 {errorMessage}
                             </Text>
                         </View>
                     )}
 
                     {/* Actions */}
-                    <View style={styles.actions}>
+                    <View className="flex-row justify-between gap-3 px-6 py-6">
                         <Pressable
                             accessibilityHint="Navigate to upgrade screen"
                             accessibilityLabel="Upgrade Plan"
@@ -253,13 +248,10 @@ export function WatchlistOverlimitModal({
                                 // Close modal — user can navigate via profile
                                 handleClose();
                             }}
-                            style={({ pressed }) => [
-                                styles.actionButton,
-                                styles.actionButtonSecondary,
-                                pressed && styles.actionButtonPressed,
-                            ]}
+                            className="flex-1 items-center justify-center py-3 rounded-lg bg-transparent border border-border"
+                            style={({ pressed }) => pressed ? { opacity: 0.8 } : undefined}
                         >
-                            <Text style={styles.actionButtonSecondaryText}>
+                            <Text className="text-typography text-sm font-semibold">
                                 Upgrade Plan
                             </Text>
                         </Pressable>
@@ -270,15 +262,12 @@ export function WatchlistOverlimitModal({
                             accessibilityRole="button"
                             disabled={isTrimming || selectedIds.length === 0}
                             onPress={handleConfirmTrim}
+                            className="flex-1 items-center justify-center py-3 rounded-lg bg-primary-500"
                             style={({ pressed }) => [
-                                styles.actionButton,
-                                styles.actionButtonPrimary,
-                                (isTrimming || selectedIds.length === 0) &&
-                                styles.actionButtonDisabled,
-                                pressed && styles.actionButtonPressed,
+                                { opacity: (isTrimming || selectedIds.length === 0) ? 0.5 : pressed ? 0.8 : 1 },
                             ]}
                         >
-                            <Text style={styles.actionButtonPrimaryText}>
+                            <Text className="text-white text-sm font-semibold">
                                 {isTrimming
                                     ? 'Saving...'
                                     : 'Keep Selected Stocks'}
@@ -290,215 +279,3 @@ export function WatchlistOverlimitModal({
         </Modal>
     );
 }
-
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: 'rgba(2, 6, 23, 0.78)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: spacing.md,
-    },
-    panel: {
-        width: '100%',
-        maxWidth: 600,
-        maxHeight: '88%',
-        backgroundColor: palette.surface,
-        borderWidth: 1,
-        borderColor: 'rgba(51, 65, 85, 0.9)',
-        borderRadius: 20,
-        overflow: 'hidden',
-    },
-    header: {
-        paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(51, 65, 85, 0.8)',
-    },
-    headerContent: {
-        gap: spacing.sm,
-    },
-    titleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-    },
-    backButtonContainer: {
-        position: 'absolute',
-        left: spacing.md,
-        zIndex: 10,
-    },
-    backButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(15, 23, 42, 0.85)',
-        borderWidth: 1,
-        borderColor: 'rgba(51, 65, 85, 0.7)',
-    },
-    backButtonPressed: {
-        opacity: 0.7,
-        backgroundColor: 'rgba(30, 41, 59, 0.95)',
-    },
-    title: {
-        color: palette.textPrimary,
-        fontSize: 20,
-        fontWeight: '700',
-    },
-    description: {
-        color: palette.textSecondary,
-        fontSize: 14,
-        lineHeight: 22,
-    },
-    descriptionBold: {
-        color: palette.textPrimary,
-        fontWeight: '700',
-    },
-    selectBox: {
-        marginHorizontal: spacing.lg,
-        marginTop: spacing.md,
-        borderWidth: 1,
-        borderColor: 'rgba(51, 65, 85, 0.85)',
-        borderRadius: 14,
-        overflow: 'hidden',
-        backgroundColor: palette.background,
-    },
-    selectHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm + 4,
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(51, 65, 85, 0.85)',
-    },
-    selectHeaderLabel: {
-        color: palette.textPrimary,
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    selectHeaderCount: {
-        color: palette.textSecondary,
-        fontSize: 12,
-        fontWeight: '500',
-    },
-    selectList: {
-        maxHeight: 300,
-    },
-    selectListContent: {
-        padding: spacing.sm + 2,
-    },
-    emptyState: {
-        paddingVertical: spacing.xl,
-        alignItems: 'center',
-    },
-    emptyStateText: {
-        color: palette.textSecondary,
-        fontSize: 14,
-    },
-    stockItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: spacing.sm + 4,
-        paddingHorizontal: spacing.sm + 2,
-        borderWidth: 1,
-        borderColor: 'rgba(51, 65, 85, 0.9)',
-        borderRadius: 12,
-        backgroundColor: palette.background,
-        marginBottom: spacing.xs + 2,
-    },
-    stockItemSelected: {
-        borderColor: 'rgba(59, 130, 246, 0.95)',
-        backgroundColor: 'rgba(59, 130, 246, 0.12)',
-    },
-    stockItemPressed: {
-        opacity: 0.8,
-    },
-    stockItemInfo: {
-        flex: 1,
-        marginLeft: spacing.sm,
-        gap: spacing.xs / 2,
-    },
-    stockItemSymbol: {
-        color: palette.textPrimary,
-        fontSize: 14,
-        fontWeight: '700',
-    },
-    stockItemName: {
-        color: palette.textSecondary,
-        fontSize: 12,
-    },
-    checkbox: {
-        width: 22,
-        height: 22,
-        borderRadius: 11,
-        borderWidth: 1,
-        borderColor: palette.textSecondary,
-        marginRight: spacing.sm,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    checkboxSelected: {
-        borderColor: palette.primary,
-        backgroundColor: palette.primary,
-    },
-    checkboxMark: {
-        color: '#FFFFFF',
-        fontSize: 13,
-        fontWeight: '700',
-    },
-    errorContainer: {
-        marginHorizontal: spacing.lg,
-        marginTop: spacing.sm + 2,
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.sm + 2,
-        borderWidth: 1,
-        borderColor: 'rgba(248, 113, 113, 0.35)',
-        borderRadius: 10,
-        backgroundColor: 'rgba(127, 29, 29, 0.25)',
-    },
-    errorText: {
-        color: '#FECACA',
-        fontSize: 13,
-    },
-    actions: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: spacing.sm + 2,
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.lg,
-    },
-    actionButton: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: spacing.sm + 4,
-        borderRadius: 8,
-    },
-    actionButtonPrimary: {
-        backgroundColor: palette.primary,
-    },
-    actionButtonSecondary: {
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: palette.border,
-    },
-    actionButtonDisabled: {
-        opacity: 0.5,
-    },
-    actionButtonPressed: {
-        opacity: 0.8,
-    },
-    actionButtonPrimaryText: {
-        color: '#FFFFFF',
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    actionButtonSecondaryText: {
-        color: palette.textPrimary,
-        fontSize: 14,
-        fontWeight: '600',
-    },
-});

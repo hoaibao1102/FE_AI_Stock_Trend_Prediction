@@ -1,10 +1,9 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { MiniIndexChart } from '@/features/dashboard/components/MiniIndexChart';
 import { DashboardSection } from '@/features/dashboard/components/DashboardSection';
 import type { DashboardMarketOverviewIndex } from '@/features/dashboard/types';
 import { StatusBadge, Text } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import { formatPercent, formatPrice, formatVolume } from '@/shared/utils/format';
 
 type DashboardOverviewSectionProps = {
@@ -23,96 +22,34 @@ export function DashboardOverviewSection({
       {items.map((item) => (
         <View
           key={item.symbol}
-          style={styles.indexCard}>
-          <View style={styles.indexCardTop}>
+          className="bg-surface border-border rounded-cardxl border p-4 gap-2">
+          <View className="flex-row items-start justify-between">
             <View>
-              <Text style={styles.indexSymbol}>{item.display_symbol}</Text>
-              <Text style={styles.indexMarket}>{item.market}</Text>
+              <Text className="text-base font-bold leading-6 text-typography">{item.display_symbol}</Text>
+              <Text className="text-2xs font-semibold leading-4 text-typography-muted mt-1">{item.market}</Text>
             </View>
             <StatusBadge
               label={item.change_percent >= 0 ? 'Up session' : 'Down session'}
               tone={item.change_percent >= 0 ? 'up' : 'down'}
             />
           </View>
-          <Text style={styles.indexValue}>{formatPrice(item.close_index)}</Text>
+          <Text className="text-2xl font-bold leading-8 text-typography">{formatPrice(item.close_index)}</Text>
           <Text
-            style={[
-              styles.indexChange,
-              item.change_percent >= 0 ? styles.positiveText : styles.negativeText,
-            ]}>
+            className={`text-xs font-bold leading-5 ${
+              item.change_percent >= 0 ? 'text-market-up' : 'text-market-down'
+            }`}>
             {formatPercent(item.change_percent)}
           </Text>
           <MiniIndexChart
             data={item.chart}
             isNegative={item.change_percent < 0}
           />
-          <View style={styles.indexFooter}>
-            <Text style={styles.indexVolume}>Vol: {formatVolume(item.total_volume)}</Text>
-            <Text style={styles.indexDate}>Date: {item.trading_date}</Text>
+          <View className="flex-row items-center justify-between">
+            <Text className="text-2xs leading-4 text-typography-muted">Vol: {formatVolume(item.total_volume)}</Text>
+            <Text className="text-2xs leading-4 text-typography-muted">Date: {item.trading_date}</Text>
           </View>
         </View>
       ))}
     </DashboardSection>
   );
 }
-
-const styles = StyleSheet.create({
-  indexCard: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    gap: spacing.sm,
-    padding: spacing.md,
-  },
-  indexCardTop: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  indexSymbol: {
-    color: palette.textPrimary,
-    fontSize: 16,
-    fontWeight: '700',
-    lineHeight: 22,
-  },
-  indexMarket: {
-    color: palette.textSecondary,
-    fontSize: 11,
-    fontWeight: '600',
-    lineHeight: 14,
-    marginTop: spacing.xs,
-  },
-  indexValue: {
-    color: palette.textPrimary,
-    fontSize: 24,
-    fontWeight: '700',
-    lineHeight: 32,
-  },
-  indexChange: {
-    fontSize: 13,
-    fontWeight: '700',
-    lineHeight: 18,
-  },
-  indexVolume: {
-    color: palette.textSecondary,
-    fontSize: 11,
-    lineHeight: 14,
-  },
-  indexFooter: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  indexDate: {
-    color: palette.textSecondary,
-    fontSize: 11,
-    lineHeight: 14,
-  },
-  positiveText: {
-    color: palette.positive,
-  },
-  negativeText: {
-    color: palette.negative,
-  },
-});

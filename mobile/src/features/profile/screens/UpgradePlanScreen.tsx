@@ -1,13 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Bolt, Crown, ShieldCheck, Star, TrendingUp } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { RootScreenProps } from '@/app/navigation/navigation.types';
 import { clearPersistedSession } from '@/shared/services/tokenStorage';
+import { SwipeBackGesture } from '@/shared/ui/components/SwipeBackGesture';
 import { Card, Text, useToast } from '@/shared/ui';
-import { palette, radius, spacing } from '@/shared/design/tokens';
 import { useAuthStore } from '@/stores/auth.store';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import {
@@ -137,76 +137,72 @@ export function UpgradePlanScreen({ navigation }: RootScreenProps<'UpgradePlan'>
   }, [clearSession, navigation, refresh, showToast]);
 
   return (
-    <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={styles.safeArea}>
+    <SwipeBackGesture onGoBack={() => navigation.goBack()}>
+    <SafeAreaView edges={['top', 'right', 'bottom', 'left']} className="flex-1 bg-background">
       <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          {
-            paddingBottom: spacing.xl,
-            paddingTop: spacing.sm,
-          },
-        ]}
+        contentContainerClassName="grow gap-6 px-4"
+        contentContainerStyle={{ paddingBottom: 32, paddingTop: 8 }}
         showsVerticalScrollIndicator={false}>
-        <Pressable accessibilityRole="button" onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>Back</Text>
+        <Pressable accessibilityRole="button" onPress={() => navigation.goBack()} className="self-start items-center justify-center min-h-[38px] px-4 bg-surface border border-border rounded-full">
+          <Text className="text-xs text-typography font-bold leading-5">Back</Text>
         </Pressable>
 
-        <Card style={styles.hero}>
-          <View style={styles.heroGlowPrimary} />
-          <View style={styles.heroGlowSecondary} />
-          <View style={styles.heroBadge}>
+        <Card className="bg-[#1D4ED8] border-[#60A5FA] rounded-cardxl border overflow-hidden p-4 gap-4 relative">
+          <View className="absolute -right-[65px] -top-[55px] w-[180px] h-[180px] rounded-full" style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)' }} />
+          <View className="absolute right-[50px] -bottom-[50px] w-[140px] h-[140px] rounded-full" style={{ backgroundColor: 'rgba(191, 219, 254, 0.12)' }} />
+          <View className="items-center justify-center w-11 h-11 rounded-cardxl border" style={{ backgroundColor: 'rgba(15, 23, 42, 0.22)', borderColor: 'rgba(255, 255, 255, 0.16)' }}>
             <Crown color="#F8FAFC" size={20} />
           </View>
-          <Text style={styles.heroEyebrow}>AI Stock Trend Pro</Text>
-          <Text style={styles.heroTitle}>See the benefits and upgrade in one tap</Text>
-          <Text style={styles.heroBody}>
+          <Text className="text-2xs text-[#BFDBFE] font-bold leading-4" style={{ letterSpacing: 0.8, textTransform: 'uppercase' }}>AI Stock Trend Pro</Text>
+          <Text className="text-3xl text-[#F8FAFC] font-bold leading-8">See the benefits and upgrade in one tap</Text>
+          <Text className="text-sm text-[#DBEAFE] leading-5">
             This mobile page is built for user accounts that want a clear PRO offer and a direct upgrade button.
           </Text>
 
-          <View style={styles.planRow}>
-            <View style={styles.planChip}>
+          <View className="flex-row items-center flex-wrap gap-2 justify-between">
+            <View className="flex-row items-center gap-1 px-2 py-[6px] rounded-full border" style={{ backgroundColor: 'rgba(15, 23, 42, 0.26)', borderColor: 'rgba(255, 255, 255, 0.14)' }}>
               <Star color="#FCD34D" size={14} />
-              <Text style={styles.planChipText}>{planLabel}</Text>
+              <Text className="text-2xs text-[#F8FAFC] font-bold leading-4">{planLabel}</Text>
             </View>
-            <Text style={styles.price}>50,000 VND / 30 days</Text>
+            <Text className="text-sm text-[#E2E8F0] font-bold leading-5">50,000 VND / 30 days</Text>
           </View>
         </Card>
 
-        <Card style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>PRO benefits</Text>
-          <View style={styles.benefitList}>
+        <Card className="bg-surface-elevated border-border rounded-cardxl border p-4 gap-4">
+          <Text className="text-lg text-typography font-bold leading-6">PRO benefits</Text>
+          <View className="gap-4">
             {BENEFITS.map((benefit) => {
               const Icon = benefit.icon;
 
               return (
-                <View key={benefit.text} style={styles.benefitRow}>
-                  <View style={styles.benefitIcon}>
-                    <Icon color={palette.primarySoft} size={18} />
+                <View key={benefit.text} className="flex-row items-center gap-2">
+                  <View className="items-center justify-center w-9 h-9 rounded-md" style={{ backgroundColor: 'rgba(59, 130, 246, 0.12)' }}>
+                    <Icon color="#3B82F6" size={18} />
                   </View>
-                  <Text style={styles.benefitText}>{benefit.text}</Text>
+                  <Text className="text-sm text-typography leading-5 flex-1">{benefit.text}</Text>
                 </View>
               );
             })}
           </View>
         </Card>
 
-        <Card style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Current subscription</Text>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Plan</Text>
-            <Text style={styles.summaryValue}>{effectiveProfile?.plan ?? 'FREE'}</Text>
+        <Card className="bg-surface-elevated border-border rounded-cardxl border p-4 gap-4">
+          <Text className="text-lg text-typography font-bold leading-6">Current subscription</Text>
+          <View className="flex-row items-center justify-between gap-4">
+            <Text className="text-2xs text-typography-muted leading-5 flex-1">Plan</Text>
+            <Text className="text-2xs text-typography font-bold leading-5 flex-1 text-right">{effectiveProfile?.plan ?? 'FREE'}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Status</Text>
-            <Text style={styles.summaryValue}>{effectiveProfile?.subscription_status ?? 'NONE'}</Text>
+          <View className="flex-row items-center justify-between gap-4">
+            <Text className="text-2xs text-typography-muted leading-5 flex-1">Status</Text>
+            <Text className="text-2xs text-typography font-bold leading-5 flex-1 text-right">{effectiveProfile?.subscription_status ?? 'NONE'}</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Expires on</Text>
-            <Text style={styles.summaryValue}>{formatExpiry(effectiveProfile?.subscription_expires_at)}</Text>
+          <View className="flex-row items-center justify-between gap-4">
+            <Text className="text-2xs text-typography-muted leading-5 flex-1">Expires on</Text>
+            <Text className="text-2xs text-typography font-bold leading-5 flex-1 text-right">{formatExpiry(effectiveProfile?.subscription_expires_at)}</Text>
           </View>
           {error ? (
-            <Pressable accessibilityRole="button" onPress={retry} style={styles.retryButton}>
-              <Text style={styles.retryText}>Retry loading account data</Text>
+            <Pressable accessibilityRole="button" onPress={retry} className="self-start items-center justify-center min-h-[40px] px-4 bg-surface border border-border rounded-sm">
+              <Text className="text-2xs text-typography font-bold leading-5">Retry loading account data</Text>
             </Pressable>
           ) : null}
         </Card>
@@ -217,17 +213,17 @@ export function UpgradePlanScreen({ navigation }: RootScreenProps<'UpgradePlan'>
           onPress={() => {
             void handleUpgrade();
           }}
+          className={`items-center justify-center min-h-[56px] px-4 rounded-cardxl ${isLoading || activePro ? 'opacity-60' : ''}`}
           style={({ pressed }) => [
-            styles.upgradeButton,
-            (pressed || isSubmitting) && styles.upgradeButtonPressed,
-            (isLoading || activePro) && styles.upgradeButtonDisabled,
+            { backgroundColor: '#3B82F6' },
+            { opacity: (pressed || isSubmitting) ? 0.88 : 1 },
           ]}>
           {isSubmitting ? (
-            <ActivityIndicator color={palette.textPrimary} size="small" />
+            <ActivityIndicator color="#F8FAFC" size="small" />
           ) : (
-            <View style={styles.upgradeContent}>
-              <Bolt color={palette.textPrimary} size={18} />
-              <Text style={styles.upgradeText}>
+            <View className="flex-row items-center gap-2">
+              <Bolt color="#F8FAFC" size={18} />
+              <Text className="text-base text-[#F8FAFC] font-bold leading-5">
                 {activePro ? 'Your PRO plan is already active' : 'Upgrade to PRO'}
               </Text>
             </View>
@@ -235,219 +231,6 @@ export function UpgradePlanScreen({ navigation }: RootScreenProps<'UpgradePlan'>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
+    </SwipeBackGesture>
   );
 }
-
-const styles = StyleSheet.create({
-  backButton: {
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    justifyContent: 'center',
-    minHeight: 38,
-    paddingHorizontal: spacing.md,
-  },
-  backButtonText: {
-    color: palette.textPrimary,
-    fontSize: 13,
-    fontWeight: '700',
-    lineHeight: 18,
-  },
-  benefitIcon: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(59, 130, 246, 0.12)',
-    borderRadius: 12,
-    height: 36,
-    justifyContent: 'center',
-    width: 36,
-  },
-  benefitList: {
-    gap: spacing.md,
-  },
-  benefitRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  benefitText: {
-    color: palette.textPrimary,
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  content: {
-    flexGrow: 1,
-    gap: spacing.lg,
-    paddingHorizontal: spacing.md,
-  },
-  hero: {
-    backgroundColor: '#1D4ED8',
-    borderColor: '#60A5FA',
-    borderRadius: radius.card,
-    borderWidth: 1,
-    gap: spacing.md,
-    overflow: 'hidden',
-    padding: spacing.md,
-    position: 'relative',
-  },
-  heroBadge: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(15, 23, 42, 0.22)',
-    borderColor: 'rgba(255, 255, 255, 0.16)',
-    borderRadius: 14,
-    borderWidth: 1,
-    height: 44,
-    justifyContent: 'center',
-    width: 44,
-  },
-  heroBody: {
-    color: '#DBEAFE',
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  heroEyebrow: {
-    color: '#BFDBFE',
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-    lineHeight: 16,
-    textTransform: 'uppercase',
-  },
-  heroGlowPrimary: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderRadius: 140,
-    height: 180,
-    position: 'absolute',
-    right: -65,
-    top: -55,
-    width: 180,
-  },
-  heroGlowSecondary: {
-    backgroundColor: 'rgba(191, 219, 254, 0.12)',
-    borderRadius: 120,
-    bottom: -50,
-    height: 140,
-    position: 'absolute',
-    right: 50,
-    width: 140,
-  },
-  heroTitle: {
-    color: '#F8FAFC',
-    fontSize: 28,
-    fontWeight: '800',
-    lineHeight: 34,
-  },
-  planChip: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(15, 23, 42, 0.26)',
-    borderColor: 'rgba(255, 255, 255, 0.14)',
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
-  },
-  planChipText: {
-    color: '#F8FAFC',
-    fontSize: 12,
-    fontWeight: '700',
-    lineHeight: 16,
-  },
-  planRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    justifyContent: 'space-between',
-  },
-  price: {
-    color: '#E2E8F0',
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 20,
-  },
-  retryButton: {
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    justifyContent: 'center',
-    minHeight: 40,
-    paddingHorizontal: spacing.md,
-  },
-  retryText: {
-    color: palette.textPrimary,
-    fontSize: 13,
-    fontWeight: '700',
-    lineHeight: 18,
-  },
-  safeArea: {
-    backgroundColor: palette.background,
-    flex: 1,
-  },
-  sectionCard: {
-    backgroundColor: palette.elevated,
-    borderColor: palette.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    gap: spacing.md,
-    padding: spacing.md,
-  },
-  sectionTitle: {
-    color: palette.textPrimary,
-    fontSize: 18,
-    fontWeight: '700',
-    lineHeight: 24,
-  },
-  summaryLabel: {
-    color: palette.textSecondary,
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  summaryRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: spacing.md,
-    justifyContent: 'space-between',
-  },
-  summaryValue: {
-    color: palette.textPrimary,
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '700',
-    lineHeight: 18,
-    textAlign: 'right',
-  },
-  upgradeButton: {
-    alignItems: 'center',
-    backgroundColor: palette.primary,
-    borderRadius: radius.card,
-    justifyContent: 'center',
-    minHeight: 56,
-    paddingHorizontal: spacing.md,
-  },
-  upgradeButtonDisabled: {
-    opacity: 0.6,
-  },
-  upgradeButtonPressed: {
-    opacity: 0.88,
-  },
-  upgradeContent: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  upgradeText: {
-    color: palette.textPrimary,
-    fontSize: 15,
-    fontWeight: '800',
-    lineHeight: 20,
-  },
-});
