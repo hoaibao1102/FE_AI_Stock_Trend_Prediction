@@ -67,7 +67,7 @@ export function LoginForm({
           onBlur={() => formik.setFieldTouched('email')}
           onChangeText={(value) => formik.setFieldValue('email', value)}
           onSubmitEditing={() => passwordRef.current?.focus()}
-          placeholder="operator@vn30.net"
+          placeholder="youremail@gmail.com"
           returnKeyType="next"
           textContentType="emailAddress"
           value={formik.values.email}

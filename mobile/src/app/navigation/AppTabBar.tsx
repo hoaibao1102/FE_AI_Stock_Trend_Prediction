@@ -40,11 +40,11 @@ const TAB_META: Record<
     label: string;
   }
 > = {
-  Alerts: { icon: AlertsIcon, label: 'Alerts' },
   Dashboard: { icon: DashboardIcon, label: 'Dashboard' },
-  Profile: { icon: ProfileIcon, label: 'Profile' },
   Search: { icon: SearchIcon, label: 'Search' },
   Watchlist: { icon: WatchlistIcon, label: 'Watchlist' },
+  Alerts: { icon: AlertsIcon, label: 'Alerts' },
+  Profile: { icon: ProfileIcon, label: 'Profile' },
 };
 
 export function AppTabBar({ descriptors, navigation, state }: AppTabBarProps) {
@@ -56,35 +56,28 @@ export function AppTabBar({ descriptors, navigation, state }: AppTabBarProps) {
     const shortSide = Math.min(width, height);
 
     return {
-      barMinHeight: Math.max(height * 0.11, 45),
-      iconSize: Math.max(shortSide * 0.07, 22),
-      paddingBottom: Math.max(insets.bottom, height * 0.018),
-      paddingHorizontal: Math.max(width * 0.04, 8),
-      paddingTop: Math.max(height * 0.018, 8),
-      railRadius: Math.max(14, Math.min(shortSide * 0.045, 18)),
-      touchHeight: Math.max(height * 0.066, 54),
+      iconSize: Math.max(shortSide * 0.07, 24),
     };
-  }, [height, insets.bottom, width]);
+  }, [height, width]);
 
   const visibleRoutes = state.routes.filter((route) => route.name in TAB_META);
 
   return (
     <Box
-      className="bg-background border-t border-t-border"
+      className="bg-[#151527] relative"
       style={{
-        minHeight: metrics.barMinHeight,
-        paddingBottom: metrics.paddingBottom,
-        paddingHorizontal: metrics.paddingHorizontal,
-        paddingTop: metrics.paddingTop,
+        borderTopLeftRadius: 14,
+        borderTopRightRadius: 14,
+        borderColor: '#2A2A44',
+        borderWidth: 1.5,
+        borderBottomWidth: 0,
+        shadowColor: '#000',
+        shadowOffset: { height: -2, width: 0 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+        elevation: 4,
       }}>
-      <View
-        className="flex-row items-center justify-between"
-        style={{
-          borderRadius: metrics.railRadius,
-          gap: 4,
-          paddingHorizontal: Math.max(width * 0.016, 4),
-          paddingVertical: Math.max(height * 0.008, 4),
-        }}>
+      <View className="flex-row items-center justify-evenly" style={{ paddingVertical: 14 }}>
         {visibleRoutes.map((route) => {
           const routeIndex = state.routes.findIndex((entry) => entry.key === route.key);
           const isFocused = state.index === routeIndex;
@@ -110,19 +103,21 @@ export function AppTabBar({ descriptors, navigation, state }: AppTabBarProps) {
                   navigation.navigate(route.name, route.params);
                 }
               }}
-              className={`items-center justify-center flex-1 rounded-full overflow-hidden relative active:opacity-80 min-w-[44px] ${isFocused ? 'bg-[rgba(173,198,255,0.12)]' : ''}`}
-              style={{
-                minHeight: metrics.touchHeight,
-                paddingVertical: Math.max(height * 0.012, 8),
-              }}>
-              <Icon color={isFocused ? '#3B82F6' : '#94A3B8'} size={metrics.iconSize} />
+              className="items-center justify-center flex-1 overflow-hidden relative active:opacity-80 min-w-[44px]"
+              style={{ paddingVertical: 10 }}>
+              {isFocused ? (
+                <View className="absolute top-0 w-5 h-[2.5px] bg-[#3B82F6] rounded-full" />
+              ) : null}
+              <Icon color={isFocused ? '#3B82F6' : '#64748B'} size={metrics.iconSize} />
               {route.name === 'Alerts' && unreadNotifications > 0 ? (
                 <View
-                  className="absolute items-center justify-center rounded-full min-w-4 px-1 right-[18%] top-[12%]"
+                  className="absolute items-center justify-center rounded-full min-w-4 px-1"
                   style={{
                     backgroundColor: '#3B82F6',
                     borderColor: 'rgba(8, 17, 26, 0.12)',
                     borderWidth: 1,
+                    right: '22%',
+                    top: 2,
                   }}>
                   <Text className="text-[#08111A] text-[9px] font-extrabold">
                     {unreadNotifications > 9 ? '9+' : unreadNotifications}

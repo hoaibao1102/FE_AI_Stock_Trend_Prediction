@@ -207,28 +207,42 @@ export function UpgradePlanScreen({ navigation }: RootScreenProps<'UpgradePlan'>
           ) : null}
         </Card>
 
-        <Pressable
-          accessibilityRole="button"
-          disabled={isSubmitting || isLoading || activePro}
-          onPress={() => {
-            void handleUpgrade();
-          }}
-          className={`items-center justify-center min-h-[56px] px-4 rounded-cardxl ${isLoading || activePro ? 'opacity-60' : ''}`}
-          style={({ pressed }) => [
-            { backgroundColor: '#3B82F6' },
-            { opacity: (pressed || isSubmitting) ? 0.88 : 1 },
-          ]}>
-          {isSubmitting ? (
-            <ActivityIndicator color="#F8FAFC" size="small" />
-          ) : (
-            <View className="flex-row items-center gap-2">
-              <Bolt color="#F8FAFC" size={18} />
-              <Text className="text-base text-[#F8FAFC] font-bold leading-5">
-                {activePro ? 'Your PRO plan is already active' : 'Upgrade to PRO'}
-              </Text>
+        <View className="rounded-cardxl overflow-hidden" style={{ backgroundColor: '#1E3A5F', borderWidth: 1, borderColor: 'rgba(96,165,250,0.2)' }}>
+          <Pressable
+            accessibilityRole="button"
+            disabled={isSubmitting || isLoading || activePro}
+            onPress={() => { void handleUpgrade(); }}
+            className={`${isLoading || activePro ? 'opacity-60' : ''}`}
+            style={({ pressed }) => ({
+              opacity: (pressed || isSubmitting) ? 0.9 : 1,
+            })}>
+            <View className="px-4 py-3.5 relative overflow-hidden">
+              {/* Single subtle decorative blob */}
+              <View className="absolute -right-[30px] -top-[30px] w-[130px] h-[130px] rounded-full" style={{ backgroundColor: 'rgba(96,165,250,0.08)' }} />
+
+              <View className="flex-row items-center justify-between">
+                {/* Left: icon + text */}
+                <View className="flex-row items-center gap-3 flex-1">
+                  <View className="items-center justify-center w-10 h-10 rounded-full" style={{ backgroundColor: 'rgba(251,191,36,0.12)' }}>
+                    <Crown color="#FCD34D" size={18} strokeWidth={2} />
+                  </View>
+                  <View>
+                    <Text className="text-base text-[#F8FAFC] font-bold leading-5">Upgrade to PRO</Text>
+                    <Text className="text-xs text-[#93C5FD] font-semibold leading-4">Only 50K VND / 30 days</Text>
+                  </View>
+                </View>
+
+                {/* Right: CTA */}
+                <View className="flex-row items-center gap-1">
+                  <Text className="text-sm text-[#60A5FA] font-bold leading-5">Upgrade</Text>
+                  <View className="w-5 h-5 rounded-full items-center justify-center bg-[#60A5FA]">
+                    <Text className="text-xs text-[#0F172A] font-bold leading-4">›</Text>
+                  </View>
+                </View>
+              </View>
             </View>
-          )}
-        </Pressable>
+          </Pressable>
+        </View>
       </ScrollView>
     </SafeAreaView>
     </SwipeBackGesture>
