@@ -6,24 +6,27 @@ import { useToggleWatchlist } from '@/features/stocks/hooks/useToggleWatchlist';
 
 type ActionButtonsProps = {
   symbol: string;
+  isWatched: boolean;
+  watchlistLoading: boolean;
   onCreateAlert?: () => void;
 };
 
-export function ActionButtons({ symbol, onCreateAlert }: ActionButtonsProps) {
-  const { isWatched, toggle } = useToggleWatchlist(symbol);
+export function ActionButtons({ symbol: stockSymbol, isWatched: watchedProp, watchlistLoading, onCreateAlert }: ActionButtonsProps) {
+  const showDisabled = !watchlistLoading && !watchedProp;
+  const { isWatched, toggle } = useToggleWatchlist(stockSymbol);
 
   return (
     <View className="flex-row gap-2 px-4">
       <Pressable
         accessibilityRole="button"
         onPress={onCreateAlert}
-        disabled={!onCreateAlert}
+        disabled={showDisabled}
         className="flex-1 flex-row items-center justify-center bg-primary-500 rounded-sm h-11 gap-2"
-        style={!onCreateAlert ? { opacity: 0.5 } : undefined}
+        style={showDisabled ? { opacity: 0.5 } : undefined}
       >
         <BellPlus color="#F8FAFC" size={18} />
         <Text className="text-sm font-extrabold text-typography">
-          {onCreateAlert ? 'Create Alert' : 'Add to Watchlist First'}
+          {watchlistLoading ? 'Loading...' : !watchedProp ? 'Add to Watchlist First' : 'Create Alert'}
         </Text>
       </Pressable>
       <Pressable

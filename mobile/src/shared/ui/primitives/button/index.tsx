@@ -103,23 +103,26 @@ type ButtonProps = {
   loading?: boolean;
   onPress?: () => void;
   children?: React.ReactNode;
+  className?: string;
   style?: ViewStyle;
 };
 
 function Button({
   variant = 'solid', size = 'md', action = 'primary',
-  disabled, loading, onPress, children, style,
+  disabled, loading, onPress, children, className, style,
 }: ButtonProps) {
   const key = colorKey(action, variant);
   const height = HEIGHTS[size];
+  const useCustomStyle = !className;
 
   return (
     <ButtonCtx.Provider value={{ variant, size, action }}>
       <Pressable
         disabled={disabled || loading}
         onPress={onPress}
+        className={className}
         style={({ pressed }) => [
-          {
+          useCustomStyle && {
             alignItems: 'center',
             backgroundColor: BG_COLORS[key] ?? '#1E293B',
             borderColor: BORDER_COLORS[key] ?? '#334155',
@@ -130,6 +133,16 @@ function Button({
             height,
             justifyContent: 'center',
             opacity: disabled ? 0.4 : pressed ? 0.85 : 1,
+            paddingHorizontal: variant === 'link' ? 0 : 16,
+          },
+          !useCustomStyle && {
+            alignItems: 'center',
+            borderRadius: 4,
+            borderWidth: 0,
+            flexDirection: 'row',
+            gap: 8,
+            height,
+            justifyContent: 'center',
             paddingHorizontal: variant === 'link' ? 0 : 16,
           },
           style,

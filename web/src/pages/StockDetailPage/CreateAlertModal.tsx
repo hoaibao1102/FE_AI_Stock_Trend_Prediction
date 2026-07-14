@@ -128,9 +128,23 @@ export default function CreateAlertModal({
                     {/* Alert Type */}
                     <div className="grid gap-1.5">
                         <label className="text-sm text-[#94A3B8]">Alert Type</label>
-                        <div className="flex h-10 items-center rounded-md border border-[#334155] bg-[#1E293B] px-3 text-sm text-[#F8FAFC]">
-                            {alertType === "PRICE_ABOVE" ? "Price Above" : alertType === "PRICE_BELOW" ? "Price Below" : "Volume Spike"}
-                        </div>
+                        {isEdit ? (
+                            <div className="flex h-10 items-center rounded-md border border-[#334155] bg-[#1E293B] px-3 text-sm text-[#F8FAFC]">
+                                {alertType === "PRICE_ABOVE" ? "Price Above" : alertType === "PRICE_BELOW" ? "Price Below" : "Volume Spike"}
+                            </div>
+                        ) : (
+                            <select
+                                value={alertType}
+                                onChange={(e) => setAlertType(e.target.value as AlertType)}
+                                className="h-10 w-full rounded-md border border-[#334155] bg-[#111827] px-3 text-sm text-[#F8FAFC] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#3B82F6]/40"
+                            >
+                                {ALERT_TYPES.map((t) => (
+                                    <option key={t.value} value={t.value}>
+                                        {t.label}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </div>
 
                     {/* Threshold */}
