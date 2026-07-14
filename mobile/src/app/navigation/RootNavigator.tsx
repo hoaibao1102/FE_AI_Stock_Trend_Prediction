@@ -9,6 +9,7 @@ import { EditProfileScreen } from '@/features/profile/screens/EditProfileScreen'
 import { UpgradePlanScreen } from '@/features/profile/screens/UpgradePlanScreen';
 import { StartupScreen } from '@/features/startup/screens/StartupScreen';
 import { StockDetailScreen } from '@/features/stocks/screens/StockDetailScreen';
+import { AiAnalysisScreen } from '@/features/stocks/screens/AiAnalysisScreen';
 import type { RootStackParamList } from '@/app/navigation/navigation.types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -77,6 +78,11 @@ export function RootNavigator() {
         name="StockDetail"
         component={StockDetailScreen}
         options={detailScreenOptions}
+      />
+      <Stack.Screen
+        name="AiAnalysis"
+        component={AiAnalysisScreen}
+        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
       />
       <Stack.Screen
         name="ChangePassword"
