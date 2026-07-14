@@ -16,6 +16,7 @@ export type RootStackParamList = {
   EditAlert: { alertId: string };
   NotificationCenter: undefined;
   ChangePassword: undefined;
+  AiAnalysis: { symbol?: string } | undefined;
 };
 
 // ─── Main Tab ────────────────────────────────────────
