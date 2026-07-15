@@ -398,7 +398,7 @@ export default function WatchlistPage() {
                                         <th>Market</th>
                                         <th>Latest Close</th>
                                         <th>Change %</th>
-                                        <th className="text-right">Actions</th>
+                                        <th className="text-right"><div className="flex items-center justify-end gap-1">Actions</div></th>
                                     </tr>
                                 </thead>
 

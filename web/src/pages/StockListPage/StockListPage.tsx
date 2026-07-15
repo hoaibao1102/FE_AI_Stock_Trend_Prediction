@@ -1,19 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
-import {
-    ArrowDownUp,
-    Bell,
-    Download,
-    RefreshCw,
-    Star,
-} from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
+import { ArrowDownUp, Download, RefreshCw } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { getStockList, type StockItem, type StockListMeta, type StockListQuery } from "@/services/stock.service"
-import { getWatchlist, addToWatchlist, removeFromWatchlist } from "@/services/watchlist.service"
-import { useAuthStore } from "@/stores/auth.store"
 import {
     SearchInput,
     StatusBadge,
@@ -24,14 +15,10 @@ import {
     TableEmpty,
     TableNoMatch,
     placeholder,
-    formatNumber,
-    formatCompact,
-    formatPercent,
 } from "@/shared/components"
-import "@/shared/components/shared-stock.css"
 import "./StockListPage.css"
 
-type SortKey = "symbol" | "companyName" | "latestClosePrice" | "changePercent" | "volume" | "marketCap"
+type SortKey = "symbol" | "companyName"
 type SortDirection = "asc" | "desc"
 
 type LoadState = {
@@ -50,31 +37,12 @@ const DEFAULT_QUERY: StockListQuery = {
 const LOCAL_PAGE_SIZE_OPTIONS = [20, 25, 50]
 
 function downloadCsv(rows: StockItem[]) {
-    const header = [
-        "Symbol",
-        "Company Name",
-        "Market",
-        "Industry/Sector",
-        "Status",
-        "Latest Close Price",
-        "Change",
-        "Change %",
-        "Volume",
-        "Market Cap",
-        "Last Updated",
-    ]
+    const header = ["Symbol", "Company Name", "Market", "Status"]
     const csvRows = rows.map((item) => [
         item.symbol,
         item.companyName ?? "",
         item.market ?? "",
-        item.industry ?? item.sector ?? "",
         item.status ?? "",
-        item.latestClosePrice ?? "",
-        item.change ?? "",
-        item.changePercent ?? "",
-        item.volume ?? "",
-        item.marketCap ?? "",
-        item.lastUpdated ?? "",
     ])
     const csv = [header, ...csvRows].map((row) => row.join(",")).join("\n")
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
@@ -96,15 +64,11 @@ export default function StockListPage() {
         error: null,
     })
     const [searchText, setSearchText] = useState("")
-    const [sectorFilter, setSectorFilter] = useState("all")
     const [statusFilter, setStatusFilter] = useState("all")
     const [sortKey, setSortKey] = useState<SortKey>("symbol")
     const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
     const [tablePage, setTablePage] = useState(1)
     const [rowsPerPage, setRowsPerPage] = useState(25)
-    const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
-    const [watchedSymbols, setWatchedSymbols] = useState<Set<string>>(new Set())
-    const [watchlistLoading, setWatchlistLoading] = useState<Set<string>>(new Set())
 
     const activeMarketLabel = useMemo(() => {
         const marketValues = Array.from(new Set(
@@ -116,61 +80,6 @@ export default function StockListPage() {
         if (marketValues.length === 1) return marketValues[0]
         return query.market?.trim().toUpperCase() || "Selected"
     }, [query.market, state.items])
-
-    const loadWatchedSymbols = useCallback(async () => {
-        if (!isAuthenticated) return
-        try {
-            const list = await getWatchlist()
-            setWatchedSymbols(new Set(list.map((item) => item.symbol)))
-        } catch {
-            // silently fail — non-blocking background fetch
-        }
-    }, [isAuthenticated])
-
-    useEffect(() => {
-        void loadWatchedSymbols()
-    }, [loadWatchedSymbols])
-
-    const handleWatchlistToggle = async (symbol: string) => {
-        if (!isAuthenticated) {
-            toast.error("Authentication required", {
-                description: "Please log in to manage your watchlist",
-            })
-            return
-        }
-        if (watchlistLoading.has(symbol)) return
-
-        setWatchlistLoading((prev) => new Set(prev).add(symbol))
-        try {
-            if (watchedSymbols.has(symbol)) {
-                await removeFromWatchlist(symbol)
-                setWatchedSymbols((prev) => {
-                    const next = new Set(prev)
-                    next.delete(symbol)
-                    return next
-                })
-                toast.success("Removed from watchlist", {
-                    description: `${symbol} has been removed from your watchlist`,
-                })
-            } else {
-                await addToWatchlist(symbol)
-                setWatchedSymbols((prev) => new Set(prev).add(symbol))
-                toast.success("Added to watchlist", {
-                    description: `${symbol} has been added to your watchlist`,
-                })
-            }
-        } catch (error) {
-            toast.error("Watchlist update failed", {
-                description: error instanceof Error ? error.message : "An unexpected error occurred",
-            })
-        } finally {
-            setWatchlistLoading((prev) => {
-                const next = new Set(prev)
-                next.delete(symbol)
-                return next
-            })
-        }
-    }
 
     useEffect(() => {
         let isMounted = true
@@ -205,15 +114,6 @@ export default function StockListPage() {
 
     const endpoint = `/api/stocks?page=${query.page}&limit=${query.limit}&market=${query.market}`
 
-    const sectors = useMemo(() => {
-        const values = new Set<string>()
-        state.items.forEach((item) => {
-            const label = item.industry || item.sector
-            if (label) values.add(label)
-        })
-        return Array.from(values).sort((a, b) => a.localeCompare(b))
-    }, [state.items])
-
     const statuses = useMemo(() => {
         const values = new Set<string>()
         state.items.forEach((item) => {
@@ -228,12 +128,10 @@ export default function StockListPage() {
             const matchesSearch = !search
                 || item.symbol.toLowerCase().includes(search)
                 || item.companyName?.toLowerCase().includes(search)
-            const itemSector = item.industry || item.sector
-            const matchesSector = sectorFilter === "all" || itemSector === sectorFilter
             const matchesStatus = statusFilter === "all" || item.status === statusFilter
-            return matchesSearch && matchesSector && matchesStatus
+            return matchesSearch && matchesStatus
         })
-    }, [searchText, sectorFilter, state.items, statusFilter])
+    }, [searchText, state.items, statusFilter])
 
     const sortedItems = useMemo(() => {
         const direction = sortDirection === "asc" ? 1 : -1
@@ -244,25 +142,12 @@ export default function StockListPage() {
                         return item.symbol
                     case "companyName":
                         return item.companyName ?? ""
-                    case "latestClosePrice":
-                        return item.latestClosePrice ?? Number.NEGATIVE_INFINITY
-                    case "changePercent":
-                        return item.changePercent ?? Number.NEGATIVE_INFINITY
-                    case "volume":
-                        return item.volume ?? Number.NEGATIVE_INFINITY
-                    case "marketCap":
-                        return item.marketCap ?? Number.NEGATIVE_INFINITY
                 }
             }
 
             const leftValue = getValue(left)
             const rightValue = getValue(right)
-
-            if (typeof leftValue === "string" && typeof rightValue === "string") {
-                return leftValue.localeCompare(rightValue) * direction
-            }
-
-            return ((leftValue as number) - (rightValue as number)) * direction
+            return leftValue.localeCompare(rightValue) * direction
         })
     }, [filteredItems, sortDirection, sortKey])
 
@@ -270,7 +155,7 @@ export default function StockListPage() {
 
     useEffect(() => {
         setTablePage(1)
-    }, [searchText, sectorFilter, sortDirection, sortKey, statusFilter, rowsPerPage])
+    }, [searchText, sortDirection, sortKey, statusFilter, rowsPerPage])
 
     useEffect(() => {
         if (tablePage > totalPages) setTablePage(totalPages)
@@ -280,19 +165,6 @@ export default function StockListPage() {
         const start = (tablePage - 1) * rowsPerPage
         return sortedItems.slice(start, start + rowsPerPage)
     }, [rowsPerPage, sortedItems, tablePage])
-
-    const qualitySummary = useMemo(() => {
-        const validSymbols = state.items.filter((item) => item.symbol.trim()).length
-        const missingCompanyNames = state.items.filter((item) => !item.companyName).length
-        const missingPriceData = state.items.filter((item) => item.latestClosePrice === undefined).length
-        return {
-            totalFetched: state.items.length,
-            validSymbols,
-            missingCompanyNames,
-            missingPriceData,
-            lastFetchTime: new Date().toLocaleString(),
-        }
-    }, [state.items])
 
     const handleSort = (nextKey: SortKey) => {
         if (nextKey === sortKey) {
@@ -306,13 +178,11 @@ export default function StockListPage() {
 
     const clearFilters = () => {
         setSearchText("")
-        setSectorFilter("all")
         setStatusFilter("all")
     }
 
     const handleMarketChange = (market: string) => {
         setQuery((current) => ({ ...current, market, page: 1 }))
-        setSectorFilter("all")
         setStatusFilter("all")
         setTablePage(1)
     }
@@ -328,13 +198,11 @@ export default function StockListPage() {
             <section className="stock-list__header">
                 <div>
                     <h1>Stock List</h1>
-                    <p>Browse {activeMarketLabel}-listed stocks and monitor market data quality</p>
+                    <p>Browse {activeMarketLabel}-listed stocks</p>
                 </div>
                 <div className="stock-list__header-status">
                     <span><strong>Market</strong>{activeMarketLabel}</span>
                     <span><strong>Total stocks</strong>{state.meta.total ?? state.items.length ?? "--"}</span>
-                    <span><strong>Last updated</strong>{placeholder(state.meta.lastUpdated)}</span>
-                    <span><strong>Source</strong>{placeholder(state.meta.source)}</span>
                 </div>
             </section>
 
@@ -348,17 +216,6 @@ export default function StockListPage() {
                 >
                     {["HOSE", "HNX", "UPCOM"].map((market) => (
                         <option key={market} value={market}>{market}</option>
-                    ))}
-                </select>
-
-                <select
-                    value={sectorFilter}
-                    className="stock-list__select"
-                    onChange={(event) => setSectorFilter(event.target.value)}
-                >
-                    <option value="all">All sectors</option>
-                    {sectors.map((sector) => (
-                        <option key={sector} value={sector}>{sector}</option>
                     ))}
                 </select>
 
@@ -381,22 +238,6 @@ export default function StockListPage() {
                         <Download className="size-3.5" /> Export
                     </Button>
                 </div>
-            </section>
-
-            <section className="stock-list__summary-grid">
-                {[
-                    ["Total fetched records", qualitySummary.totalFetched || "--"],
-                    ["Valid symbols", qualitySummary.validSymbols || "--"],
-                    ["Missing company names", qualitySummary.missingCompanyNames],
-                    ["Missing price data", qualitySummary.missingPriceData],
-                    ["Market scope", activeMarketLabel],
-                    ["Last fetch time", qualitySummary.lastFetchTime],
-                ].map(([label, value]) => (
-                    <div key={label} className="stock-list__summary-card">
-                        <span>{label}</span>
-                        <strong>{value}</strong>
-                    </div>
-                ))}
             </section>
 
             <section className="stock-list__table-card">
@@ -432,26 +273,18 @@ export default function StockListPage() {
                             <table className="stock-list__table">
                                 <thead>
                                     <tr>
-                                        {[
+                                        {([
                                             ["Symbol", "symbol"],
                                             ["Company Name", "companyName"],
                                             ["Market", null],
-                                            ["Industry/Sector", null],
                                             ["Status", null],
-                                            ["Latest Close", "latestClosePrice"],
-                                            ["Change", null],
-                                            ["Change %", "changePercent"],
-                                            ["Volume", "volume"],
-                                            ["Market Cap", "marketCap"],
-                                            ["Last Updated", null],
-                                            ["Actions", null],
-                                        ].map(([label, key]) => (
+                                        ] as const).map(([label, key]) => (
                                             <th key={label}>
                                                 {key ? (
                                                     <button
                                                         type="button"
                                                         className="stock-list__sort-button"
-                                                        onClick={() => handleSort(key as SortKey)}
+                                                        onClick={() => handleSort(key)}
                                                     >
                                                         {label}
                                                         <ArrowDownUp className="size-3" />
@@ -462,76 +295,20 @@ export default function StockListPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {paginatedItems.map((item) => {
-                                        const industryLabel = item.industry || item.sector
-                                        return (
-                                            <tr
-                                                key={item.symbol}
-                                                className="stock-list__table-row"
-                                                onClick={() => handleNavigateToStock(item.symbol)}
-                                            >
-                                                <td className="stock-list__symbol-cell">{item.symbol}</td>
-                                                <td>{placeholder(item.companyName)}</td>
-                                                <td><Badge variant="outline">{placeholder(item.market)}</Badge></td>
-                                                <td>{placeholder(industryLabel)}</td>
-                                                <td>
-                                                    <StatusBadge status={item.status} />
-                                                </td>
-                                                <td>{formatNumber(item.latestClosePrice)}</td>
-                                                <td className={item.change === undefined ? "shared-neutral" : item.change > 0 ? "shared-positive" : item.change < 0 ? "shared-negative" : "shared-neutral"}>
-                                                    {item.change === undefined ? "--" : formatNumber(item.change)}
-                                                </td>
-                                                <td className={item.changePercent === undefined ? "shared-neutral" : item.changePercent > 0 ? "shared-positive" : item.changePercent < 0 ? "shared-negative" : "shared-neutral"}>
-                                                    {formatPercent(item.changePercent)}
-                                                </td>
-                                                <td>{formatCompact(item.volume)}</td>
-                                                <td>{formatCompact(item.marketCap)}</td>
-                                                <td>{placeholder(item.lastUpdated)}</td>
-                                                <td>
-                                                    <div className="stock-list__row-actions">
-                                                        <Button
-                                                            type="button"
-                                                            variant="outline"
-                                                            size="xs"
-                                                            onClick={(event) => {
-                                                                event.stopPropagation()
-                                                                handleNavigateToStock(item.symbol)
-                                                            }}
-                                                        >
-                                                            View Detail
-                                                        </Button>
-                                                        <Button
-                                                            type="button"
-                                                            variant={watchedSymbols.has(item.symbol) ? "default" : "outline"}
-                                                            size="icon-xs"
-                                                            aria-label={watchedSymbols.has(item.symbol) ? `Remove ${item.symbol} from watchlist` : `Add ${item.symbol} to watchlist`}
-                                                            onClick={(event) => {
-                                                                event.stopPropagation()
-                                                                void handleWatchlistToggle(item.symbol)
-                                                            }}
-                                                            disabled={watchlistLoading.has(item.symbol)}
-                                                            className={watchedSymbols.has(item.symbol) ? "text-white" : "text-white/60"}
-                                                        >
-                                                            <Star
-                                                                className={watchlistLoading.has(item.symbol) ? "size-3 animate-pulse" : "size-3"}
-                                                                fill={watchedSymbols.has(item.symbol) ? "currentColor" : "none"}
-                                                            />
-                                                        </Button>
-                                                        <Button
-                                                            type="button"
-                                                            variant="outline"
-                                                            size="icon-xs"
-                                                            aria-label={`Configure alert for ${item.symbol}`}
-                                                            onClick={(event) => event.stopPropagation()}
-                                                            disabled
-                                                        >
-                                                            <Bell className="size-3" />
-                                                        </Button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        )
-                                    })}
+                                    {paginatedItems.map((item) => (
+                                        <tr
+                                            key={item.symbol}
+                                            className="stock-list__table-row"
+                                            onClick={() => handleNavigateToStock(item.symbol)}
+                                        >
+                                            <td className="stock-list__symbol-cell">{item.symbol}</td>
+                                            <td>{placeholder(item.companyName)}</td>
+                                            <td><Badge variant="outline">{placeholder(item.market)}</Badge></td>
+                                            <td>
+                                                <StatusBadge status={item.status} />
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
