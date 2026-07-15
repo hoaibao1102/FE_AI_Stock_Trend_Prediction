@@ -3,7 +3,7 @@ import { Animated, Easing } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { readPersistedSession } from '@/shared/services/tokenStorage';
-import { initializeApp } from '@/features/startup/startup.service';
+import { runStartup as initializeApp } from '@/features/startup/startup.service';
 import { useStartupStore } from '@/stores/startup.store';
 import { useAuthStore } from '@/stores/auth.store';
 import type { RootStackParamList } from '@/app/navigation/navigation.types';

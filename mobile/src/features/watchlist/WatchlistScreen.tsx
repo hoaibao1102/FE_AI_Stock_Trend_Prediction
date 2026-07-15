@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, View } from 'react-native';
 
 function ListSeparator() {
   return <View className="bg-border h-[0.5px] ml-4" />;
@@ -213,6 +213,18 @@ export function WatchlistScreen() {
         showsVerticalScrollIndicator={false}
         stickyHeaderIndices={[]}
       />
+
+      {/* AI Analyze — pinned at bottom */}
+      <View className="px-4 pb-3 bg-background" style={{ paddingTop: 8 }}>
+        <Pressable
+          onPress={() => navigation.navigate('AiAnalysis', { symbol: '' })}
+          className="flex-row items-center justify-center gap-1.5 bg-primary-500 rounded-xl py-3 active:opacity-80"
+        >
+          <Text className="text-white text-xs font-extrabold">AI</Text>
+          <Text className="text-white text-sm font-semibold">Phân tích cổ phiếu</Text>
+          <Text className="text-white/60 text-2xs font-medium">Phân tích nhanh</Text>
+        </Pressable>
+      </View>
 
       <WatchlistOverlimitModal
         open={showOverlimitModal && !overLimit}

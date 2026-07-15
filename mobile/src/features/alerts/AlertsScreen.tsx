@@ -33,6 +33,7 @@ export function AlertsScreen() {
   const [toggling, setToggling] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState<Set<string>>(new Set());
   const [watchlistSymbols, setWatchlistSymbols] = useState<string[]>([]);
+  const [watchlistLoading, setWatchlistLoading] = useState(true);
 
   const loadAlerts = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -50,7 +51,9 @@ export function AlertsScreen() {
           items.map((i: any) => i.stock?.symbol).filter(Boolean),
         );
       }
+      setWatchlistLoading(false);
     } catch (e) {
+      setWatchlistLoading(false);
       setError(e instanceof Error ? e.message : 'Failed to load alerts');
     } finally {
       setLoading(false);
@@ -112,6 +115,7 @@ export function AlertsScreen() {
   );
 
   const canCreate = watchlistSymbols.length > 0;
+  const showDisabled = !watchlistLoading && !canCreate;
 
   return (
     <View className="flex-1 bg-background">
@@ -144,17 +148,17 @@ export function AlertsScreen() {
           <TouchableOpacity
             accessibilityRole="button"
             onPress={() => setShowCreate(true)}
-            disabled={!canCreate}
+            disabled={showDisabled}
             className="h-11 px-4 rounded-full flex-row items-center gap-1.5"
             style={{
-              backgroundColor: canCreate ? '#3B82F6' : '#1E293B',
-              opacity: canCreate ? 1 : 0.4,
+              backgroundColor: showDisabled ? '#1E293B' : '#3B82F6',
+              opacity: showDisabled ? 0.4 : 1,
             }}
           >
-            <Plus color={canCreate ? '#FFFFFF' : '#64748B'} size={18} />
+            <Plus color={showDisabled ? '#64748B' : '#FFFFFF'} size={18} />
             <Text
               className="text-[13px] font-bold"
-              style={{ color: canCreate ? '#FFFFFF' : '#64748B' }}
+              style={{ color: showDisabled ? '#64748B' : '#FFFFFF' }}
             >
               New
             </Text>
@@ -203,16 +207,16 @@ export function AlertsScreen() {
             <TouchableOpacity
               accessibilityRole="button"
               onPress={() => setShowCreate(true)}
-              disabled={!canCreate}
+              disabled={showDisabled}
               className="px-5 py-2.5 rounded-full"
               style={{
-                backgroundColor: canCreate ? '#3B82F6' : '#1E293B',
-                opacity: canCreate ? 1 : 0.4,
+                backgroundColor: showDisabled ? '#1E293B' : '#3B82F6',
+                opacity: showDisabled ? 0.4 : 1,
               }}
             >
               <Text
                 className="text-[13px] font-bold"
-                style={{ color: canCreate ? '#FFFFFF' : '#64748B' }}
+                style={{ color: showDisabled ? '#64748B' : '#FFFFFF' }}
               >
                 + Create Alert
               </Text>

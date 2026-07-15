@@ -16,6 +16,7 @@ export type RootStackParamList = {
   EditAlert: { alertId: string };
   NotificationCenter: undefined;
   ChangePassword: undefined;
+  AiAnalysis: { symbol?: string } | undefined;
 };
 
 // ─── Main Tab ────────────────────────────────────────
@@ -39,3 +40,8 @@ export type MainTabScreenProps<T extends keyof MainTabParamList> = CompositeScre
   BottomTabScreenProps<MainTabParamList, T>,
   NativeStackScreenProps<RootStackParamList>
 >;
+
+export type IconProps = {
+  color?: string;
+  size?: number;
+};

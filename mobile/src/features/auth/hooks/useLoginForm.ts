@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import { useState } from 'react';
 import { useFormik } from 'formik';
 
@@ -7,7 +8,6 @@ import {
   getRoleAccessMessage,
   isMobileAllowedRole,
   loginWithCredentials,
-  loginWithGoogle,
 } from '@/features/auth/services/auth.service';
 import { persistRememberedSession, clearPersistedSession } from '@/shared/services/tokenStorage';
 import { useAuthStore } from '@/stores/auth.store';
@@ -67,27 +67,8 @@ export function useLoginForm(onSuccess: () => void) {
     },
   });
 
-  async function handleGoogleLogin() {
-    clearError();
-    setIsGoogleSubmitting(true);
-
-    try {
-      const session = await loginWithGoogle();
-
-      if (!session) {
-        return;
-      }
-
-      await completeSignIn(session, formik.values.rememberMe);
-    } catch (error) {
-      failSubmit(
-        error instanceof Error
-          ? error.message
-          : 'Google authentication failed. Please try again.',
-      );
-    } finally {
-      setIsGoogleSubmitting(false);
-    }
+  function handleGoogleLogin() {
+    Alert.alert('Tính năng tạm thời không khả dụng', 'Đăng nhập bằng Google hiện chưa hỗ trợ trên ứng dụng di động. Vui lòng sử dụng email và mật khẩu hoặc truy cập bản web để có trải nghiệm đầy đủ.');
   }
 
   return {

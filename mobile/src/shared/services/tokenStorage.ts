@@ -28,6 +28,19 @@ export async function persistRememberedSession(session: AuthSession): Promise<vo
   ]);
 }
 
+export async function updateStoredAccessToken(newAccessToken: string): Promise<void> {
+  const rawAuth = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+  if (!rawAuth) return;
+
+  const parsed = JSON.parse(rawAuth);
+  const updated = { ...parsed, accessToken: newAccessToken, access_token: newAccessToken };
+
+  await AsyncStorage.multiSet([
+    [AUTH_STORAGE_KEY, JSON.stringify(updated)],
+    [ACCESS_TOKEN_STORAGE_KEY, newAccessToken],
+  ]);
+}
+
 export async function clearPersistedSession(): Promise<void> {
   await AsyncStorage.multiRemove([
     AUTH_STORAGE_KEY,

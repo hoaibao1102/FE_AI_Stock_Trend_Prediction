@@ -11,6 +11,7 @@ type AuthStore = {
   clearSession: () => void;
   failSubmit: (message: string) => void;
   setSession: (session: AuthSession) => void;
+  updateAccessToken: (accessToken: string) => void;
 };
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -42,5 +43,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
       errorMessage: null,
       isSubmitting: false,
       session,
+    }),
+  updateAccessToken: (accessToken) =>
+    set((state) => {
+      if (!state.session) return {};
+      return { session: { ...state.session, accessToken } };
     }),
 }));

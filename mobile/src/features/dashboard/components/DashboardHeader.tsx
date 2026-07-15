@@ -34,8 +34,8 @@ export function DashboardHeader({ badgeLabel, onNotificationPress }: DashboardHe
                         accessibilityLabel="Notifications"
                         accessibilityRole="button"
                         onPress={onNotificationPress}
-                        className="items-center bg-surface border-border rounded-full border w-[38px] h-[38px] active:opacity-[0.74]">
-                        <BellIcon color={'#94A3B8'} size={18} />
+                        className="items-center justify-center bg-surface border-border rounded-full border w-[38px] h-[38px] active:opacity-[0.74]">
+                        <BellIcon color={'#94A3B8'} size={22} strokeWidth={1.8} />
                         {unreadNotifications > 0 ? (
                             <View className="items-center bg-primary-500 rounded-full justify-center min-w-4 px-[3px] absolute -right-0.5 -top-0.5">
                                 <Text style={{ color: '#08111A' }} className="text-2xs font-bold">

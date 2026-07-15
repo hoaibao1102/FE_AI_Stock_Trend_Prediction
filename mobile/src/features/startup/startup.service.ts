@@ -1,12 +1,15 @@
 import {
   clearPersistedSession,
   readPersistedSession,
+  updateStoredAccessToken,
 } from '@/shared/services/tokenStorage';
 import {
   getRoleAccessMessage,
   isMobileAllowedRole,
   isTokenExpired,
+  refreshAccessToken,
 } from '@/features/auth/services/auth.service';
+import { useAuthStore } from '@/stores/auth.store';
 
 type StartupDestination = '/dashboard' | '/login';
 
@@ -34,7 +37,7 @@ type AuthValidationResult = {
   statusText: string;
 };
 
-const GENERIC_RETRY_MESSAGE = 'Unable to continue startup. Retrying...';
+const GENERIC_RETRY_MESSAGE = 'Unable startup. Retrying...';
 
 function buildFailure(stage: Exclude<StartupStage, 'ready'>, statusText: string): StartupFailure {
   return {
@@ -45,6 +48,21 @@ function buildFailure(stage: Exclude<StartupStage, 'ready'>, statusText: string)
     stage,
     statusText,
   };
+}
+
+async function tryRefreshAccessToken(): Promise<AuthValidationResult | null> {
+  const session = await readPersistedSession();
+  if (!session) return null;
+  if (isTokenExpired(session.refreshToken)) return null;
+
+  try {
+    const newToken = await refreshAccessToken(session.refreshToken);
+    await updateStoredAccessToken(newToken);
+    useAuthStore.getState().updateAccessToken(newToken);
+    return { destination: '/dashboard', statusText: 'Session refreshed.' };
+  } catch {
+    return null;
+  }
 }
 
 async function validateAuthenticationState(): Promise<AuthValidationResult> {
@@ -73,41 +91,22 @@ async function validateAuthenticationState(): Promise<AuthValidationResult> {
   }
 
   if (isTokenExpired(session.accessToken)) {
-    await clearPersistedSession();
+    const refreshed = await tryRefreshAccessToken();
+    if (refreshed) return refreshed;
 
+    await clearPersistedSession();
     return {
       destination: '/login',
       statusText: 'Session expired. Redirecting to sign in.',
     };
   }
 
-  return {
-    destination: '/dashboard',
-    statusText: 'Session verified. Preparing dashboard.',
-  };
+  return { destination: '/dashboard', statusText: 'Session valid.' };
 }
 
-async function runMockStartupDelay(durationMs: number) {
-  await new Promise((resolve) => setTimeout(resolve, durationMs));
-}
-
-export async function initializeApp(): Promise<StartupResult> {
+export async function runStartup(): Promise<StartupResult> {
   try {
-    const session = await readPersistedSession();
-
-    if (!session) {
-      await runMockStartupDelay(1100);
-
-      return {
-        ok: true,
-        destination: '/login',
-        stage: 'ready',
-        statusText: 'Startup ready. Opening sign in.',
-      };
-    }
-
     const authentication = await validateAuthenticationState();
-    await runMockStartupDelay(1200);
 
     return {
       ok: true,
@@ -119,6 +118,6 @@ export async function initializeApp(): Promise<StartupResult> {
           : authentication.statusText,
     };
   } catch {
-    return buildFailure('authentication', 'Unable to read the current session state.');
+    return buildFailure('authentication', 'Unable read current session state.');
   }
 }

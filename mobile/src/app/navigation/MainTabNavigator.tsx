@@ -6,11 +6,14 @@ import { ActivityIndicator, View } from 'react-native';
 import {
   clearPersistedSession,
   readPersistedSession,
+  updateStoredAccessToken,
 } from '@/shared/services/tokenStorage';
 import {
   isMobileAllowedRole,
   isTokenExpired,
+  refreshAccessToken,
 } from '@/features/auth/services/auth.service';
+import { useAuthStore } from '@/stores/auth.store';
 import { AlertsScreen } from '@/features/alerts/AlertsScreen';
 import { DashboardScreen } from '@/features/dashboard/DashboardScreen';
 import { ProfileScreen } from '@/features/profile/ProfileScreen';
@@ -18,7 +21,6 @@ import { SearchScreen } from '@/features/search/SearchScreen';
 import { WatchlistScreen } from '@/features/watchlist/WatchlistScreen';
 import type { MainTabParamList, RootScreenProps } from '@/app/navigation/navigation.types';
 import { AppTabBar } from '@/app/navigation/AppTabBar';
-import { useAuthStore } from '@/stores/auth.store';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -66,7 +68,7 @@ export default function MainTabNavigator() {
         return;
       }
 
-      if (!isSessionUsable(persistedSession)) {
+      if (!persistedSession) {
         await clearPersistedSession();
         clearSession();
         setIsChecking(false);
@@ -77,12 +79,46 @@ export default function MainTabNavigator() {
             routes: [{ name: 'Login' }],
           });
         }
-
         return;
       }
 
-      setSession(persistedSession);
+      // Try refresh if only access token expired but refresh still valid
+      if (isTokenExpired(persistedSession.refreshToken)) {
+        await clearPersistedSession();
+        clearSession();
+        setIsChecking(false);
+
+        if (mounted) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }],
+          });
+        }
+        return;
+      }
+
+      if (isTokenExpired(persistedSession.accessToken)) {
+        try {
+          const newToken = await refreshAccessToken(persistedSession.refreshToken);
+          await updateStoredAccessToken(newToken);
+          useAuthStore.getState().updateAccessToken(newToken);
+          setIsChecking(false);
+          return;
+        } catch {
+          // Refresh failed — fall through to logout
+        }
+      }
+
+      await clearPersistedSession();
+      clearSession();
       setIsChecking(false);
+
+      if (mounted) {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        });
+      }
     }
 
     void validateSession();
@@ -109,9 +145,9 @@ export default function MainTabNavigator() {
       }}
       tabBar={(props) => <AppTabBar {...props} />}>
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
+      <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="Watchlist" component={WatchlistScreen} />
       <Tab.Screen name="Alerts" component={AlertsScreen} />
-      <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

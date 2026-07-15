@@ -25,7 +25,7 @@ export const useAppShellStore = create<AppShellState>((set) => ({
   isOffline: false,
   isRefreshing: false,
   isStale: false,
-  unreadNotifications: 3,
+  unreadNotifications: 0,
   warningMessage: null,
   markNotificationsRead: () => set({ unreadNotifications: 0 }),
   refreshContent: async () => {

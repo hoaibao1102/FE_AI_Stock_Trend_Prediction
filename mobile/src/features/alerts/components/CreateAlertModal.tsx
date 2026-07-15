@@ -299,18 +299,21 @@ export function CreateAlertModal({
             </View>
 
             {/* Submit */}
-            <Button
-              disabled={!isValid || submitting}
-              loading={submitting}
-              onPress={handleSubmit}
-              action="primary"
-              variant="solid"
-              size="lg"
-            >
-              <Text className="text-white text-[15px] font-bold">
-                {isEdit ? 'Save Changes' : 'Create Alert'}
-              </Text>
-            </Button>
+            <View className="items-end px-4 pt-4 pb-4">
+              <Button
+                disabled={!isValid || submitting}
+                loading={submitting}
+                onPress={handleSubmit}
+                action="primary"
+                variant="solid"
+                size="lg"
+                className="bg-primary-500 rounded-full px-6 py-3"
+              >
+                <Text className="text-white text-[15px] font-bold">
+                  {isEdit ? 'Save Changes' : 'Create Alert'}
+                </Text>
+              </Button>
+            </View>
           </ScrollView>
         </View>
       </View>

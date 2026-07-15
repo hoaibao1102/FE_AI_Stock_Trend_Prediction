@@ -47,6 +47,7 @@ export function StockDetailScreen({
   const [showCreateAlert, setShowCreateAlert] = useState(false);
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
   const [watchlistSymbols, setWatchlistSymbols] = useState<string[]>([]);
+  const [watchlistLoading, setWatchlistLoading] = useState(true);
 
   const isWatched = useMemo(
     () => watchlistSymbols.includes(symbol),
@@ -76,6 +77,7 @@ export function StockDetailScreen({
           items.map((i: any) => i.stock?.symbol).filter(Boolean),
         );
       })
+      .finally(() => setWatchlistLoading(false))
       .catch(() => {});
   }, [isAuthenticated]);
 
@@ -152,9 +154,9 @@ export function StockDetailScreen({
         <TechnicalSummary stats={stockChart.technicalStats} />
         <ActionButtons
           symbol={symbol}
-          onCreateAlert={
-            isWatched ? () => setShowCreateAlert(true) : undefined
-          }
+          isWatched={isWatched}
+          watchlistLoading={watchlistLoading}
+          onCreateAlert={() => setShowCreateAlert(true)}
         />
 
         {/* Alert Configuration Card */}
@@ -265,15 +267,15 @@ export function StockDetailScreen({
             <TouchableOpacity
               accessibilityRole="button"
               onPress={() => setShowCreateAlert(true)}
-              disabled={!isWatched}
+              disabled={!watchlistLoading && !isWatched}
               className="h-10 rounded-md items-center justify-center"
               style={{
-                backgroundColor: isWatched ? '#3B82F6' : '#334155',
-                opacity: isWatched ? 1 : 0.5,
+                backgroundColor: !watchlistLoading && !isWatched ? '#334155' : '#3B82F6',
+                opacity: !watchlistLoading && !isWatched ? 0.5 : 1,
               }}
             >
               <Text className="text-[13px] font-bold text-white">
-                + Add Alert
+                {watchlistLoading ? 'Loading...' : '+ Add Alert'}
               </Text>
             </TouchableOpacity>
           </View>
