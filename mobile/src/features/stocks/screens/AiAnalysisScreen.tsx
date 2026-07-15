@@ -302,6 +302,13 @@ export function AiAnalysisScreen({ navigation }: RootScreenProps<'AiAnalysis'>) 
           />
         </View>
 
+        <View className="mx-4 mb-3 rounded-lg border border-amber-500/30 bg-amber-500/15 px-3 py-2.5">
+          <Text className="text-white text-[11px] leading-4 text-center">
+            Để có phân tích chuyên sâu hơn, vui lòng truy cập bản web.{' '}
+            <Text className="text-amber-300 font-semibold">Phân tích nâng cao</Text> với nhiều chỉ báo kỹ thuật, backtest & báo cáo chi tiết chỉ có trên web.
+          </Text>
+        </View>
+
         <ScrollView className="flex-1 px-4" contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingBottom: 16 }} showsVerticalScrollIndicator={false}>
           {filteredSymbols.length === 0 ? (
             <View className="w-full items-center py-12">
