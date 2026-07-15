@@ -29,7 +29,7 @@ const plans: Plan[] = [
     },
     {
         name: "Pro",
-        price: "$9.99",
+        price: "$1.9",
         description: "For active users who need more watchlist capacity.",
         badge: "Most Popular",
         popular: true,
