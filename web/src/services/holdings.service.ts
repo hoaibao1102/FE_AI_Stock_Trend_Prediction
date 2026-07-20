@@ -3,9 +3,12 @@ import type {
     GetMyHoldingsParams,
     HoldingItem,
     HoldingsListResponse,
+    RecordTransactionPayload,
+    RecordTransactionResponse,
     RemoveHoldingResponse,
     SaveHoldingPayload,
     SaveHoldingResponse,
+    TransactionsListResponse,
 } from "@/types/holdings"
 
 type ApiSuccessResponse<T> = {
@@ -116,4 +119,30 @@ export async function removeHolding(symbol: string): Promise<RemoveHoldingRespon
     })
 
     return assertSuccess(response.status, response.data, "Failed to remove holding")
+}
+
+export async function recordTransaction(
+    symbol: string,
+    payload: RecordTransactionPayload,
+): Promise<RecordTransactionResponse> {
+    const response = await authenticatedRequest<ApiSuccessResponse<RecordTransactionResponse> | ApiErrorResponse>({
+        url: `/api/me/holdings/${encodeURIComponent(normalizeSymbol(symbol))}/transactions`,
+        method: "POST",
+        data: payload,
+    })
+
+    return assertSuccess(response.status, response.data, "Failed to record transaction")
+}
+
+export async function getHoldingTransactions(
+    symbol: string,
+    params: { page?: number; limit?: number; status?: "ACTIVE" | "VOIDED" | "ALL" } = {},
+): Promise<TransactionsListResponse> {
+    const response = await authenticatedRequest<ApiSuccessResponse<TransactionsListResponse> | ApiErrorResponse>({
+        url: `/api/me/holdings/${encodeURIComponent(normalizeSymbol(symbol))}/transactions`,
+        method: "GET",
+        params: buildQuery(params),
+    })
+
+    return assertSuccess(response.status, response.data, "Failed to load transactions")
 }

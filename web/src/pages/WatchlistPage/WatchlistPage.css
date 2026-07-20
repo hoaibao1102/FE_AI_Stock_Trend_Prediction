@@ -11,7 +11,9 @@
 }
 
 .watchlist__header,
-.watchlist__table-card {
+.watchlist__table-card,
+.watchlist__tabs,
+.watchlist__summary-card {
     border: 1px solid var(--border);
     border-radius: 10px;
     background: #111827; /* surface-card */
@@ -21,7 +23,106 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
     padding: 16px;
+    flex-wrap: wrap;
+}
+
+.watchlist__tabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    width: fit-content;
+}
+
+.watchlist__tab {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.watchlist__tab:hover {
+    color: var(--foreground);
+    background: rgba(30, 41, 59, 0.55);
+}
+
+.watchlist__tab.is-active {
+    color: #f8fafc;
+    background: rgba(59, 130, 246, 0.22);
+}
+
+.watchlist__summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.watchlist__summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+}
+
+.watchlist__summary-card span {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.watchlist__summary-card strong {
+    color: #f8fafc;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.watchlist__summary-card small {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+}
+
+.watchlist__pnl-sub {
+    margin-top: 2px;
+    font-size: 0.68rem;
+}
+
+.watchlist__warning {
+    padding: 10px 12px;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    border-radius: 10px;
+    background: rgba(120, 53, 15, 0.25);
+    color: #fde68a;
+    font-size: 0.78rem;
+}
+
+@media (max-width: 960px) {
+    .watchlist__summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .watchlist__summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .watchlist__tabs {
+        width: 100%;
+    }
+
+    .watchlist__tab {
+        flex: 1;
+        text-align: center;
+    }
 }
 
 .watchlist__header h1 {

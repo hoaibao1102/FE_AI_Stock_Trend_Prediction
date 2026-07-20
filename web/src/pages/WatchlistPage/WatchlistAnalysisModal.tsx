@@ -24,18 +24,18 @@ type WatchlistAnalysisModalProps = {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const DECISION_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-    BUY:   { label: "Mua thêm",   color: "#16a34a", bg: "rgba(22,163,74,0.12)",   border: "rgba(22,163,74,0.35)" },
-    HOLD:  { label: "Giữ nguyên", color: "#d97706", bg: "rgba(217,119,6,0.12)",   border: "rgba(217,119,6,0.35)" },
-    SELL:  { label: "Bán ra",     color: "#dc2626", bg: "rgba(220,38,38,0.12)",   border: "rgba(220,38,38,0.35)" },
-    WATCH: { label: "Theo dõi",   color: "#2563eb", bg: "rgba(37,99,235,0.12)",   border: "rgba(37,99,235,0.35)" },
+    BUY:   { label: "Mua thêm",     color: "#16a34a", bg: "rgba(22,163,74,0.12)",   border: "rgba(22,163,74,0.35)" },
+    HOLD:  { label: "Giữ nguyên",   color: "#d97706", bg: "rgba(217,119,6,0.12)",   border: "rgba(217,119,6,0.35)" },
+    SELL:  { label: "Giảm vị thế",  color: "#dc2626", bg: "rgba(220,38,38,0.12)",   border: "rgba(220,38,38,0.35)" },
+    WATCH: { label: "Theo dõi chặt", color: "#2563eb", bg: "rgba(37,99,235,0.12)",   border: "rgba(37,99,235,0.35)" },
 }
 
 const PNL_SIGNAL_LABEL: Record<string, string> = {
-    STRONG_PROFIT_HOLD: "Lãi mạnh ≥15% — Cân nhắc chốt",
-    PROFIT_HOLD:        "Lãi 5-15% — Tiếp tục giữ",
-    NEUTRAL:            "±5% — Theo dõi",
-    LOSS_WATCH:         "Lỗ 5-15% — Chú ý",
-    LOSS_REVIEW:        "Lỗ nặng ≥15% — Xem xét cắt",
+    STRONG_PROFIT_HOLD: "Lãi ≥15% — Cân nhắc chốt từng phần",
+    PROFIT_HOLD:        "Lãi 5–15% — Tiếp tục giữ",
+    NEUTRAL:            "±5% — Giữ nguyên",
+    LOSS_WATCH:         "Lỗ 5–15% — Theo dõi chặt",
+    LOSS_REVIEW:        "Lỗ ≥15% — Xem xét giảm vị thế",
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -53,6 +53,30 @@ function formatTimeId(timeId?: string): string {
     return `${timeId.slice(6, 8)}/${timeId.slice(4, 6)}/${timeId.slice(0, 4)}`
 }
 
+function getConcentrationWarning(items: MergedHoldingItem[]): string | null {
+    if (items.length < 2) return null
+
+    const sorted = [...items].sort(
+        (a, b) => (b.allocation_pct ?? 0) - (a.allocation_pct ?? 0),
+    )
+    const top = sorted[0]
+    const topAlloc = top?.allocation_pct ?? 0
+    const top3Alloc = sorted
+        .slice(0, 3)
+        .reduce((sum, item) => sum + (item.allocation_pct ?? 0), 0)
+
+    if (topAlloc >= 40) {
+        return `${top.symbol} chiếm ${topAlloc.toFixed(1)}% danh mục — mức tập trung cao, cân nhắc tái cân bằng.`
+    }
+    if (top3Alloc >= 70 && items.length >= 3) {
+        return `Top 3 mã chiếm ${top3Alloc.toFixed(1)}% danh mục — đa dạng hóa còn hạn chế.`
+    }
+    if (topAlloc >= 25) {
+        return `${top.symbol} chiếm ${topAlloc.toFixed(1)}% — theo dõi tỷ trọng khi AI khuyến nghị mua thêm.`
+    }
+    return null
+}
+
 // ─── MiniSparkline ────────────────────────────────────────────────────────────
 
 function MiniSparkline({
@@ -64,7 +88,14 @@ function MiniSparkline({
 }) {
     if (!prices?.length) return <div style={{ width: 80, height: 30 }} />
 
-    const closes = prices.map(p => p.close).filter(c => c != null && typeof c === "number")
+    const closes = prices
+        .map(p => {
+            const value = p.close
+            if (typeof value === "number" && Number.isFinite(value)) return value
+            const parsed = Number(value)
+            return Number.isFinite(parsed) ? parsed : null
+        })
+        .filter((c): c is number => c != null)
     if (closes.length < 2) return <div style={{ width: 80, height: 30 }} />
 
     const min = Math.min(...closes)
@@ -186,6 +217,21 @@ function PortfolioSummaryBanner({
                     <div
                         style={{
                             borderRadius: 10,
+                            background: "rgba(59,130,246,0.12)",
+                            border: "1px solid rgba(59,130,246,0.3)",
+                            padding: "8px 14px",
+                            textAlign: "center",
+                            minWidth: 56,
+                        }}
+                    >
+                        <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 2 }}>Vị thế</div>
+                        <div style={{ fontSize: 20, fontWeight: 700, color: "#93c5fd", lineHeight: 1 }}>
+                            {portfolio.position_count ?? (portfolio.count_profit + portfolio.count_loss + (portfolio.count_neutral ?? 0))}
+                        </div>
+                    </div>
+                    <div
+                        style={{
+                            borderRadius: 10,
                             background: "rgba(22,163,74,0.15)",
                             border: "1px solid rgba(22,163,74,0.3)",
                             padding: "8px 14px",
@@ -240,9 +286,30 @@ function PortfolioSummaryBanner({
     )
 }
 
-// ─── Holding Row ─────────────────────────────────────────────────────────────
+function ConcentrationWarning({ items }: { items: MergedHoldingItem[] }) {
+    const warning = getConcentrationWarning(items)
+    if (!warning) return null
 
-// ─── HoldingAdviceDetail ──────────────────────────────────────────────────────
+    return (
+        <div
+            style={{
+                marginTop: 10,
+                marginBottom: 4,
+                padding: "10px 14px",
+                borderRadius: 8,
+                border: "1px solid rgba(234,179,8,0.35)",
+                background: "rgba(234,179,8,0.08)",
+                color: "#fbbf24",
+                fontSize: 12,
+                lineHeight: 1.5,
+            }}
+        >
+            ⚠️ <strong>Tập trung danh mục:</strong> {warning}
+        </div>
+    )
+}
+
+// ─── Holding Row ─────────────────────────────────────────────────────────────
 
 type HoldingAdviceDetailProps = {
     advice: NonNullable<MergedHoldingItem["advice"]>
@@ -598,13 +665,18 @@ function HoldingAdviceDetail({ advice }: HoldingAdviceDetailProps) {
 
 // ─── Holding Row ─────────────────────────────────────────────────────────────
 
-function HoldingRow({ item, aiLoading }: { item: MergedHoldingItem; aiLoading: boolean }) {
+function HoldingRow({ item }: { item: MergedHoldingItem }) {
     const [expanded, setExpanded] = useState(false)
-    const isProfit = item.status === "PROFIT"
+    const isProfit = item.unrealized_pnl != null
+        ? item.unrealized_pnl >= 0
+        : item.status === "PROFIT"
     const advice   = item.advice
     const decision = advice?.decision
     const cfg      = DECISION_CONFIG[decision ?? ""] ?? null
-    const pnlColor = isProfit ? "#4ade80" : "#f87171"
+    const pnlColor = item.unrealized_pnl == null
+        ? "#94a3b8"
+        : isProfit ? "#4ade80" : "#f87171"
+    const rowLoading = item.adviceLoading === true
 
     return (
         <div
@@ -632,7 +704,7 @@ function HoldingRow({ item, aiLoading }: { item: MergedHoldingItem; aiLoading: b
                 }}
             >
                 {/* Stock info */}
-                <div style={{ gridColumn: "span 3", display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ gridColumn: "span 2", display: "flex", alignItems: "center", gap: 8 }}>
                     {advice ? (
                         expanded ? (
                             <ChevronUp size={16} color="#64748b" style={{ flexShrink: 0 }} />
@@ -652,13 +724,27 @@ function HoldingRow({ item, aiLoading }: { item: MergedHoldingItem; aiLoading: b
                     </div>
                 </div>
 
+                {/* Allocation */}
+                <div style={{ gridColumn: "span 2", textAlign: "center" }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0" }}>
+                        {item.allocation_pct != null ? `${item.allocation_pct.toFixed(1)}%` : "–"}
+                    </div>
+                    <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>
+                        tỷ trọng
+                    </div>
+                </div>
+
                 {/* P&L */}
-                <div style={{ gridColumn: "span 4", textAlign: "right" }}>
+                <div style={{ gridColumn: "span 3", textAlign: "right" }}>
                     <div style={{ fontSize: 14, fontWeight: 700, color: pnlColor }}>
-                        {isProfit ? "+" : ""}{formatVND(item.unrealized_pnl)}
+                        {item.unrealized_pnl != null
+                            ? `${item.unrealized_pnl >= 0 ? "+" : ""}${formatVND(item.unrealized_pnl)}`
+                            : "—"}
                     </div>
                     <div style={{ fontSize: 12, fontWeight: 600, color: pnlColor, marginTop: 1 }}>
-                        {isProfit ? "+" : ""}{item.unrealized_pnl_pct?.toFixed(2)}%
+                        {item.unrealized_pnl_pct != null
+                            ? `${item.unrealized_pnl_pct >= 0 ? "+" : ""}${item.unrealized_pnl_pct.toFixed(2)}%`
+                            : "—"}
                     </div>
                     <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>
                         {item.quantity != null ? `${item.quantity.toLocaleString("vi-VN")} CP · ` : ""}{formatPrice(item.average_cost)} → {item.close_price != null ? formatPrice(item.close_price) : "Chưa có giá"}
@@ -683,7 +769,7 @@ function HoldingRow({ item, aiLoading }: { item: MergedHoldingItem; aiLoading: b
 
                 {/* AI Decision badge */}
                 <div style={{ gridColumn: "span 3", textAlign: "right" }}>
-                    {aiLoading && !advice ? (
+                    {rowLoading && !advice ? (
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6 }}>
                             <Loader2 size={14} color="#60a5fa" style={{ animation: "spin 1s linear infinite" }} />
                             <span style={{ fontSize: 11, color: "#60a5fa" }}>AI...</span>
@@ -743,7 +829,7 @@ function HoldingRow({ item, aiLoading }: { item: MergedHoldingItem; aiLoading: b
             )}
 
             {/* Loading state when expanded and advice is being fetched */}
-            {expanded && aiLoading && !advice && (
+            {expanded && rowLoading && !advice && (
                 <div
                     style={{
                         marginTop: 10,
@@ -780,10 +866,11 @@ function ListHeader() {
                 borderBottom: "1px solid rgba(100,116,139,0.2)",
             }}
         >
-            <div style={{ gridColumn: "span 3", fontSize: 11, fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.06em" }}>Mã / Công ty</div>
-            <div style={{ gridColumn: "span 4", fontSize: 11, fontWeight: 600, color: "#475569", textAlign: "right", textTransform: "uppercase", letterSpacing: "0.06em" }}>Hiệu suất P&L</div>
+            <div style={{ gridColumn: "span 2", fontSize: 11, fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.06em" }}>Mã / Công ty</div>
+            <div style={{ gridColumn: "span 2", fontSize: 11, fontWeight: 600, color: "#475569", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.06em" }}>Tỷ trọng</div>
+            <div style={{ gridColumn: "span 3", fontSize: 11, fontWeight: 600, color: "#475569", textAlign: "right", textTransform: "uppercase", letterSpacing: "0.06em" }}>Hiệu suất P&L</div>
             <div style={{ gridColumn: "span 2", fontSize: 11, fontWeight: 600, color: "#475569", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.06em" }}>Biểu đồ 7d</div>
-            <div style={{ gridColumn: "span 3", fontSize: 11, fontWeight: 600, color: "#475569", textAlign: "right", textTransform: "uppercase", letterSpacing: "0.06em" }}>Đề xuất AI</div>
+            <div style={{ gridColumn: "span 3", fontSize: 11, fontWeight: 600, color: "#475569", textAlign: "right", textTransform: "uppercase", letterSpacing: "0.06em" }}>Khuyến nghị vị thế</div>
         </div>
     )
 }
@@ -1017,10 +1104,10 @@ export default function WatchlistAnalysisModal({
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
                         <div>
                             <DialogTitle style={{ fontSize: 18, fontWeight: 700, color: "#f1f5f9" }}>
-                                📊 Phân tích danh mục
+                                📊 Phân tích danh mục đầu tư
                             </DialogTitle>
                             <DialogDescription style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>
-                                P&L thực tế + Khuyến nghị AI cho từng mã cổ phiếu
+                                P&L thực tế + khuyến nghị quản lý vị thế cho {items.length} mã đang nắm giữ
                             </DialogDescription>
                         </div>
 
@@ -1074,6 +1161,7 @@ export default function WatchlistAnalysisModal({
                         <>
                             {/* Portfolio Summary Banner */}
                             <PortfolioSummaryBanner portfolio={portfolio} dataAsOf={dataAsOf} />
+                            <ConcentrationWarning items={items} />
 
                             {/* AI Loading Indicator */}
                             {aiLoading && (
@@ -1141,7 +1229,10 @@ export default function WatchlistAnalysisModal({
                                 >
                                     <ListHeader />
                                     {items.map(item => (
-                                        <HoldingRow key={item.symbol} item={item} aiLoading={aiLoading} />
+                                        <HoldingRow
+                                            key={item.holding_id || item.symbol}
+                                            item={item}
+                                        />
                                     ))}
                                 </div>
                             )}

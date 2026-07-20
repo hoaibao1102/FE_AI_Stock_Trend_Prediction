@@ -33,6 +33,11 @@ import {
     getAiReportHistoryDetail,
     getAiReportHistoryUrl,
 } from "@/services/aiReportService"
+import {
+    buildHistoryListCacheKey,
+    getCachedHistoryDetail,
+    getCachedHistoryList,
+} from "@/services/aiReportHistoryCache"
 import { Breadcrumb } from "@/shared/components"
 import type {
     AiReportData,
@@ -312,11 +317,19 @@ function AiReportHistoryListPage() {
     const navigate = useNavigate()
     const [draftFilters, setDraftFilters] = useState<HistoryFilters>(EMPTY_FILTERS)
     const [queryFilters, setQueryFilters] = useState<HistoryFilters>(EMPTY_FILTERS)
-    const [items, setItems] = useState<AiReportHistoryListItem[]>([])
+    const initialCacheKey = buildHistoryListCacheKey({
+        page: 1,
+        limit: DEFAULT_LIMIT,
+        ...EMPTY_FILTERS,
+    })
+    const initialCached = getCachedHistoryList(initialCacheKey)
+    const [items, setItems] = useState<AiReportHistoryListItem[]>(
+        () => initialCached?.data.items ?? [],
+    )
     const [page, setPage] = useState(1)
     const [limit, setLimit] = useState(DEFAULT_LIMIT)
-    const [total, setTotal] = useState(0)
-    const [isLoading, setIsLoading] = useState(true)
+    const [total, setTotal] = useState(() => initialCached?.data.total ?? 0)
+    const [isLoading, setIsLoading] = useState(() => !initialCached)
     const [error, setError] = useState<HistoryErrorState | null>(null)
     const [deleteTarget, setDeleteTarget] = useState<AiReportHistoryListItem | null>(null)
     const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null)
@@ -327,19 +340,24 @@ function AiReportHistoryListPage() {
     const to = Math.min(page * limit, total)
 
     const loadHistories = useCallback(
-        async (signal?: AbortSignal) => {
-            setIsLoading(true)
+        async (options?: { forceRefresh?: boolean }, signal?: AbortSignal) => {
+            const params = {
+                page,
+                limit,
+                ...queryFilters,
+            }
+            const cacheKey = buildHistoryListCacheKey(params)
+            const hasCached = !options?.forceRefresh && Boolean(getCachedHistoryList(cacheKey))
+
+            if (!hasCached) {
+                setIsLoading(true)
+            }
             setError(null)
 
             try {
-                const response = await getAiReportHistories(
-                    {
-                        page,
-                        limit,
-                        ...queryFilters,
-                    },
-                    signal
-                )
+                const response = await getAiReportHistories(params, signal, {
+                    forceRefresh: options?.forceRefresh,
+                })
                 setItems(response.data.items)
                 setPage(response.data.page)
                 setLimit(response.data.limit)
@@ -495,7 +513,7 @@ function AiReportHistoryListPage() {
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={() => void loadHistories()}
+                        onClick={() => void loadHistories({ forceRefresh: true })}
                         disabled={isLoading}
                     >
                         <RefreshCw className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
@@ -645,9 +663,17 @@ function AiReportHistoryListPage() {
 
 function AiReportHistoryDetailPage({ historyId }: { historyId: string }) {
     const navigate = useNavigate()
-    const [report, setReport] = useState<AiReportResponse | null>(null)
-    const [reportId, setReportId] = useState("")
-    const [isLoading, setIsLoading] = useState(true)
+    const cachedDetail = getCachedHistoryDetail(historyId)
+    const [report, setReport] = useState<AiReportResponse | null>(() => {
+        if (!cachedDetail?.data?.report_json) return null
+        try {
+            return normalizeHistoryReportJson(cachedDetail.data.report_json)
+        } catch {
+            return null
+        }
+    })
+    const [reportId, setReportId] = useState(cachedDetail?.data?.report_id ?? "")
+    const [isLoading, setIsLoading] = useState(() => !cachedDetail)
     const [error, setError] = useState<HistoryErrorState | null>(null)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
@@ -656,7 +682,10 @@ function AiReportHistoryDetailPage({ historyId }: { historyId: string }) {
         const controller = new AbortController()
 
         async function loadDetail() {
-            setIsLoading(true)
+            const hasCached = Boolean(getCachedHistoryDetail(historyId))
+            if (!hasCached) {
+                setIsLoading(true)
+            }
             setError(null)
 
             try {

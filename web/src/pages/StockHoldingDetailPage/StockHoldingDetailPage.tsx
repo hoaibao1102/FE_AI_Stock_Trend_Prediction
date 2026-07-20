@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react"
 import { ArrowLeft, Landmark, Loader2, Save, Trash2 } from "lucide-react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 
-import { formatAverageCost, formatDate, formatNumber, formatPrice } from "@/components/holdings/holdings-format"
+import { formatAverageCost, formatDate, formatMoney, formatNumber, formatPrice, formatSignedMoney, formatSignedPercent, getPnlTone } from "@/components/holdings/holdings-format"
+import HoldingTransactionsSection from "@/components/holdings/HoldingTransactionsSection"
+import { buildPortfolioAllocationMap } from "@/components/holdings/portfolio-metrics"
 import "@/components/holdings/holdings-ui.css"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -16,13 +18,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
-import {
-    getHoldingDetail,
-    HoldingsServiceError,
-    removeHolding,
-    saveHolding,
-    updateHolding,
-} from "@/services/holdings.service"
+import { getHoldingDetail, getMyHoldings, HoldingsServiceError, removeHolding, saveHolding, updateHolding } from "@/services/holdings.service"
+import { getHoldingsPnl } from "@/services/holdings-pnl.service"
 import { getStockDetail } from "@/services/stock.service"
 import { Breadcrumb, TableError, TableLoading } from "@/shared/components"
 import type { HoldingItem } from "@/types/holdings"
@@ -89,8 +86,12 @@ function toFormState(holding: HoldingItem | null): HoldingFormState {
 
 export default function StockHoldingDetailPage() {
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
     const { symbol: routeSymbol } = useParams()
     const symbol = (routeSymbol || "").trim().toUpperCase()
+    const fromPortfolio = searchParams.get("from") === "portfolio"
+    const backPath = fromPortfolio ? "/watchlist?tab=portfolio" : "/watchlist"
+    const backLabel = fromPortfolio ? "Back to Portfolio" : "Back to Watchlist"
 
     const [profile, setProfile] = useState<StockProfile | null>(null)
     const [holding, setHolding] = useState<HoldingItem | null>(null)
@@ -101,6 +102,14 @@ export default function StockHoldingDetailPage() {
     const [isRemoving, setIsRemoving] = useState(false)
     const [removeDialogOpen, setRemoveDialogOpen] = useState(false)
     const [form, setForm] = useState<HoldingFormState>(EMPTY_FORM)
+    const [showManualAdjust, setShowManualAdjust] = useState(false)
+    const [positionPnl, setPositionPnl] = useState<{
+        marketValue: number | null
+        cost: number | null
+        unrealizedPnl: number | null
+        unrealizedPnlPct: number | null
+        allocationPct: number | null
+    } | null>(null)
     const maxHoldingDate = getYesterdayLabel()
 
     const loadProfile = async () => {
@@ -115,6 +124,61 @@ export default function StockHoldingDetailPage() {
             })
         } catch {
             setProfile({ symbol })
+        }
+    }
+
+    const loadPositionPnl = async () => {
+        if (!symbol) return
+
+        try {
+            const [pnl, holdingsResult] = await Promise.all([
+                getHoldingsPnl(),
+                getMyHoldings({ status: "ACTIVE", limit: 100 }),
+            ])
+
+            const item = pnl.items.find((entry) => entry.symbol?.toUpperCase() === symbol)
+            const pnlBySymbol: Record<string, NonNullable<typeof item>> = {}
+            for (const entry of pnl.items) {
+                if (entry.symbol) {
+                    pnlBySymbol[entry.symbol.toUpperCase()] = entry
+                }
+            }
+
+            const allocationMap = buildPortfolioAllocationMap(holdingsResult.items, pnlBySymbol)
+            const allocationPct = allocationMap[symbol] ?? item?.allocation_pct ?? null
+
+            if (!item && !holding) {
+                setPositionPnl(null)
+                return
+            }
+
+            const currentHolding = holdingsResult.items.find(
+                (entry) => entry.stock?.symbol?.toUpperCase() === symbol,
+            )
+
+            const marketValue =
+                item?.market_value ??
+                (currentHolding?.latest_market_price != null
+                    ? currentHolding.latest_market_price * (currentHolding.quantity || 0)
+                    : null)
+
+            const cost =
+                item?.cost ??
+                (currentHolding ? currentHolding.average_cost * currentHolding.quantity : null)
+
+            setPositionPnl({
+                marketValue,
+                cost,
+                unrealizedPnl: item?.unrealized_pnl ?? (marketValue != null && cost != null ? marketValue - cost : null),
+                unrealizedPnlPct:
+                    item?.unrealized_pnl_pct ??
+                    (marketValue != null && cost != null && cost > 0
+                        ? ((marketValue - cost) / cost) * 100
+                        : null),
+                allocationPct,
+            })
+        } catch {
+            setPositionPnl(null)
         }
     }
 
@@ -149,7 +213,12 @@ export default function StockHoldingDetailPage() {
         if (!symbol) return
         void loadProfile()
         void loadHolding()
+        void loadPositionPnl()
     }, [symbol])
+
+    const refreshHoldingState = async () => {
+        await Promise.all([loadHolding(), loadPositionPnl()])
+    }
 
     const handleChange = (field: keyof HoldingFormState, value: string) => {
         setForm((current) => ({
@@ -186,6 +255,7 @@ export default function StockHoldingDetailPage() {
             setHolding(response.holding)
             setHoldingMissing(false)
             setForm(toFormState(response.holding))
+            await refreshHoldingState()
             toast.success(holding ? "Holding updated" : "Holding created", {
                 description: `${symbol} holding information has been saved.`,
             })
@@ -208,6 +278,7 @@ export default function StockHoldingDetailPage() {
             setHoldingMissing(true)
             setForm(EMPTY_FORM)
             setRemoveDialogOpen(false)
+            await refreshHoldingState()
             toast.success("Holding removed", {
                 description: `${symbol} has been removed from your personal holdings.`,
             })
@@ -227,7 +298,7 @@ export default function StockHoldingDetailPage() {
     return (
         <>
             <div className="stock-holding-page">
-                <Breadcrumb items={["Home", "Watchlist", symbol || "Holding"]} />
+                <Breadcrumb items={["Home", "Watchlist & Portfolio", symbol || "Holding"]} />
 
                 <section className="stock-holding-page__header">
                     <div className="stock-holding-page__header-main">
@@ -236,10 +307,10 @@ export default function StockHoldingDetailPage() {
                             variant="outline"
                             size="sm"
                             className="stock-holding-page__back"
-                            onClick={() => navigate("/watchlist")}
+                            onClick={() => navigate(backPath)}
                         >
                             <ArrowLeft className="mr-1.5 size-4" />
-                            Back to Watchlist
+                            {backLabel}
                         </Button>
 
                         <div>
@@ -262,8 +333,8 @@ export default function StockHoldingDetailPage() {
                 <section className="stock-holding-page__section">
                     <div className="stock-holding-page__section-header">
                         <div>
-                            <h2>Holding Overview</h2>
-                            <p>Track only the current position for this stock in the MVP.</p>
+                            <h2>Position Overview</h2>
+                            <p>Current portfolio position with live market value and unrealized P&L.</p>
                         </div>
                     </div>
 
@@ -282,6 +353,27 @@ export default function StockHoldingDetailPage() {
                                 <strong>{holding ? formatNumber(holding.quantity) : "--"}</strong>
                             </div>
                             <div className="holdings-metric-card">
+                                <span>Total Cost</span>
+                                <strong>{positionPnl?.cost != null ? formatMoney(positionPnl.cost) : holding ? formatMoney(holding.total_cost ?? holding.average_cost * holding.quantity) : "--"}</strong>
+                            </div>
+                            <div className="holdings-metric-card">
+                                <span>Market Value</span>
+                                <strong>{positionPnl?.marketValue != null ? formatMoney(positionPnl.marketValue) : "--"}</strong>
+                            </div>
+                            <div className="holdings-metric-card">
+                                <span>Unrealized P&L</span>
+                                <strong className={getPnlTone(positionPnl?.unrealizedPnl)}>
+                                    {formatSignedMoney(positionPnl?.unrealizedPnl)}
+                                </strong>
+                                <small className={getPnlTone(positionPnl?.unrealizedPnlPct)}>
+                                    {formatSignedPercent(positionPnl?.unrealizedPnlPct)}
+                                </small>
+                            </div>
+                            <div className="holdings-metric-card">
+                                <span>Allocation</span>
+                                <strong>{positionPnl?.allocationPct != null ? `${formatNumber(positionPnl.allocationPct)}%` : "--"}</strong>
+                            </div>
+                            <div className="holdings-metric-card">
                                 <span>Holding Date</span>
                                 <strong>{holding ? formatDate(holding.holding_date, "date") : "--"}</strong>
                             </div>
@@ -293,18 +385,30 @@ export default function StockHoldingDetailPage() {
                     )}
                 </section>
 
+                <HoldingTransactionsSection
+                    symbol={symbol}
+                    holding={holding}
+                    latestMarketPrice={latestMarketPrice}
+                    onHoldingChange={refreshHoldingState}
+                />
+
                 <section className="stock-holding-page__section">
                     <div className="stock-holding-page__section-header">
                         <div>
-                            <h2>{holding ? "Update Holding" : "Create Holding"}</h2>
-                            <p>Enter only average cost, quantity, holding date, and an optional note.</p>
+                            <h2>Manual Adjustment</h2>
+                            <p>Override position values directly. Prefer Buy/Sell transactions for accurate average cost tracking.</p>
                         </div>
+                        <Button type="button" variant="outline" size="sm" onClick={() => setShowManualAdjust((open) => !open)}>
+                            {showManualAdjust ? "Hide" : "Show"}
+                        </Button>
                     </div>
 
+                    {!showManualAdjust ? null : (
+                    <>
                     {holdingMissing ? (
                         <div className="stock-holding-page__holding-banner">
                             <strong className="text-slate-100">No holding saved yet for {symbol}.</strong>
-                            <p>You can still keep this stock in your watchlist without adding a holding. Fill in the form below if you want to track your current position.</p>
+                            <p>Record a Buy transaction above, or use this form to set an initial position manually.</p>
                         </div>
                     ) : null}
 
@@ -364,7 +468,7 @@ export default function StockHoldingDetailPage() {
                         </div>
 
                         <div className="stock-holding-page__helper">
-                            The app stores one current holding per stock. Latest market price is shown for reference only and no P/L is calculated in this MVP.
+                            Manual adjustment overwrites the current position. For buy-more or sell-partial flows, use Record Transaction above.
                         </div>
 
                         <div className="stock-holding-page__actions">
@@ -381,7 +485,7 @@ export default function StockHoldingDetailPage() {
                             ) : (
                                 <div className="stock-holding-page__hint">
                                     <Landmark className="size-4" />
-                                    Save this form when you want to start tracking a holding.
+                                    Save this form when you want to set an initial position manually.
                                 </div>
                             )}
 
@@ -400,6 +504,8 @@ export default function StockHoldingDetailPage() {
                             </Button>
                         </div>
                     </form>
+                    </>
+                    )}
                 </section>
             </div>
 

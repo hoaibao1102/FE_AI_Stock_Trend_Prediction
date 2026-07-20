@@ -7,9 +7,20 @@ import {
     type PortfolioData,
     PortfolioServiceError,
 } from "@/services/holdings-pnl.service"
+import {
+    enrichHoldingsItem,
+    enrichHoldingsItemsWithAllocation,
+    buildPortfolioSummaryFromItems,
+} from "@/components/holdings/portfolio-metrics"
+import {
+    clearPortfolioAdviceCache,
+    getPortfolioAdviceCache,
+    setPortfolioAdviceCache,
+} from "@/services/portfolioAdviceCache"
 
 export type MergedHoldingItem = HoldingsItem & {
     advice: HoldingsAdviceItem | null
+    adviceLoading?: boolean
 }
 
 export type UsePortfolioAnalysisResult = {
@@ -28,15 +39,23 @@ export type UsePortfolioAnalysisResult = {
     isReady: boolean
 }
 
+function buildItemsFromPnl(pnlItems: HoldingsItem[]): HoldingsItem[] {
+    return enrichHoldingsItemsWithAllocation(
+        pnlItems
+            .filter(item => item.symbol)
+            .map(item => enrichHoldingsItem(item)),
+    )
+}
+
 /**
- * 2-Tier portfolio analysis hook
- * - Tier 1: Fetch P&L instantly (< 500ms)
- * - Tier 2: Fetch AI advice async (30-120s or cache < 1s)
+ * - Tier 1: P&L API only (single round-trip)
+ * - Tier 2: AI advice — skip if client + server daily cache hit
  */
 export function usePortfolioAnalysis(): UsePortfolioAnalysisResult {
     const [portfolio, setPortfolio] = useState<PortfolioData | null>(null)
     const [pnlItems, setPnlItems] = useState<HoldingsItem[]>([])
     const [adviceData, setAdviceData] = useState<HoldingsAdviceItem[]>([])
+    const [adviceLoadingSymbols, setAdviceLoadingSymbols] = useState<Set<string>>(new Set())
 
     const [pnlLoading, setPnlLoading] = useState(false)
     const [aiLoading, setAiLoading] = useState(false)
@@ -50,59 +69,120 @@ export function usePortfolioAnalysis(): UsePortfolioAnalysisResult {
     const [fallbackCount, setFallbackCount] = useState<number>()
 
     const load = useCallback(async (options?: { forceRefresh?: boolean }) => {
-        // ── Tier 1: Load P&L instantly ──────────────────────────────
-        setPnlLoading(true)
+        const forceRefresh = options?.forceRefresh ?? false
+        if (forceRefresh) {
+            clearPortfolioAdviceCache()
+        }
+
         setPnlError(null)
-        setAdviceData([])
         setAiError(null)
 
-        let pnl
+        let mergedItems: HoldingsItem[] = []
+        let portfolioSummary: PortfolioData | null = null
+        let generatedAtValue: string | undefined
+        let dataAsOfValue: string | undefined
+
+        setPnlLoading(true)
         try {
-            pnl = await getHoldingsPnl()
-            setPortfolio(pnl.portfolio)
-            setPnlItems(pnl.items)
-            setGeneratedAt(pnl.generated_at)
-            setDataAsOf(pnl.data_as_of)
+            const pnlResult = await getHoldingsPnl()
+            mergedItems = buildItemsFromPnl(pnlResult.items)
+            portfolioSummary = pnlResult.portfolio ?? buildPortfolioSummaryFromItems(mergedItems)
+            generatedAtValue = pnlResult.generated_at
+            dataAsOfValue = pnlResult.data_as_of
+
+            setPortfolio(portfolioSummary)
+            setPnlItems(mergedItems)
+            setGeneratedAt(generatedAtValue)
+            setDataAsOf(dataAsOfValue)
         } catch (err) {
             const message =
                 err instanceof PortfolioServiceError
                     ? err.message
-                    : "Không tải được dữ liệu P&L"
+                    : err instanceof Error
+                      ? err.message
+                      : "Không tải được dữ liệu danh mục"
             setPnlError(message)
             setPnlLoading(false)
-            return // Don't load Tier 2 if Tier 1 fails
+            return
         } finally {
             setPnlLoading(false)
         }
 
-        // ── Tier 2: Load AI advice (async) ──────────────────────────
-        if (!pnl.items?.length) return
+        if (!mergedItems.length) {
+            setAdviceData([])
+            return
+        }
+
+        const symbols = mergedItems.map(item => item.symbol!).filter(Boolean)
+        const clientCache = !forceRefresh ? getPortfolioAdviceCache(symbols) : null
+
+        if (clientCache) {
+            setAdviceData(clientCache.advice)
+            setCachedCount(clientCache.cachedCount)
+            setGeneratedCount(clientCache.generatedCount ?? 0)
+            setFallbackCount(clientCache.fallbackCount ?? 0)
+            if (clientCache.generatedAt) setGeneratedAt(clientCache.generatedAt)
+            if (clientCache.dataAsOf) setDataAsOf(clientCache.dataAsOf)
+            setAdviceLoadingSymbols(new Set())
+            setAiLoading(false)
+            return
+        }
 
         setAiLoading(true)
+        setAdviceLoadingSymbols(new Set(symbols.map(s => s.toUpperCase())))
+
         try {
-            const advice = await getHoldingsAdvice(pnl.items, {
-                forceRefresh: options?.forceRefresh,
+            const advice = await getHoldingsAdvice(mergedItems, {
+                forceRefresh,
+                portfolio: portfolioSummary,
             })
-            setAdviceData(advice.advice ?? [])
-            setGeneratedAt(advice.generated_at)
+
+            const adviceItems = advice.advice ?? []
+            setAdviceData(adviceItems)
             setCachedCount(advice.cached_count)
             setGeneratedCount(advice.generated_count)
             setFallbackCount(advice.fallback_count)
+            if (advice.generated_at) {
+                setGeneratedAt(advice.generated_at)
+            }
+
+            if (adviceItems.length > 0) {
+                setPortfolioAdviceCache({
+                    symbols,
+                    advice: adviceItems,
+                    portfolio: portfolioSummary,
+                    items: mergedItems,
+                    generatedAt: advice.generated_at ?? generatedAtValue,
+                    dataAsOf: dataAsOfValue,
+                    cachedCount: advice.cached_count,
+                    generatedCount: advice.generated_count,
+                    fallbackCount: advice.fallback_count,
+                })
+            }
         } catch (err) {
             const message =
                 err instanceof PortfolioServiceError
                     ? err.message
-                    : "Không tải được phân tích AI"
+                    : err instanceof Error
+                      ? err.message
+                      : "Không tải được phân tích AI danh mục"
             setAiError(message)
         } finally {
+            setAdviceLoadingSymbols(new Set())
             setAiLoading(false)
         }
     }, [])
 
-    // Merge P&L + Advice per symbol
     const mergedItems: MergedHoldingItem[] = pnlItems.map(item => {
-        const adviceItem = adviceData.find(a => a.symbol === item.symbol) ?? null
-        return { ...item, advice: adviceItem }
+        const symbolKey = item.symbol?.toUpperCase()
+        const adviceItem = adviceData.find(
+            a => a.symbol?.toUpperCase() === symbolKey,
+        ) ?? null
+        return {
+            ...item,
+            advice: adviceItem,
+            adviceLoading: symbolKey ? adviceLoadingSymbols.has(symbolKey) : false,
+        }
     })
 
     return {

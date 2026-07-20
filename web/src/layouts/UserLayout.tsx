@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react"
 import {
+    Briefcase,
     History,
     LayoutDashboard,
     Menu,
@@ -7,7 +8,6 @@ import {
     ShieldAlert,
     Sparkles,
     TableProperties,
-    Users,
 } from "lucide-react"
 import { NavLink, Outlet, useNavigate } from "react-router-dom"
 
@@ -55,7 +55,7 @@ const NAV_ITEMS: NavItem[] = [
     { label: "Stock List", path: "stock-list", icon: TableProperties },
     { label: "AI phân tích cổ phiếu", path: "stock-analysis", icon: Sparkles, end: true },
     { label: "Lịch sử báo cáo AI", path: "stock-analysis/history", icon: History },
-    { label: "Watchlist", path: "watchlist", icon: Users },
+    { label: "Watchlist & Portfolio", path: "watchlist", icon: Briefcase },
     { label: "Alerts", path: "alerts", icon: ShieldAlert },
     // { label: "Comparison", path: "comparison", icon: Scale },
     { label: "Settings", path: "settings", icon: Settings },

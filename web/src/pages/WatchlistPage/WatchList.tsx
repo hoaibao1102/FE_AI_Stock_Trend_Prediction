@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { AlertTriangle, BarChart3, Crown, Landmark, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 
 import { formatPrice } from "@/components/holdings/holdings-format"
@@ -21,7 +21,9 @@ import {
     trimWatchlist,
     type WatchlistRawItem,
 } from "@/services/watchlist.service"
+import { getMyHoldings } from "@/services/holdings.service"
 import AddStockModal from "@/shared/components/AddStockModal"
+import AddPortfolioPositionModal from "@/components/holdings/AddPortfolioPositionModal"
 import {
     Breadcrumb,
     TableEmpty,
@@ -30,9 +32,16 @@ import {
     formatPercent,
     placeholder,
 } from "@/shared/components"
+import PortfolioPanel from "./PortfolioPanel"
 import WatchlistAnalysisModal from "./WatchlistAnalysisModal"
 import "@/shared/components/shared-stock.css"
 import "./WatchlistPage.css"
+
+type PageTab = "watchlist" | "portfolio"
+
+function parseTab(value: string | null): PageTab {
+    return value === "portfolio" ? "portfolio" : "watchlist"
+}
 
 function getStockId(raw: WatchlistRawItem): string {
     return String(raw.stock_id || raw.stock?.stock_id || raw.stock?.symbol || raw.stock_code || "")
@@ -216,6 +225,9 @@ function WatchlistOverflowOverlay({
 
 export default function WatchlistPage() {
     const navigate = useNavigate()
+    const [searchParams, setSearchParams] = useSearchParams()
+    const activeTab = parseTab(searchParams.get("tab"))
+
     const [watchlist, setWatchlist] = useState<StockItem[]>([])
     const [rawWatchlist, setRawWatchlist] = useState<WatchlistRawItem[]>([])
     const [isOverLimit, setIsOverLimit] = useState(false)
@@ -224,7 +236,10 @@ export default function WatchlistPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [isOpen, setIsOpen] = useState(false)
+    const [isPortfolioAddOpen, setIsPortfolioAddOpen] = useState(false)
     const [isAnalysisOpen, setIsAnalysisOpen] = useState(false)
+    const [portfolioRefreshKey, setPortfolioRefreshKey] = useState(0)
+    const [heldSymbols, setHeldSymbols] = useState<Set<string>>(new Set())
 
     const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
     const [isCheckingHolding, setIsCheckingHolding] = useState(false)
@@ -235,6 +250,10 @@ export default function WatchlistPage() {
         () => new Set(watchlist.map((stock) => stock.symbol)),
         [watchlist]
     )
+
+    const setActiveTab = (tab: PageTab) => {
+        setSearchParams(tab === "watchlist" ? {} : { tab }, { replace: true })
+    }
 
     const loadWatchlist = async () => {
         setIsLoading(true)
@@ -254,8 +273,33 @@ export default function WatchlistPage() {
         }
     }
 
+    const handleRefresh = () => {
+        if (activeTab === "portfolio") {
+            setPortfolioRefreshKey((key) => key + 1)
+            return
+        }
+
+        void loadWatchlist()
+    }
+
+    const loadHeldSymbols = async () => {
+        try {
+            const result = await getMyHoldings({ status: "ACTIVE", limit: 100 })
+            setHeldSymbols(
+                new Set(
+                    result.items
+                        .map((item) => item.stock?.symbol?.toUpperCase())
+                        .filter((symbol): symbol is string => Boolean(symbol)),
+                ),
+            )
+        } catch {
+            setHeldSymbols(new Set())
+        }
+    }
+
     useEffect(() => {
         void loadWatchlist()
+        void loadHeldSymbols()
     }, [])
 
     const handleDeleteClick = async (stock: StockItem) => {
@@ -318,31 +362,47 @@ export default function WatchlistPage() {
     const handleOpenHolding = () => {
         if (!addedStockPrompt) return
 
-        navigate(`/watchlist/${encodeURIComponent(addedStockPrompt.symbol)}/holding`)
+        navigate(`/watchlist/${encodeURIComponent(addedStockPrompt.symbol)}/holding?from=portfolio`)
         setAddedStockPrompt(null)
     }
 
     return (
         <>
             <div className="watchlist">
-                <Breadcrumb items={["Home", "Watchlist"]} />
+                <Breadcrumb items={["Home", "Watchlist & Portfolio"]} />
 
                 <section className="watchlist__header">
                     <div>
-                        <h1>My Watchlist</h1>
-                        <p>Monitor your selected stocks in real-time</p>
+                        <h1>{activeTab === "watchlist" ? "My Watchlist" : "My Portfolio"}</h1>
+                        <p>
+                            {activeTab === "watchlist"
+                                ? "Theo dõi mã bạn quan tâm theo thời gian thực"
+                                : "Quản lý vị thế đang nắm giữ và theo dõi P&L"}
+                        </p>
                     </div>
 
-                    <div className="flex gap-2">
-                        <Button
-                            type="button"
-                            variant="default"
-                            size="sm"
-                            onClick={() => setIsOpen(true)}
-                        >
-                            <Plus className="mr-1.5 size-3.5" />
-                            Add Stock
-                        </Button>
+                    <div className="flex flex-wrap gap-2">
+                        {activeTab === "watchlist" ? (
+                            <Button
+                                type="button"
+                                variant="default"
+                                size="sm"
+                                onClick={() => setIsOpen(true)}
+                            >
+                                <Plus className="mr-1.5 size-3.5" />
+                                Add Stock
+                            </Button>
+                        ) : (
+                            <Button
+                                type="button"
+                                variant="default"
+                                size="sm"
+                                onClick={() => setIsPortfolioAddOpen(true)}
+                            >
+                                <Plus className="mr-1.5 size-3.5" />
+                                Add Position
+                            </Button>
+                        )}
 
                         <AddStockModal
                             open={isOpen}
@@ -352,15 +412,20 @@ export default function WatchlistPage() {
                             onStockAdded={(stock) => setAddedStockPrompt(stock)}
                         />
 
+                        <AddPortfolioPositionModal
+                            open={isPortfolioAddOpen}
+                            onOpenChange={setIsPortfolioAddOpen}
+                            heldSymbols={heldSymbols}
+                        />
+
                         <Button
                             type="button"
                             variant="default"
                             size="sm"
                             onClick={() => setIsAnalysisOpen(true)}
-                            disabled={isLoading || watchlist.length === 0}
                         >
                             <BarChart3 className="mr-1.5 size-3.5" />
-                            Analyze Watchlist
+                            Analyze Portfolio
                         </Button>
 
                         <WatchlistAnalysisModal
@@ -372,8 +437,8 @@ export default function WatchlistPage() {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => void loadWatchlist()}
-                            disabled={isLoading}
+                            onClick={handleRefresh}
+                            disabled={activeTab === "watchlist" && isLoading}
                         >
                             <RefreshCw className="mr-1.5 size-3.5" />
                             Refresh
@@ -381,97 +446,129 @@ export default function WatchlistPage() {
                     </div>
                 </section>
 
-                <section className="watchlist__table-card">
-                    {isLoading ? (
-                        <TableLoading />
-                    ) : error ? (
-                        <TableError message={error} onRetry={() => void loadWatchlist()} />
-                    ) : watchlist.length === 0 ? (
-                        <TableEmpty message="Your watchlist is empty. Add stocks from the Stock List page." />
-                    ) : (
-                        <div className="watchlist__table-wrap">
-                            <table className="watchlist__table">
-                                <thead>
-                                    <tr>
-                                        <th>Symbol</th>
-                                        <th>Company Name</th>
-                                        <th>Market</th>
-                                        <th>Latest Close</th>
-                                        <th>Change %</th>
-                                        <th className="text-right">Actions</th>
-                                    </tr>
-                                </thead>
+                <div className="watchlist__tabs" role="tablist" aria-label="Watchlist and Portfolio">
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-selected={activeTab === "watchlist"}
+                        className={`watchlist__tab ${activeTab === "watchlist" ? "is-active" : ""}`}
+                        onClick={() => setActiveTab("watchlist")}
+                    >
+                        Watchlist
+                    </button>
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-selected={activeTab === "portfolio"}
+                        className={`watchlist__tab ${activeTab === "portfolio" ? "is-active" : ""}`}
+                        onClick={() => setActiveTab("portfolio")}
+                    >
+                        Portfolio
+                    </button>
+                </div>
 
-                                <tbody>
-                                    {watchlist.map((stock) => {
-                                        const isPositive = (stock.changePercent ?? 0) >= 0
-                                        const isNegative = (stock.changePercent ?? 0) < 0
+                {activeTab === "watchlist" ? (
+                    <section className="watchlist__table-card">
+                        {isLoading ? (
+                            <TableLoading />
+                        ) : error ? (
+                            <TableError message={error} onRetry={() => void loadWatchlist()} />
+                        ) : watchlist.length === 0 ? (
+                            <TableEmpty message="Your watchlist is empty. Add stocks from the Stock List page." />
+                        ) : (
+                            <div className="watchlist__table-wrap">
+                                <table className="watchlist__table">
+                                    <thead>
+                                        <tr>
+                                            <th>Symbol</th>
+                                            <th>Company Name</th>
+                                            <th>Market</th>
+                                            <th>Latest Close</th>
+                                            <th>Change %</th>
+                                            <th className="text-right">Actions</th>
+                                        </tr>
+                                    </thead>
 
-                                        return (
-                                            <tr key={stock.symbol}>
-                                                <td className="watchlist__symbol-cell">{stock.symbol}</td>
-                                                <td>{placeholder(stock.companyName)}</td>
-                                                <td>{placeholder(stock.market)}</td>
-                                                <td>{formatPrice(stock.latestClosePrice)}</td>
-                                                <td
-                                                    className={
-                                                        stock.changePercent === undefined
-                                                            ? "shared-neutral"
-                                                            : isPositive
-                                                                ? "shared-positive"
-                                                                : isNegative
-                                                                    ? "shared-negative"
-                                                                    : "shared-neutral"
-                                                    }
-                                                >
-                                                    {formatPercent(stock.changePercent)}
-                                                </td>
-                                                <td className="text-right">
-                                                    <div className="flex items-center justify-end gap-1">
-                                                        <Button
-                                                            type="button"
-                                                            variant="outline"
-                                                            size="xs"
-                                                            onClick={() => navigate(`/stocks/${encodeURIComponent(stock.symbol)}`)}
-                                                        >
-                                                            View Detail
-                                                        </Button>
+                                    <tbody>
+                                        {watchlist.map((stock) => {
+                                            const isPositive = (stock.changePercent ?? 0) >= 0
+                                            const isNegative = (stock.changePercent ?? 0) < 0
 
-                                                        <Button
-                                                            type="button"
-                                                            variant="outline"
-                                                            size="xs"
-                                                            onClick={() => navigate(`/watchlist/${encodeURIComponent(stock.symbol)}/holding`)}
-                                                        >
-                                                            <Landmark className="mr-1 size-3" />
-                                                            Manage Holding
-                                                        </Button>
+                                            return (
+                                                <tr key={stock.symbol}>
+                                                    <td className="watchlist__symbol-cell">{stock.symbol}</td>
+                                                    <td>{placeholder(stock.companyName)}</td>
+                                                    <td>{placeholder(stock.market)}</td>
+                                                    <td>{formatPrice(stock.latestClosePrice)}</td>
+                                                    <td
+                                                        className={
+                                                            stock.changePercent === undefined
+                                                                ? "shared-neutral"
+                                                                : isPositive
+                                                                    ? "shared-positive"
+                                                                    : isNegative
+                                                                        ? "shared-negative"
+                                                                        : "shared-neutral"
+                                                        }
+                                                    >
+                                                        {formatPercent(stock.changePercent)}
+                                                    </td>
+                                                    <td className="text-right">
+                                                        <div className="flex items-center justify-end gap-1">
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="xs"
+                                                                onClick={() => navigate(`/stocks/${encodeURIComponent(stock.symbol)}`)}
+                                                            >
+                                                                View Detail
+                                                            </Button>
 
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon-xs"
-                                                            className="text-red-400 hover:bg-red-500/10 hover:text-red-300"
-                                                            onClick={() => void handleDeleteClick(stock)}
-                                                            disabled={isCheckingHolding || isDeleting}
-                                                            aria-label={`Remove ${stock.symbol}`}
-                                                        >
-                                                            {isCheckingHolding ? (
-                                                                <Loader2 className="size-3.5 animate-spin" />
-                                                            ) : (
-                                                                <Trash2 className="size-3.5" />
-                                                            )}
-                                                        </Button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        )
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </section>
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="xs"
+                                                                onClick={() =>
+                                                                    navigate(
+                                                                        `/watchlist/${encodeURIComponent(stock.symbol)}/holding?from=watchlist`
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Landmark className="mr-1 size-3" />
+                                                                Manage Holding
+                                                            </Button>
+
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="icon-xs"
+                                                                className="text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                                                                onClick={() => void handleDeleteClick(stock)}
+                                                                disabled={isCheckingHolding || isDeleting}
+                                                                aria-label={`Remove ${stock.symbol}`}
+                                                            >
+                                                                {isCheckingHolding ? (
+                                                                    <Loader2 className="size-3.5 animate-spin" />
+                                                                ) : (
+                                                                    <Trash2 className="size-3.5" />
+                                                                )}
+                                                            </Button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </section>
+                ) : (
+                    <PortfolioPanel
+                        refreshKey={portfolioRefreshKey}
+                        onHoldingsChange={() => void loadHeldSymbols()}
+                    />
+                )}
             </div>
 
             <WatchlistOverflowOverlay
@@ -517,7 +614,7 @@ export default function WatchlistPage() {
                             <Trash2 className="mt-0.5 size-4 shrink-0 text-rose-300" />
                             <span>
                                 {deleteTarget?.symbol}
-                                {deleteTarget?.companyName ? ` - ${deleteTarget.companyName}` : ""} has saved holding data. If you continue, only the watchlist row will be removed. The holding data will remain available in holding management.
+                                {deleteTarget?.companyName ? ` - ${deleteTarget.companyName}` : ""} has saved holding data. If you continue, only the watchlist row will be removed. The holding will remain available in the Portfolio tab.
                             </span>
                         </div>
                     </div>

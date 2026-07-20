@@ -201,6 +201,77 @@
     font-size: 0.8rem;
 }
 
+.stock-holding-page__txn-tabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(51, 65, 85, 0.85);
+    border-radius: 10px;
+    background: #0f172a;
+}
+
+.stock-holding-page__txn-tab {
+    display: inline-flex;
+    align-items: center;
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.stock-holding-page__txn-tab.is-active {
+    color: #f8fafc;
+    background: rgba(59, 130, 246, 0.22);
+}
+
+.stock-holding-page__txn-tab:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.stock-holding-page__table-wrap {
+    overflow: auto;
+    border: 1px solid rgba(51, 65, 85, 0.85);
+    border-radius: 8px;
+}
+
+.stock-holding-page__table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+}
+
+.stock-holding-page__table th,
+.stock-holding-page__table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+    text-align: left;
+    font-size: 0.74rem;
+    white-space: nowrap;
+}
+
+.stock-holding-page__table th {
+    color: #94a3b8;
+    font-weight: 600;
+    background: #0f172a;
+}
+
+.stock-holding-page__txn-buy {
+    color: #34d399;
+    font-weight: 700;
+}
+
+.stock-holding-page__txn-sell {
+    color: #fb7185;
+    font-weight: 700;
+}
+
 @media (max-width: 768px) {
     .stock-holding-page__header {
         flex-direction: column;

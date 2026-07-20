@@ -26,7 +26,7 @@ import { useNavigate } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/providers/AuthProvider"
-import { analyseOneStock, getAnalyseOneUrl, fetchVisualizationJson } from "@/services/aiReportService"
+import { analyseOneStock, getAnalyseOneUrl, fetchVisualizationJson, invalidateAiReportHistoryCache } from "@/services/aiReportService"
 import VisualizationTab from "@/components/visualization/VisualizationTab"
 import { buildZipExportPackage, downloadBlob } from "@/utils/visualizationExport"
 import { autoDownloadVisualizationExport } from "@/lib/config"
@@ -99,14 +99,16 @@ const UNVERIFIED = "Chưa xác minh"
 const DISCLAIMER =
     "Báo cáo này chỉ phục vụ tham khảo/học tập, không phải khuyến nghị đầu tư cá nhân hóa."
 
+const GEMINI_PREFERRED_MODEL = "gemini-2.5-flash"
+
 const PROVIDER_DEFAULT_MODELS: Record<AnalysisFormState["provider"], string> = {
     openai: "gpt-4.1-mini",
-    gemini: "gemini-1.5-flash",
+    gemini: GEMINI_PREFERRED_MODEL,
 }
 
 const MODEL_OPTIONS: Record<AnalysisFormState["provider"], string[]> = {
     openai: ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini"],
-    gemini: ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"],
+    gemini: ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"],
 }
 
 const DEFAULT_FORM: AnalysisFormState = {
@@ -1290,8 +1292,8 @@ function AiAnalysisForm({
                         }}
                         disabled={isLoading}
                     >
+                        <option value="gemini">gemini (ưu tiên cho dài hạn)</option>
                         <option value="openai">openai</option>
-                        <option value="gemini">gemini</option>
                     </select>
                 </label>
 
@@ -2850,7 +2852,14 @@ export default function StockAnalysisPage() {
         field: K,
         value: AnalysisFormState[K]
     ) => {
-        setForm((current) => ({ ...current, [field]: value }))
+        setForm((current) => {
+            const next = { ...current, [field]: value }
+            if (field === "timeHorizon" && (value === "long_term" || value === "long")) {
+                next.provider = "gemini"
+                next.model = GEMINI_PREFERRED_MODEL
+            }
+            return next
+        })
     }
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -2903,6 +2912,9 @@ export default function StockAnalysisPage() {
             const nextReport = response.data ?? null
             setReport(nextReport)
             setHistorySavedId(nextReport?.history_id?.trim() || null)
+            if (nextReport?.history_id?.trim()) {
+                invalidateAiReportHistoryCache()
+            }
             setIsFormCollapsed(true)
             // Auto-download visualization export package once after a successful analysis if enabled
             if (nextReport && nextReport.report_id && autoDownloadVisualizationExport) {

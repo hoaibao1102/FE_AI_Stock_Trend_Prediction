@@ -12,12 +12,55 @@ export type HoldingItem = {
     stock: HoldingStock | null
     average_cost: number
     quantity: number
+    total_cost?: number
     holding_date: string
     latest_market_price: number | null
     note?: string
     status: HoldingStatus
     created_at?: string
     updated_at?: string
+}
+
+export type TransactionType = "BUY" | "SELL"
+
+export type TransactionStatus = "ACTIVE" | "VOIDED"
+
+export type HoldingTransactionItem = {
+    transaction_id: string
+    transaction_type: TransactionType
+    trade_date: string
+    quantity: number
+    price: number
+    fee: number
+    tax: number
+    note?: string
+    status: TransactionStatus
+    created_at?: string
+    updated_at?: string
+}
+
+export type RecordTransactionPayload = {
+    transaction_type: TransactionType
+    trade_date: string
+    quantity: number
+    price: number
+    fee?: number
+    tax?: number
+    note?: string
+}
+
+export type RecordTransactionResponse = {
+    transaction: HoldingTransactionItem
+    holding: HoldingItem | null
+}
+
+export type TransactionsListResponse = {
+    items: HoldingTransactionItem[]
+    pagination: {
+        page: number
+        limit: number
+        total: number
+    }
 }
 
 export type GetMyHoldingsParams = {

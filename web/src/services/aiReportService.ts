@@ -9,6 +9,14 @@ import type {
     AiReportHistoryQueryParams,
 } from "@/types/aiReportHistory"
 import { AiReportHistoryServiceError } from "@/types/aiReportHistory"
+import {
+    buildHistoryListCacheKey,
+    getCachedHistoryDetail,
+    getCachedHistoryList,
+    invalidateAiReportHistoryCache,
+    setCachedHistoryDetail,
+    setCachedHistoryList,
+} from "@/services/aiReportHistoryCache"
 import { getAnalyseApiBaseUrl, getAnalyseApiTimeoutMs } from "@/lib/config"
 
 const ANALYSE_PATH = "/api/ai-reports/analyse-one"
@@ -410,8 +418,18 @@ export async function analyseOneStock(
 
 export async function getAiReportHistories(
     params?: AiReportHistoryQueryParams,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    options?: { forceRefresh?: boolean }
 ): Promise<AiReportHistoryListResponse> {
+    const cacheKey = buildHistoryListCacheKey(params)
+
+    if (!options?.forceRefresh) {
+        const cached = getCachedHistoryList(cacheKey)
+        if (cached) {
+            return cached
+        }
+    }
+
     const searchParams = buildHistorySearchParams(params)
     const url = `${getAiReportHistoryUrl()}?${searchParams.toString()}`
     const token = getCurrentAccessToken()
@@ -463,16 +481,29 @@ export async function getAiReportHistories(
             )
         }
 
-        return normalizeHistoryListResponse(payload, params)
+        const normalized = normalizeHistoryListResponse(payload, params)
+        setCachedHistoryList(cacheKey, normalized)
+        return normalized
     } catch (error) {
         handleHistoryUnknownError(error, url, "GET", "list", signal)
     }
 }
 
+export { invalidateAiReportHistoryCache } from "@/services/aiReportHistoryCache"
+
 export async function getAiReportHistoryDetail(
     historyId: string,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    options?: { forceRefresh?: boolean }
 ): Promise<AiReportHistoryDetailResponse> {
+    const normalizedId = historyId.trim()
+    if (!options?.forceRefresh) {
+        const cached = getCachedHistoryDetail(normalizedId)
+        if (cached) {
+            return cached
+        }
+    }
+
     const url = getAiReportHistoryUrl(historyId)
     const token = getCurrentAccessToken()
 
@@ -538,6 +569,7 @@ export async function getAiReportHistoryDetail(
             )
         }
 
+        setCachedHistoryDetail(normalizedId, payload)
         return payload
     } catch (error) {
         handleHistoryUnknownError(error, url, "GET", "detail", signal)
@@ -545,6 +577,7 @@ export async function getAiReportHistoryDetail(
 }
 
 export async function deleteAiReportHistory(historyId: string, signal?: AbortSignal): Promise<void> {
+    const normalizedId = historyId.trim()
     const url = getAiReportHistoryUrl(historyId)
     const token = getCurrentAccessToken()
 
@@ -594,6 +627,8 @@ export async function deleteAiReportHistory(historyId: string, signal?: AbortSig
                 }
             )
         }
+
+        invalidateAiReportHistoryCache({ detailId: normalizedId })
     } catch (error) {
         handleHistoryUnknownError(error, url, "DELETE", "delete", signal)
     }

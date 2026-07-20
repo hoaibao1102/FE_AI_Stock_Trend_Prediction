@@ -47,7 +47,14 @@ function MiniSparkline({
 }) {
     if (!prices?.length) return null
 
-    const closes = prices.map(p => p.close).filter(c => c != null && typeof c === "number")
+    const closes = prices
+        .map(p => {
+            const value = p.close
+            if (typeof value === "number" && Number.isFinite(value)) return value
+            const parsed = Number(value)
+            return Number.isFinite(parsed) ? parsed : null
+        })
+        .filter((c): c is number => c != null)
     if (closes.length < 2) return null
 
     const min = Math.min(...closes)

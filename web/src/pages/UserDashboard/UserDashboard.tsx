@@ -283,7 +283,7 @@ export default function UserDashboard() {
                                 <Star className="size-4 text-amber-400 fill-amber-400" /> My Watchlist
                             </h2>
                             <Link to="/watchlist" className="text-xs text-blue-400 hover:text-blue-300 font-semibold transition">
-                                Manage Watchlist →
+                                Manage →
                             </Link>
                         </div>
 

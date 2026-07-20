@@ -17,6 +17,7 @@ export type HoldingsItem = {
     cost?: number
     unrealized_pnl?: number
     unrealized_pnl_pct?: number
+    allocation_pct?: number | null
     status?: string
     prices_7d?: Array<{
         date: string
@@ -35,6 +36,8 @@ export type PortfolioData = {
     total_unrealized_pnl_pct: number
     count_profit: number
     count_loss: number
+    position_count?: number
+    count_neutral?: number
 }
 
 export type HoldingsPnlResponse = {
@@ -57,6 +60,7 @@ export type HoldingsAdviceItem = {
     close_price?: number
     market_value?: number
     cost?: number
+    allocation_pct?: number | null
     unrealized_pnl?: number
     unrealized_pnl_pct?: number
     status?: string
@@ -184,18 +188,21 @@ export async function getHoldingsAdvice(
     items: Array<{
         symbol: string
         exchange?: string
+        market?: string
         company_name?: string
         average_cost?: number
         quantity?: number
         close_price?: number
         market_value?: number
         cost?: number
+        allocation_pct?: number | null
         unrealized_pnl?: number
         unrealized_pnl_pct?: number
         status?: string
     }>,
     options?: {
         forceRefresh?: boolean
+        portfolio?: PortfolioData | null
     }
 ): Promise<{
     advice: HoldingsAdviceItem[]
@@ -225,17 +232,29 @@ export async function getHoldingsAdvice(
     const body = {
         items: items.map(item => ({
             symbol: item.symbol,
-            exchange: item.exchange || "HOSE",
+            exchange: item.exchange || item.market || "HOSE",
             company_name: item.company_name,
-            average_cost: item.average_cost,
-            quantity: item.quantity,
+            average_cost: item.average_cost ?? 0,
+            quantity: item.quantity ?? 1,
             close_price: item.close_price,
             market_value: item.market_value,
             cost: item.cost,
+            allocation_pct: item.allocation_pct,
             unrealized_pnl: item.unrealized_pnl,
             unrealized_pnl_pct: item.unrealized_pnl_pct,
             status: item.status,
         })),
+        portfolioSummary: options?.portfolio
+            ? {
+                totalCost: options.portfolio.total_cost,
+                totalMarketValue: options.portfolio.total_market_value,
+                totalUnrealizedPnl: options.portfolio.total_unrealized_pnl,
+                totalUnrealizedPnlPct: options.portfolio.total_unrealized_pnl_pct,
+                positionCount: options.portfolio.position_count ?? items.length,
+                countProfit: options.portfolio.count_profit,
+                countLoss: options.portfolio.count_loss,
+            }
+            : undefined,
         forceRefresh: options?.forceRefresh ?? false,
     }
 
